@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sky Fr8 WMS — Staff Login</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--navy:#0B1F3A;--sky:#1E7FC2;--border:#DDE4ED;--tp:#0B1F3A;--ts:#4A637F;--tm:#8BA3BC;--off:#F7F9FC;--r:10px;--rl:16px;}
+body{font-family:'Inter',sans-serif;background:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;}
+.card{background:white;border-radius:var(--rl);padding:2.5rem 2rem;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,0.3);}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem;justify-content:center;}
+.logo-icon{width:40px;height:40px;background:var(--sky);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.logo-icon svg{width:22px;height:22px;fill:white;}
+.logo-name{font-size:18px;font-weight:600;color:var(--tp);}
+.logo-tag{font-size:12px;color:var(--tm);}
+h2{font-size:20px;font-weight:600;color:var(--tp);margin-bottom:.25rem;}
+.sub{font-size:13px;color:var(--ts);margin-bottom:1.75rem;}
+.fgrp{display:flex;flex-direction:column;gap:4px;margin-bottom:1rem;}
+.fgrp label{font-size:12px;font-weight:500;color:var(--ts);}
+.fgrp input{padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-family:'Inter',sans-serif;color:var(--tp);outline:none;transition:border-color .15s;}
+.fgrp input:focus{border-color:var(--sky);}
+.btn{width:100%;padding:11px;background:var(--sky);color:white;border:none;border-radius:var(--r);font-size:15px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-top:.5rem;transition:background .15s;}
+.btn:hover{background:#176FAD;}
+.btn:active{transform:scale(0.98);}
+.err{font-size:13px;color:#C0392B;background:#FFF5F5;border:1px solid #F5C6C6;border-radius:var(--r);padding:8px 12px;margin-top:.75rem;display:none;}
+.footer{margin-top:1.5rem;font-size:12px;color:#4A637F;text-align:center;}
+.footer a{color:#7EC8F0;text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+    <div><div class="logo-name">Sky Fr8 WMS</div><div class="logo-tag">Staff Portal</div></div>
+  </div>
+  <h2>Sign in</h2>
+  <p class="sub">Enter your credentials to access the staff portal.</p>
+  <div class="fgrp">
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Username" autocomplete="username"/>
+  </div>
+  <div class="fgrp">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password"/>
+  </div>
+  <button class="btn" onclick="doLogin()">Sign in</button>
+  <div id="err-msg" class="err"></div>
+</div>
+<div class="footer">Customer tracking? <a href="/track">Track a shipment ↗</a></div>
+
+<script>
+async function doLogin(){
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const errEl    = document.getElementById('err-msg');
+  errEl.style.display='none';
+
+  if(!username||!password){errEl.textContent='Please enter your username and password.';errEl.style.display='block';return;}
+
+  try{
+    const res = await fetch('/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username,password})
+    });
+    const data = await res.json();
+    if(res.ok && data.success){
+      window.location.href='/';
+    } else {
+      errEl.textContent = data.error||'Invalid username or password.';
+      errEl.style.display='block';
+      document.getElementById('password').value='';
+      document.getElementById('password').focus();
+    }
+  } catch(e){
+    errEl.textContent='Connection error. Make sure the server is running.';
+    errEl.style.display='block';
+  }
+}
+
+// Allow Enter key to submit
+['username','password'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+});
+</script>
+</body>
+</html>
