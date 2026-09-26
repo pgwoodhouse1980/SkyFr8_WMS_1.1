@@ -1,0 +1,926 @@
+[
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-18",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1500"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-06-19",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1514"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-19",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1511"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-22",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1529"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-23",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1544"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-06-24",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1557"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-24",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2025-1555"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-25",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1568"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-06-26",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1579"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-29",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1594"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-06-29",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1598"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-30",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1606"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-01",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1616"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-01",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1620"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-02",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1630"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-03",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1644"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-03",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1647"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-06-26",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1576"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-07",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1670"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-08",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1682"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-08",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1686"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-07",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "jmkin-2026-1671"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-10",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1712"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-09",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1696"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-10",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1717"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-13",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1730"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-13",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1733"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-15",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1749"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-14",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1730"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-16",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1760"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-16",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1764"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-17",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1773"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-17",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1776"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-20",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1793"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-21",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1808"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-22",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1819"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-23",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1832"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-06-09",
+    "registration": null,
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1423"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-24",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-18"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-24",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-18"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-28",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1877"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-27",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1862"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-27",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1869"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-29",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1887"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-30",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1900"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-07-31",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1909"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-07-31",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1916"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-03",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1930"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-03",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1935"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-04",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1941"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-05",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1951"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-07",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1968"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-05",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1954"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-07",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-"
+  },
+  {
+    "flight": "GXA8727",
+    "date": "2026-08-07",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1983"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-10",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1991"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-10",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-1997"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-11",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2003"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-12",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2011"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-12",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2016"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-13",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2024"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-14",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2031"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-17",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2052"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-18",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2059"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-14",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2033"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-19",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2069"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-20",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2077"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-21",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2090"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-21",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2095"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-24",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2111"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-25",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2118"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-24",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2118"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-26",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2139"
+  },
+  {
+    "flight": "gxa2965",
+    "date": "2026-08-26",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2031"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-27",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2143"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-28",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2153"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-08-31",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2169"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-08-31",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2184"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-01",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2184"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-02",
+    "registration": "N1438",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2191"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-03",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2202"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-04",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2213"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-09-04",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-22"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-07",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-08",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2235"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-09",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-21"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-10",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2253"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-09-10",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2258"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-11",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2263"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-14",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2280"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-09-14",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": null
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-09-11",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2267"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-15",
+    "registration": "N435GX",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2291"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-16",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2299"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-09-16",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2301"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-09-18",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2327"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-18",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2322"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-21",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-20262344"
+  },
+  {
+    "flight": "GXA965",
+    "date": "2026-09-21",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2347"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-17",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2309"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-22",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2356"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-23",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2364"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-24",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2377"
+  },
+  {
+    "flight": "GXA2965",
+    "date": "2026-09-25",
+    "registration": "N989CM",
+    "origin": "MIA",
+    "dest": "KIN",
+    "airline": "IBC Airways",
+    "asycuda": "JMKIN-2026-2390"
+  }
+]
