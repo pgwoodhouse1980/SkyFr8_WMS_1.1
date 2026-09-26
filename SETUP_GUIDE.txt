@@ -1,0 +1,158 @@
+================================================
+  AirCargo WMS — Setup & Usage Guide
+  Windows Installation
+================================================
+
+WHAT'S IN THIS FOLDER
+----------------------
+server.py           — The backend server (runs the system)
+START_SERVER.bat    — Double-click this to start the system
+START_NGROK.bat     — Double-click this to share tracking page online
+requirements.txt    — Python packages needed (auto-installed)
+templates/
+  index.html        — Staff portal (add/manage cargo)
+  track.html        — Customer tracking page
+data/
+  shipments.json    — Your shipment data
+  flights.json      — Your flight records
+  bin.json          — Recycle bin
+SETUP_GUIDE.txt     — This file
+
+
+STEP 1 — INSTALL PYTHON
+------------------------
+1. Go to https://www.python.org/downloads/
+2. Download the latest Python 3 for Windows
+3. Run the installer
+4. IMPORTANT: Check the box that says "Add Python to PATH"
+5. Click Install Now
+
+
+STEP 2 — START THE SYSTEM
+---------------------------
+1. Open the AirCargo folder
+2. Double-click START_SERVER.bat
+3. A black command window will open — this is normal
+4. Wait for the message "AirCargo WMS is running!"
+5. Open your browser and go to: http://localhost:5000 or click the AirCargo WMS on the bookmark section of the browser
+
+
+STEP 3 — ACCESS ON YOUR LOCAL NETWORK
+---------------------------------------
+To let other computers and phones on the same WiFi
+access the system:
+
+1. Find your computer's IP address:
+   - Press Windows + R
+   - Type: cmd  and press Enter
+   - Type: ipconfig  and press Enter
+   - Look for "IPv4 Address" — e.g. 192.168.1.10
+
+2. Share these links with staff:
+   - Staff portal:   http://192.168.1.10:5000
+   - Customer page:  http://192.168.1.10:5000/track
+
+   Replace 192.168.1.10 with your actual IP address.
+
+NOTE: All devices must be on the same WiFi network.
+
+STEP 4 - Remote access to Sky Cargo WMS staff portal
+----------------------------------------------------
+1. Click on the ngrok icon in the Sky Cargo WMS folder (Blue square with the "n")
+2. Type "ngrok.exe http 5000"
+3. Hit "Enter"
+4. Access the staff portal using URL "https://afraid-steadier-lemon.ngrok-free.dev"
+
+STEP 5 — SHARE CUSTOMER TRACKING PAGE ON THE INTERNET
+-------------------------------------------------------
+Using Ngrok, customers anywhere in the world can check
+their shipments online — even from their phones.
+
+FIRST TIME SETUP (do this once):
+
+1. Create a free Ngrok account:
+   Go to https://ngrok.com and click "Sign up for free"
+
+2. Download Ngrok for Windows:
+   After logging in, go to https://ngrok.com/download
+   Click "Download for Windows" and save the file.
+
+3. Extract Ngrok:
+   - Find the downloaded zip file (usually in Downloads)
+   - Right-click it and select "Extract All"
+   - Move the extracted "ngrok.exe" file into your
+     AirCargo folder (same folder as START_SERVER.bat)
+
+4. Connect your Ngrok account:
+   - Log in to https://ngrok.com
+   - Go to "Your Authtoken" on the left menu
+   - Copy your authtoken
+   - Open Command Prompt (Windows + R, type cmd, Enter)
+   - Type this command (replace YOUR_TOKEN with your token):
+     ngrok config add-authtoken YOUR_TOKEN
+   - Press Enter
+
+DAILY USE — SHARING THE TRACKING PAGE:
+1. Click on the ngrok icon in the Sky Cargo WMS folder (Blue square with the "n")
+2. Type "ngrok.exe http 5000"
+3. Hit "Enter"
+
+
+1. Make sure START_SERVER.bat is already running
+
+2. Double-click START_NGROK.bat
+   A new black window will open showing something like:
+   Forwarding  https://abc123.ngrok.io -> http://localhost:5000
+
+3. Your customer tracking page is now live at:
+   https://abc123.ngrok.io/track
+
+4. Share this link with customers via Facebook, WhatsApp etc.
+
+IMPORTANT NOTES:
+- Both START_SERVER.bat AND START_NGROK.bat must be
+  running at the same time for the link to work
+- The web address changes every time you restart Ngrok
+- To get a fixed permanent address, upgrade to Ngrok's
+  paid plan at https://ngrok.com/pricing
+
+
+STEP 5 — DAILY USE
+--------------------
+- Every day, double-click START_SERVER.bat to start
+- Keep the black command window open while working
+- To stop the server, close the black command window
+- Your data is saved automatically in the data/ folder
+
+
+WHERE IS MY DATA?
+------------------
+All data is saved in the data/ folder:
+  shipments.json  — All shipment records
+  flights.json    — Flight routing records
+  bin.json        — Deleted records (recycle bin)
+
+RECOMMENDED: Back up your data/ folder daily by copying
+it to a USB drive or cloud storage (Google Drive etc).
+
+
+TROUBLESHOOTING
+----------------
+"Python not found"
+  → Reinstall Python and check "Add Python to PATH"
+
+"Port already in use"
+  → Restart your computer and try again.
+
+"Cannot connect from other devices"
+  → Make sure all devices are on the same WiFi
+  → Allow Python through Windows Firewall when prompted
+
+Page shows "Could not connect to server"
+  → START_SERVER.bat is not running. Double-click it.
+
+Ngrok link not working
+  → Make sure START_SERVER.bat is running first
+  → Close and reopen START_NGROK.bat
+
+================================================
