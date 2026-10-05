@@ -1,0 +1,2244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sky Fr8 WMS — Staff Portal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0B1F3A;--sky:#1E7FC2;--sky-light:#E8F4FC;--white:#fff;--off:#F7F9FC;
+  --border:#DDE4ED;--tp:#0B1F3A;--ts:#4A637F;--tm:#8BA3BC;
+  --sbg:#EAF6EF;--st:#1A6B3C;--wbg:#FDF3DC;--wt:#7A5200;
+  --dbg:#FDECEC;--dt:#8B1A1A;--ibg:#E8F4FC;--it:#0D5C8A;
+  --cbg:#F0EEFF;--ct:#3D2E9E;--pvbg:#FFF0F9;--pvt:#8B1560;
+  --r:10px;--rl:16px;
+}
+body{font-family:'Inter',sans-serif;background:var(--off);color:var(--tp);font-size:14px;line-height:1.6;}
+header{background:var(--navy);padding:0 1.5rem;}
+.hinner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{width:34px;height:34px;background:var(--sky);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.logo-icon svg{width:18px;height:18px;fill:white;}
+.logo-name{font-size:15px;font-weight:600;color:white;}
+.logo-tag{font-size:11px;color:var(--tm);}
+.hbadge{font-size:11px;background:rgba(30,127,194,0.2);color:#7EC8F0;border:1px solid rgba(30,127,194,0.3);padding:3px 10px;border-radius:999px;}
+main{max-width:1100px;margin:0 auto;padding:1.5rem;}
+.nav{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap;}
+.nav button{padding:6px 14px;border-radius:var(--r);border:1px solid var(--border);background:white;color:var(--ts);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;}
+.nav button.active{background:var(--navy);color:white;border-color:var(--navy);font-weight:500;}
+.nav button:hover:not(.active){background:var(--sky-light);}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.5rem;}
+.metric{background:white;border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem;}
+.metric .ml{font-size:11px;color:var(--ts);margin-bottom:3px;}
+.metric .mv{font-size:22px;font-weight:600;color:var(--tp);}
+.card{background:white;border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.card-title{font-size:15px;font-weight:600;color:var(--tp);margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+.sh{display:none;}
+.sbar{display:flex;gap:8px;margin-bottom:1rem;}
+.sbar input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);}
+.sbar input:focus{outline:none;border-color:var(--sky);background:white;}
+.sbar button{padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);background:white;color:var(--tp);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;}
+.sbar button:hover{background:var(--sky-light);}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:500;}
+.b-a{background:var(--sbg);color:var(--st);}
+.b-t{background:var(--ibg);color:var(--it);}
+.b-p{background:var(--wbg);color:var(--wt);}
+.b-d{background:var(--dbg);color:var(--dt);}
+.b-c{background:var(--cbg);color:var(--ct);}
+.b-dv{background:var(--pvbg);color:var(--pvt);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;padding:8px 10px;color:var(--ts);font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:10px 10px;color:var(--tp);border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--off);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem;}
+.fgrp{display:flex;flex-direction:column;gap:3px;}
+.fgrp label{font-size:11px;color:var(--ts);font-weight:500;}
+.fgrp input,.fgrp select{padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;}
+.fgrp input:focus,.fgrp select:focus{outline:none;border-color:var(--sky);}
+.fgrp input.req{border-color:#185FA5;}
+.fgrp input.invalid,.fgrp select.invalid{border-color:#C0392B!important;background:#FFF5F5;}
+.rs{color:#C0392B;}
+.ferr{font-size:11px;color:#C0392B;margin-top:2px;display:none;}
+.fsec{font-size:11px;font-weight:600;color:var(--tm);text-transform:uppercase;letter-spacing:.07em;margin:.9rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.btn{padding:8px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--navy);color:white;font-size:13px;cursor:pointer;font-weight:500;font-family:'Inter',sans-serif;}
+.btn:hover{background:#0d2a4d;}
+.btn-sec{background:white;color:var(--tp);}
+.btn-sec:hover{background:var(--sky-light);}
+.btn-del{padding:4px 10px;border-radius:var(--r);border:1px solid #F5C6C6;background:transparent;color:#C0392B;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-del:hover{background:var(--dbg);}
+.btn-edit{padding:4px 10px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--it);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-edit:hover{background:var(--ibg);}
+.fmsg{font-size:12px;padding:8px 12px;border-radius:var(--r);margin-bottom:10px;display:none;}
+.fmsg-err{background:var(--dbg);color:var(--dt);}
+.fmsg-ok{background:var(--sbg);color:var(--st);}
+.del-fields{display:none;background:var(--pvbg);border:1px solid #F0C8E0;border-radius:var(--r);padding:1rem;margin-top:.5rem;}
+.hint{font-size:11px;color:var(--tm);margin-top:3px;}
+.bar-bg{background:var(--border);border-radius:4px;height:5px;margin-top:4px;}
+.bar-fill{height:5px;border-radius:4px;}
+.rpt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
+.rpt-item{padding:12px;background:var(--off);border:1px solid var(--border);border-radius:var(--r);}
+.rpt-label{font-size:11px;color:var(--ts);}
+.rpt-val{font-size:18px;font-weight:600;margin-top:2px;}
+.loading{text-align:center;padding:2rem;color:var(--tm);font-size:13px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="hinner">
+    <a class="logo" href="/">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+      <div><div class="logo-name">Sky Fr8 WMS</div><div class="logo-tag">Staff Portal</div></div>
+    </a>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="/track" target="_blank" style="font-size:12px;color:var(--tm);text-decoration:none;">Customer tracking ↗</a>
+      <span class="hbadge" id="header-username">Staff</span>
+      <a href="/logout" style="font-size:12px;color:#8BA3BC;text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#8BA3BC'">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="nav" id="main-nav">
+    <button class="active" onclick="showTab('cargo')">📦 Cargo</button>
+    <button onclick="showTab('delivery')">🚚 Delivery</button>
+    <button onclick="showTab('flights')">✈ Flights</button>
+    <button onclick="showTab('inventory')">📊 Inventory</button>
+    <button onclick="showTab('reports')">📈 Reports</button>
+    <button onclick="showTab('bin')" id="bin-tab-btn">🗑 Recycle bin</button>
+    <button class="admin-only" onclick="showTab('users')" style="display:none;">👥 Users</button>
+    <button class="admin-only" onclick="showTab('actlog')" style="display:none;">📋 Activity log</button>
+    <button class="admin-only" onclick="showTab('backup')" style="display:none;">🗂 Data Management</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="ml">Total AWBs</div><div class="mv" id="m-total">—</div></div>
+    <div class="metric"><div class="ml">Arrived</div><div class="mv" id="m-arrived" style="color:var(--st)">—</div></div>
+    <div class="metric"><div class="ml">Manifested</div><div class="mv" id="m-transit" style="color:var(--it)">—</div></div>
+    <div class="metric"><div class="ml">Delivered</div><div class="mv" id="m-delivered" style="color:var(--pvt)">—</div></div>
+  </div>
+
+  <!-- CARGO TAB -->
+  <div id="tab-cargo">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title" style="margin-bottom:0;">➕ Add air cargo</div>
+        <button class="btn" onclick="toggleAddCargoForm()" id="add-cargo-toggle-btn">+ Add Cargo</button>
+      </div>
+      <div id="add-cargo-form-wrap" style="display:none;margin-top:1rem;">
+      <div style="font-size:12px;color:var(--tm);margin-bottom:1rem;"><span class="rs">*</span> Required fields</div>
+
+      <div class="fsec">AWB & Flight Details</div>
+      <div class="fg">
+        <div class="fgrp"><label>Flight number <span class="rs">*</span></label><input id="f-flight" placeholder="GXA2965" class="req" oninput="checkFlightLookup()"/><span id="err-flight" class="ferr"></span></div>
+        <div class="fgrp"><label>Flight date <span class="rs">*</span></label><input id="f-eta" type="date" class="req" onchange="checkFlightLookup()"/><span id="err-eta" class="ferr"></span></div>
+        <div class="fgrp"><label>Aircraft registration</label><input id="f-reg" placeholder="e.g. N123SF" style="text-transform:uppercase;"/><span class="hint">Auto-filled from flight record if available</span></div>
+        <div class="fgrp"><label>Airline <span class="rs">*</span></label><input id="f-airline" placeholder="IBC Airways" value="IBC Airways" class="req"/><span id="err-airline" class="ferr"></span></div>
+        <div class="fgrp"><label>Port of loading (IATA) <span class="rs">*</span></label><input id="f-pol" placeholder="MIA" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="err-pol" class="ferr"></span></div>
+        <div class="fgrp"><label>Port of discharge (IATA) <span class="rs">*</span></label><input id="f-pod" placeholder="KIN" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="err-pod" class="ferr"></span></div>
+        <div class="fgrp" id="asycuda-wrap" style="display:none;"><label>ASYCUDA reference number</label><input id="f-asycuda" placeholder="e.g. JMKIN-2026-1514"/><span class="hint">Auto-filled from flight record if available</span></div>
+        <div class="fgrp"><label>AWB number <span class="rs">*</span></label><input id="f-awb" placeholder="e.g. 026-12345678" class="req"/><span class="hint">Enter from the air waybill document</span><span id="err-awb" class="ferr"></span></div>
+      </div>
+
+      <div class="fsec">Cargo Details</div>
+      <div class="fg">
+        <div class="fgrp"><label>Description / commodity <span class="rs">*</span></label><input id="f-desc" placeholder="Electronics, spare parts..." class="req" oninput="checkConsolidation('f-desc','f-consolidation-section')"/><span id="err-desc" class="ferr"></span></div>
+        <div class="fgrp"><label>Cargo type <span class="rs">*</span></label>
+          <select id="f-type">
+            <option value="General" selected>General</option><option>Perishable</option><option>Dangerous goods</option>
+            <option>Live animals</option><option>Valuables</option><option>Human remains</option><option>Vulnerable</option>
+          </select><span id="err-type" class="ferr"></span>
+        </div>
+        <div class="fgrp"><label>Gross weight (kg) <span class="rs">*</span></label><input id="f-gw" type="number" placeholder="0.00" class="req"/><span id="err-gw" class="ferr"></span></div>
+        <div class="fgrp"><label>Chargeable weight (kg)</label><input id="f-cw" type="number" placeholder="0.00"/></div>
+        <div class="fgrp"><label>No. of pieces manifested <span class="rs">*</span></label><input id="f-pcs-man" type="number" placeholder="1" class="req"/><span id="err-pcs-man" class="ferr"></span></div>
+        <div class="fgrp"><label>Status <span class="rs">*</span></label>
+          <select id="f-status" onchange="toggleDelivered();togglePcsReceived('f-pcs-rec','f-status');">
+            <option value="">— Select —</option><option>Manifested</option><option>Arrived</option><option>Delivered</option>
+          </select><span id="err-status" class="ferr"></span>
+        </div>
+        <div class="fgrp"><label>No. of pieces received</label><input id="f-pcs-rec" type="number" placeholder="1" disabled style="opacity:0.45;cursor:not-allowed;"/><span class="hint">Available when status is Arrived</span><span id="err-pcs-rec" class="ferr"></span></div>
+        <div class="fgrp" style="grid-column:1/-1;"><label>Remarks</label><input id="f-remarks" placeholder="Any additional notes about this shipment..."/></div>
+      </div>
+
+      <!-- Warehouse bays -->
+      <div id="f-bays-section" style="display:none;">
+        <div class="fsec">Warehouse Bay Locations</div>
+        <div id="f-bays-wrap"><div class="bay-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;"><input type="text" class="bay-loc" placeholder="Bay (e.g. A-12)" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><input type="number" class="bay-pcs" placeholder="No. of pieces" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><button type="button" onclick="removeBayRow(this)" style="padding:7px 10px;border:1px solid #F5C6C6;border-radius:var(--r);background:transparent;color:#C0392B;cursor:pointer;font-size:13px;">✕</button></div></div>
+        <button type="button" onclick="addBayRow('f-bays-wrap')" class="btn btn-sec" style="margin-bottom:.75rem;font-size:12px;">+ Add another bay</button>
+      </div>
+
+      <!-- Consolidation section -->
+      <div id="f-consolidation-section" style="display:none;background:#EEF4FF;border:1px solid #B0C8F0;border-radius:var(--r);padding:1rem;margin-bottom:.75rem;">
+        <div class="fsec" style="margin-top:0;border-color:#B0C8F0;color:#1A3A8F;">📦 House AWB entries (Consolidation)</div>
+        <div style="font-size:12px;color:#1A3A8F;margin-bottom:.75rem;">The Master AWB (MAWB) for this consolidation is the AWB number entered above.</div>
+        <div id="f-hawb-wrap"></div>
+        <button type="button" onclick="addHawbRow('f-hawb-wrap')" class="btn btn-sec" style="font-size:12px;margin-top:4px;">+ Add House AWB</button>
+      </div>
+
+      <!-- Delivered fields -->
+      <div id="del-fields" class="del-fields">
+        <div class="fsec" style="margin-top:0;border-color:#F0C8E0;">Delivery Details</div>
+        <div class="fg">
+          <div class="fgrp"><label>No. of pieces delivered <span class="rs">*</span></label><input id="f-pcs-del" type="number" placeholder="0"/><span id="err-pcs-del" class="ferr"></span></div>
+          <div class="fgrp"><label>Date delivered <span class="rs">*</span></label><input id="f-date-del" type="date"/><span id="err-date-del" class="ferr"></span></div>
+        </div>
+      </div>
+
+      <div class="fsec">Notification</div>
+      <div class="fg">
+        <div class="fgrp"><label>Notification date</label><input id="f-notif-date" type="date"/></div>
+        <div class="fgrp"><label>Notification method</label>
+          <select id="f-notif-method">
+            <option value="">— Select —</option><option>Phone call</option><option>SMS</option><option>Email</option><option>WhatsApp</option><option>In person</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fgrp"><label>Person notified</label><input id="f-notif-person" placeholder="Name of person contacted"/></div>
+      </div>
+
+      <div class="fsec">Shipper Information</div>
+      <div class="fg">
+        <div class="fgrp"><label>Name <span class="rs">*</span></label><input id="f-sname" placeholder="ABC Exports Ltd." class="req"/><span id="err-sname" class="ferr"></span></div>
+        <div class="fgrp"><label>Phone</label><input id="f-sphone" placeholder="+1 305 555 0100"/></div>
+        <div class="fgrp" style="grid-column:1/-1;"><label>Street address <span class="rs">*</span></label><input id="f-s-street" placeholder="123 Trade Ave" class="req"/><span id="err-s-street" class="ferr"></span></div>
+        <div class="fgrp"><label>City</label><input id="f-s-city" placeholder="Miami"/></div>
+        <div class="fgrp"><label>Parish / State <span class="rs">*</span></label><input id="f-s-parish" placeholder="Florida" class="req"/><span id="err-s-parish" class="ferr"></span></div>
+        <div class="fgrp"><label>Zip code</label><input id="f-s-zip" placeholder="33101"/></div>
+        <div class="fgrp"><label>Country <span class="rs">*</span></label><input id="f-s-country" placeholder="United States" class="req"/><span id="err-s-country" class="ferr"></span></div>
+      </div>
+
+      <div class="fsec">Consignee Information</div>
+      <div class="fg">
+        <div class="fgrp"><label>Name <span class="rs">*</span></label><input id="f-cname" placeholder="XYZ Imports Co." class="req"/><span id="err-cname" class="ferr"></span></div>
+        <div class="fgrp"><label>Phone</label><input id="f-cphone" placeholder="+1876 555 0200"/></div>
+        <div class="fgrp" style="grid-column:1/-1;"><label>Street address <span class="rs">*</span></label><input id="f-c-street" placeholder="45 Port Rd" class="req"/><span id="err-c-street" class="ferr"></span></div>
+        <div class="fgrp"><label>City</label><input id="f-c-city" placeholder="Kingston"/></div>
+        <div class="fgrp"><label>Parish / State <span class="rs">*</span></label><input id="f-c-parish" placeholder="Saint Andrew" class="req"/><span id="err-c-parish" class="ferr"></span></div>
+        <div class="fgrp"><label>Zip code</label><input id="f-c-zip" placeholder=""/></div>
+        <div class="fgrp"><label>Country <span class="rs">*</span></label><input id="f-c-country" placeholder="Jamaica" class="req"/><span id="err-c-country" class="ferr"></span></div>
+      </div>
+
+      <div class="fsec">Customs</div>
+      <div class="fg">
+        <div class="fgrp"><label>Customs status</label>
+          <select id="f-customs"><option>Not submitted</option><option>Submitted</option><option>Under examination</option><option>Cleared</option><option>Hold</option></select>
+        </div>
+        <div class="fgrp"><label>Declared value (USD)</label><input id="f-val" type="number" placeholder="0.00"/></div>
+      </div>
+
+      <div id="form-msg" class="fmsg"></div>
+      <button class="btn" onclick="addCargo()">💾 Save cargo</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 All shipments</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;">
+        <input type="text" id="cargo-search" oninput="filterCargo()" placeholder="Search AWB, consignee..." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <input type="text" id="filter-flight" oninput="filterCargo()" placeholder="Filter by flight no." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <input type="date" id="filter-date" onchange="filterCargo()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <select id="filter-status" onchange="filterCargo()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);">
+          <option value="">All statuses</option><option>Manifested</option><option>Arrived</option><option>Delivered</option>
+        </select>
+        <div style="display:flex;gap:8px;">
+          <button onclick="clearFilters()" class="btn btn-sec" title="Clear filters">✕ Clear</button>
+          <button onclick="exportCSV()" class="btn-sec btn">⬇ CSV</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--wbg);border:1px solid #F0D070;border-radius:var(--r);margin-bottom:1rem;">
+        <span style="font-size:13px;color:var(--wt);font-weight:500;">🛃 Overdue for customs —</span>
+        <span style="font-size:13px;color:var(--wt);">Show Arrived shipments in warehouse more than</span>
+        <input type="number" id="filter-overdue-days" min="1" placeholder="e.g. 7" oninput="filterCargo()" style="width:70px;padding:5px 8px;border:1px solid #D0A800;border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--wt);background:white;text-align:center;"/>
+        <span style="font-size:13px;color:var(--wt);">days</span>
+        <button onclick="document.getElementById('filter-overdue-days').value='';filterCargo();" style="padding:4px 10px;border:1px solid #D0A800;border-radius:var(--r);background:transparent;color:var(--wt);font-size:12px;cursor:pointer;">✕</button>
+      </div>
+      <div id="filter-summary" style="font-size:12px;color:var(--ts);margin-bottom:.75rem;display:none;"></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>AWB</th><th>Consignee</th><th>Flight</th><th>Route</th><th>Manifested</th><th>On-hand</th><th>Status</th><th>Bay(s)</th><th></th><th></th></tr></thead>
+          <tbody id="cargo-table"><tr><td colspan="10" class="loading">Loading shipments...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVERY TAB -->
+  <div id="tab-delivery" class="sh">
+    <div class="card">
+      <div class="card-title">🚚 Record delivery</div>
+
+      <!-- Arrived shipments quick-pick -->
+      <div class="fsec">Select shipment</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;">
+        <input type="text" id="del-search-awb" oninput="filterDeliveryList()" placeholder="Search AWB..." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <input type="text" id="del-search-consignee" oninput="filterDeliveryList()" placeholder="Search consignee..." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <input type="text" id="del-search-flight" oninput="filterDeliveryList()" placeholder="Search flight..." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <button onclick="clearDeliverySearch()" class="btn btn-sec">✕ Clear</button>
+      </div>
+      <div style="overflow-x:auto;margin-bottom:1rem;">
+        <table>
+          <thead><tr><th>AWB</th><th>Consignee</th><th>Flight</th><th>Manifested</th><th>Delivered</th><th>Status</th><th></th></tr></thead>
+          <tbody id="del-shipments-table"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Manual AWB entry (also supports HAWB) -->
+      <div class="fsec">Or enter AWB / House AWB directly</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;">
+        <input type="text" id="del-awb-lookup" placeholder="Enter AWB or House AWB number" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-family:'Inter',sans-serif;color:var(--tp);" oninput="deliveryLookup()"/>
+        <button onclick="deliveryLookup()" class="btn">🔍 Look up</button>
+      </div>
+
+      <div id="del-preview" style="display:none;background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+          <div id="del-mawb-row" style="display:none;grid-column:1/-1;background:#EEF4FF;border:1px solid #B0C8F0;border-radius:var(--r);padding:6px 10px;"><span style="color:#1A3A8F;font-size:12px;">Master AWB (MAWB):</span><span id="del-prev-mawb" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#1A3A8F;margin-left:8px;"></span></div>
+          <div><span style="color:var(--ts);">Consignee</span><div id="del-prev-cname" style="font-weight:500;"></div></div>
+          <div><span style="color:var(--ts);">Flight</span><div id="del-prev-flight" style="font-weight:500;"></div></div>
+          <div><span style="color:var(--ts);">Description</span><div id="del-prev-desc" style="font-weight:500;"></div></div>
+          <div><span style="color:var(--ts);">Pieces</span><div id="del-prev-pcs" style="font-weight:500;"></div></div>
+          <div><span style="color:var(--ts);">Status</span><div id="del-prev-status"></div></div>
+        </div>
+      </div>
+      <div id="del-not-found" style="display:none;padding:.75rem 1rem;background:var(--dbg);border-radius:var(--r);font-size:13px;color:var(--dt);margin-bottom:1rem;"></div>
+      <div id="del-form" style="display:none;">
+        <div class="fsec">Delivery details</div>
+        <div class="fg">
+          <div class="fgrp"><label>No. of pieces delivered <span class="rs">*</span></label><input id="del-pcs" type="number" placeholder="0"/><span id="del-err-pcs" class="ferr"></span></div>
+          <div class="fgrp"><label>Date delivered <span class="rs">*</span></label><input id="del-date" type="date"/><span id="del-err-date" class="ferr"></span></div>
+          <div class="fgrp"><label>Name of person collecting</label><input id="del-collector" placeholder="John Smith"/></div>
+          <div class="fgrp"><label>Collector ID number</label><input id="del-collector-id" placeholder="Passport / Driver's licence no."/></div>
+        </div>
+        <div id="del-msg" class="fmsg"></div>
+        <button class="btn" onclick="saveDelivery()">💾 Save delivery</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Recent deliveries</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>AWB</th><th>Consignee</th><th>Pieces delivered</th><th>Date delivered</th><th>Collected by</th><th>Collector ID</th><th></th></tr></thead>
+          <tbody id="deliveries-table"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLIGHTS TAB -->
+  <div id="tab-flights" class="sh">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title" style="margin-bottom:0;">✈ Add flight routing</div>
+        <button class="btn" onclick="toggleAddFlightForm()" id="add-flight-toggle-btn">+ Add Flight</button>
+      </div>
+      <div id="add-flight-form-wrap" style="display:none;margin-top:1rem;">
+      <div style="font-size:12px;color:var(--tm);margin-bottom:1rem;"><span class="rs">*</span> Required fields</div>
+      <div class="fsec">Flight Identification</div>
+      <div class="fg">
+        <div class="fgrp"><label>Flight number <span class="rs">*</span></label><input id="fl-flight" placeholder="GXA2965" oninput="flightLookup()"/><span id="fl-err-flight" class="ferr"></span></div>
+        <div class="fgrp"><label>Flight date <span class="rs">*</span></label><input id="fl-date" type="date" onchange="flightLookup()"/><span id="fl-err-date" class="ferr"></span></div>
+        <div class="fgrp"><label>Aircraft registration</label><input id="fl-reg" placeholder="e.g. N123SF" style="text-transform:uppercase;"/></div>
+      </div>
+      <div id="fl-asycuda-wrap" style="display:none;">
+        <div class="fsec">ASYCUDA</div>
+        <div class="fg"><div class="fgrp"><label>ASYCUDA reference number</label><input id="fl-asycuda" placeholder="e.g. JMKIN-2026-1514"/><span class="hint">Will be applied to all shipments on this flight</span></div></div>
+      </div>
+      <div class="fsec">Routing</div>
+      <div class="fg">
+        <div class="fgrp"><label>Origin airport (IATA) <span class="rs">*</span></label><input id="fl-origin" placeholder="MIA" maxlength="3" style="text-transform:uppercase;"/><span id="fl-err-origin" class="ferr"></span></div>
+        <div class="fgrp"><label>Destination airport (IATA) <span class="rs">*</span></label><input id="fl-dest" placeholder="KIN" maxlength="3" style="text-transform:uppercase;"/><span id="fl-err-dest" class="ferr"></span></div>
+        <div class="fgrp"><label>Airline <span class="rs">*</span></label><input id="fl-airline" placeholder="IBC Airways" value="IBC Airways"/><span id="fl-err-airline" class="ferr"></span></div>
+      </div>
+      <div id="fl-msg" class="fmsg"></div>
+      <button class="btn" onclick="saveFlight()">💾 Save flight</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Saved flights</div>
+      <div class="sbar"><input type="text" id="fl-search" oninput="renderFlightsTable()" placeholder="Search by flight, date, route, registration..."/></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Flight</th><th>Date</th><th>Registration</th><th>Route</th><th>Airline</th><th>ASYCUDA ref</th><th>Shipments</th><th></th><th></th><th></th></tr></thead>
+          <tbody id="flights-table"><tr><td colspan="10" class="loading">Loading flights...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVENTORY TAB -->
+  <div id="tab-inventory" class="sh">
+    <div class="card"><div class="card-title">📊 Shipments by status</div><div id="inv-status"></div></div>
+    <div class="card"><div class="card-title">📦 Shipments by cargo type</div><div id="inv-type"></div></div>
+    <div class="card"><div class="card-title">🗺 Shipments by destination</div><div id="inv-dest"></div></div>
+  </div>
+
+  <!-- REPORTS TAB -->
+  <div id="tab-reports" class="sh">
+    <div class="card">
+      <div class="card-title">📈 Summary report</div>
+      <div class="fg" style="margin-bottom:1rem;">
+        <div class="fgrp"><label>Flight number</label><input id="rpt-flight" oninput="renderReports()" placeholder="e.g. GXA2965"/></div>
+        <div class="fgrp"><label>Consignee</label><input id="rpt-cname" oninput="renderReports()" placeholder="e.g. Reliable Couriers"/></div>
+        <div class="fgrp"><label>From date</label><input id="rpt-from" type="date" onchange="renderReports()"/></div>
+        <div class="fgrp"><label>To date</label><input id="rpt-to" type="date" onchange="renderReports()"/></div>
+      </div>
+      <div style="margin-bottom:1rem;"><button class="btn btn-sec" onclick="clearReportFilters()">✕ Clear filters</button></div>
+      <div class="rpt-grid" id="rpt-grid"></div>
+    </div>
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title">📤 Export</div>
+      <button class="btn" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+  </div>
+
+  <!-- RECYCLE BIN TAB -->
+  <div id="tab-bin" class="sh">
+    <div class="card">
+      <div class="card-title">🗑 Recycle bin</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:1rem;">Deleted records are kept here and can be restored. Records are permanently removed after 30 days.</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+        <input type="text" id="bin-search" oninput="renderBinTable()" placeholder="Search deleted records..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <button class="btn btn-sec" onclick="if(confirm('Permanently delete ALL records in the bin? This cannot be undone.')) emptyBin();">🗑 Empty bin</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>AWB</th><th>Consignee</th><th>Flight</th><th>Status at deletion</th><th>Deleted on</th><th>Expires</th><th></th><th></th></tr></thead>
+          <tbody id="bin-table"><tr><td colspan="8" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS TAB (admin only) -->
+  <div id="tab-users" class="sh">
+    <div class="card">
+      <div class="card-title">👥 User Management</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:1rem;">Create and manage staff accounts and their access levels.</div>
+      <button class="btn" onclick="openUserModal()" style="margin-bottom:1.25rem;">+ Add new user</button>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Created</th><th></th><th></th></tr></thead>
+          <tbody id="users-table"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY LOG TAB (admin only) -->
+  <div id="tab-actlog" class="sh">
+    <div class="card">
+      <div class="card-title">📋 Activity log</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:1rem;">
+        <input type="text" id="log-search-user" oninput="filterLog()" placeholder="Filter by user..." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <input type="text" id="log-search-action" oninput="filterLog()" placeholder="Filter by action..." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <input type="date" id="log-filter-date" onchange="filterLog()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
+        <button onclick="clearLogFilters()" class="btn btn-sec">✕ Clear</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Date &amp; Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
+          <tbody id="actlog-table"><tr><td colspan="4" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACKUP TAB (admin only) -->
+  <div id="tab-backup" class="sh">
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">📄 Import from flight manifest (PDF)</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:1rem;">Upload a cargo manifest PDF to pull in multiple shipments at once. You'll get a chance to review and edit everything before it's saved — nothing is added automatically.</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="file" id="manifest-file-input" accept=".pdf" style="font-size:13px;font-family:'Inter',sans-serif;"/>
+        <button class="btn" onclick="previewManifest()">Parse manifest</button>
+      </div>
+      <div id="manifest-msg" class="fmsg" style="display:none;margin-top:1rem;"></div>
+      <div id="manifest-review" style="display:none;margin-top:1.25rem;"></div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title">💾 Download a backup</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:1rem;">Downloads a single .zip with all your current data — shipments, flights, recycle bin, users, and the activity log.</div>
+      <button class="btn" onclick="downloadBackup()">⬇ Download backup</button>
+    </div>
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title">♻ Restore from a backup</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:1rem;">
+        Uploading a backup <strong>replaces your current data</strong> with what's in that file. A safety copy of your current data is taken automatically first, so this can be undone if something goes wrong — contact whoever manages your server if you ever need that safety copy restored.
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="file" id="restore-file-input" accept=".zip" style="font-size:13px;font-family:'Inter',sans-serif;"/>
+        <button class="btn btn-sec" onclick="restoreBackup()">Restore from file</button>
+      </div>
+      <div id="restore-msg" class="fmsg" style="display:none;margin-top:1rem;"></div>
+    </div>
+  </div>
+</main>
+
+<!-- USER MODAL -->
+<div id="user-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1000;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:white;border-radius:var(--rl);max-width:420px;margin:0 auto;padding:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;" id="user-modal-mode">Add new user</div><div id="user-modal-title" style="font-size:18px;font-weight:600;color:var(--navy);">New user</div></div>
+      <button onclick="closeUserModal()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
+    </div>
+    <div id="um-msg" class="fmsg" style="display:none;"></div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Username <span class="rs">*</span></label>
+      <input id="um-username" placeholder="e.g. jsmith"/>
+      <span id="um-err-username" class="ferr"></span>
+    </div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Password <span class="rs">*</span> <span id="um-pw-note" style="color:var(--tm);font-weight:400;"></span></label>
+      <input id="um-password" type="password" placeholder="Password"/>
+      <span id="um-err-password" class="ferr"></span>
+    </div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Role</label>
+      <select id="um-role">
+        <option value="staff">Staff</option>
+        <option value="admin">Admin</option>
+      </select>
+      <span class="hint">Admins can manage users. Staff cannot.</span>
+    </div>
+    <div class="fgrp" id="um-active-wrap" style="display:none;margin-bottom:.75rem;">
+      <label>Status</label>
+      <select id="um-active">
+        <option value="true">Active</option>
+        <option value="false">Deactivated</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1rem;">
+      <button class="btn" onclick="saveUser()">Save</button>
+      <button class="btn btn-sec" onclick="closeUserModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT SHIPMENT MODAL -->
+<div id="edit-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1000;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:white;border-radius:var(--rl);max-width:760px;margin:0 auto;padding:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Editing record</div><div id="edit-awb-label" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--navy);"></div></div>
+      <button onclick="closeEdit()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
+    </div>
+    <div class="fsec">AWB & Flight Details</div>
+    <div class="fg">
+      <div class="fgrp"><label>Flight number <span class="rs">*</span></label><input id="e-flight" class="req" oninput="eCheckFlightLookup()"/><span id="eerr-flight" class="ferr"></span></div>
+      <div class="fgrp"><label>Flight date <span class="rs">*</span></label><input id="e-eta" type="date" class="req" onchange="eCheckFlightLookup()"/><span id="eerr-eta" class="ferr"></span></div>
+      <div class="fgrp"><label>Aircraft registration</label><input id="e-reg" style="text-transform:uppercase;"/></div>
+      <div class="fgrp"><label>Airline <span class="rs">*</span></label><input id="e-airline" class="req"/><span id="eerr-airline" class="ferr"></span></div>
+      <div class="fgrp"><label>Port of loading (IATA) <span class="rs">*</span></label><input id="e-pol" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="eerr-pol" class="ferr"></span></div>
+      <div class="fgrp"><label>Port of discharge (IATA) <span class="rs">*</span></label><input id="e-pod" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="eerr-pod" class="ferr"></span></div>
+      <div class="fgrp" id="e-asycuda-wrap"><label>ASYCUDA reference number</label><input id="e-asycuda" placeholder="e.g. JMKIN-2026-1514"/><span class="hint">Optional</span></div>
+    </div>
+    <div class="fsec">Cargo Details</div>
+    <div class="fg">
+      <div class="fgrp"><label>Description / commodity <span class="rs">*</span></label><input id="e-desc" class="req" oninput="checkConsolidation('e-desc','e-consolidation-section')"/><span id="eerr-desc" class="ferr"></span></div>
+      <div class="fgrp"><label>Cargo type <span class="rs">*</span></label>
+        <select id="e-type"><option value="General">General</option><option>Perishable</option><option>Dangerous goods</option><option>Live animals</option><option>Valuables</option><option>Human remains</option><option>Vulnerable</option></select>
+      </div>
+      <div class="fgrp"><label>Gross weight (kg) <span class="rs">*</span></label><input id="e-gw" type="number" class="req"/><span id="eerr-gw" class="ferr"></span></div>
+      <div class="fgrp"><label>Chargeable weight (kg)</label><input id="e-cw" type="number"/></div>
+      <div class="fgrp"><label>No. of pieces manifested <span class="rs">*</span></label><input id="e-pcs-man" type="number" class="req"/><span id="eerr-pcs-man" class="ferr"></span></div>
+      <div class="fgrp"><label>Status <span class="rs">*</span></label>
+        <select id="e-status" onchange="eToggleDelivered();togglePcsReceived('e-pcs-rec','e-status');">
+          <option value="">— Select —</option><option>Manifested</option><option>Arrived</option><option>Delivered</option>
+        </select><span id="eerr-status" class="ferr"></span>
+      </div>
+      <div class="fgrp"><label>No. of pieces received</label><input id="e-pcs-rec" type="number" disabled style="opacity:0.45;cursor:not-allowed;"/><span class="hint" id="e-pcs-rec-hint">Available when status is Arrived</span><span id="eerr-pcs-rec" class="ferr"></span></div>
+      <div class="fgrp" style="grid-column:1/-1;">
+        <label>Remarks</label>
+        <div id="e-remarks-list" style="margin-bottom:8px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="e-remarks-new" placeholder="Add a remark..." style="flex:1;"/>
+          <button type="button" class="btn btn-sec" onclick="addRemark('e')" style="white-space:nowrap;">+ Add remark</button>
+        </div>
+      </div>
+    </div>
+    <div id="e-bays-section" style="display:none;">
+      <div class="fsec">Warehouse Bay Locations</div>
+      <div id="e-bays-wrap"></div>
+      <button type="button" onclick="addBayRow('e-bays-wrap')" class="btn btn-sec" style="margin-bottom:.75rem;font-size:12px;">+ Add another bay</button>
+    </div>
+    <div id="e-consolidation-section" style="display:none;background:#EEF4FF;border:1px solid #B0C8F0;border-radius:var(--r);padding:1rem;margin-bottom:.75rem;">
+      <div class="fsec" style="margin-top:0;border-color:#B0C8F0;color:#1A3A8F;">📦 House AWB entries (Consolidation)</div>
+      <div style="font-size:12px;color:#1A3A8F;margin-bottom:.75rem;">The Master AWB (MAWB) for this consolidation is the AWB number shown above.</div>
+      <div id="e-hawb-wrap"></div>
+      <button type="button" onclick="addHawbRow('e-hawb-wrap')" class="btn btn-sec" style="font-size:12px;margin-top:4px;">+ Add House AWB</button>
+    </div>
+    <div id="e-del-fields" class="del-fields">
+      <div class="fsec" style="margin-top:0;border-color:#F0C8E0;">Delivery Details</div>
+      <div class="fg">
+        <div class="fgrp"><label>No. of pieces delivered <span class="rs">*</span></label><input id="e-pcs-del" type="number"/><span id="eerr-pcs-del" class="ferr"></span></div>
+        <div class="fgrp"><label>Date delivered <span class="rs">*</span></label><input id="e-date-del" type="date"/><span id="eerr-date-del" class="ferr"></span></div>
+      </div>
+    </div>
+    <div class="fsec">Notification</div>
+    <div class="fg">
+      <div class="fgrp"><label>Notification date</label><input id="e-notif-date" type="date"/></div>
+      <div class="fgrp"><label>Notification method</label>
+        <select id="e-notif-method">
+          <option value="">— Select —</option><option>Phone call</option><option>SMS</option><option>Email</option><option>WhatsApp</option><option>In person</option><option>Other</option>
+        </select>
+      </div>
+      <div class="fgrp"><label>Person notified</label><input id="e-notif-person" placeholder="Name of person contacted"/></div>
+    </div>
+    <div class="fsec">Shipper Information</div>
+    <div class="fg">
+      <div class="fgrp"><label>Name <span class="rs">*</span></label><input id="e-sname" class="req"/><span id="eerr-sname" class="ferr"></span></div>
+      <div class="fgrp"><label>Phone</label><input id="e-sphone"/></div>
+      <div class="fgrp" style="grid-column:1/-1;"><label>Street address <span class="rs">*</span></label><input id="e-s-street" class="req"/><span id="eerr-s-street" class="ferr"></span></div>
+      <div class="fgrp"><label>City</label><input id="e-s-city"/></div>
+      <div class="fgrp"><label>Parish / State <span class="rs">*</span></label><input id="e-s-parish" class="req"/><span id="eerr-s-parish" class="ferr"></span></div>
+      <div class="fgrp"><label>Zip code</label><input id="e-s-zip"/></div>
+      <div class="fgrp"><label>Country <span class="rs">*</span></label><input id="e-s-country" class="req"/><span id="eerr-s-country" class="ferr"></span></div>
+    </div>
+    <div class="fsec">Consignee Information</div>
+    <div class="fg">
+      <div class="fgrp"><label>Name <span class="rs">*</span></label><input id="e-cname" class="req"/><span id="eerr-cname" class="ferr"></span></div>
+      <div class="fgrp"><label>Phone</label><input id="e-cphone"/></div>
+      <div class="fgrp" style="grid-column:1/-1;"><label>Street address <span class="rs">*</span></label><input id="e-c-street" class="req"/><span id="eerr-c-street" class="ferr"></span></div>
+      <div class="fgrp"><label>City</label><input id="e-c-city"/></div>
+      <div class="fgrp"><label>Parish / State <span class="rs">*</span></label><input id="e-c-parish" class="req"/><span id="eerr-c-parish" class="ferr"></span></div>
+      <div class="fgrp"><label>Zip code</label><input id="e-c-zip"/></div>
+      <div class="fgrp"><label>Country <span class="rs">*</span></label><input id="e-c-country" class="req"/><span id="eerr-c-country" class="ferr"></span></div>
+    </div>
+    <div class="fsec">Customs</div>
+    <div class="fg">
+      <div class="fgrp"><label>Customs status</label>
+        <select id="e-customs"><option>Not submitted</option><option>Submitted</option><option>Under examination</option><option>Cleared</option><option>Hold</option></select>
+      </div>
+      <div class="fgrp"><label>Declared value (USD)</label><input id="e-val" type="number"/></div>
+    </div>
+    <div id="edit-msg" class="fmsg"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:.5rem;">
+      <button class="btn" onclick="saveEdit()">💾 Save changes</button>
+      <button class="btn btn-sec" onclick="closeEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- FLIGHT EDIT MODAL -->
+<div id="fl-edit-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1000;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:white;border-radius:var(--rl);max-width:600px;margin:0 auto;padding:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Editing flight</div><div id="fl-edit-label" style="font-size:18px;font-weight:600;color:var(--navy);"></div></div>
+      <button onclick="closeFlightEdit()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
+    </div>
+    <div class="fsec">Flight Identification</div>
+    <div class="fg">
+      <div class="fgrp"><label>Flight number <span class="rs">*</span></label><input id="fle-flight" class="req"/><span id="fle-err-flight" class="ferr"></span></div>
+      <div class="fgrp"><label>Flight date <span class="rs">*</span></label><input id="fle-date" type="date" class="req"/><span id="fle-err-date" class="ferr"></span></div>
+      <div class="fgrp"><label>Aircraft registration</label><input id="fle-reg" style="text-transform:uppercase;"/></div>
+    </div>
+    <div class="fsec">ASYCUDA</div>
+    <div class="fg"><div class="fgrp"><label>ASYCUDA reference number</label><input id="fle-asycuda" placeholder="e.g. JMKIN-2026-1514"/><span class="hint">Saving will apply this to all matching shipments</span></div></div>
+    <div class="fsec">Routing</div>
+    <div class="fg">
+      <div class="fgrp"><label>Origin airport (IATA) <span class="rs">*</span></label><input id="fle-origin" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="fle-err-origin" class="ferr"></span></div>
+      <div class="fgrp"><label>Destination airport (IATA) <span class="rs">*</span></label><input id="fle-dest" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="fle-err-dest" class="ferr"></span></div>
+      <div class="fgrp"><label>Airline <span class="rs">*</span></label><input id="fle-airline" class="req"/><span id="fle-err-airline" class="ferr"></span></div>
+    </div>
+    <div id="fle-msg" class="fmsg"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:.5rem;">
+      <button class="btn" onclick="saveFlightEdit()">💾 Save changes</button>
+      <button class="btn btn-sec" onclick="closeFlightEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ARRIVE ALL MODAL -->
+<div id="fl-arrive-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1000;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:white;border-radius:var(--rl);max-width:680px;margin:0 auto;padding:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
+      <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Arrive shipments</div><div id="fl-arrive-label" style="font-size:18px;font-weight:600;color:var(--navy);"></div></div>
+      <button onclick="closeArriveAll()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
+    </div>
+    <div style="font-size:12px;color:var(--ts);margin-bottom:1rem;">This marks all <strong>Manifested</strong> shipments on this flight as <strong>Arrived</strong>. Pieces received defaults to pieces manifested — adjust any that came in short before confirming.</div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>AWB</th><th>Consignee</th><th>Pcs manifested</th><th>Pcs received</th></tr></thead>
+        <tbody id="fl-arrive-rows"></tbody>
+      </table>
+    </div>
+    <div id="fl-arrive-empty" style="display:none;text-align:center;color:var(--tm);padding:1.5rem;font-size:13px;">No manifested shipments left on this flight.</div>
+    <div id="fla-msg" class="fmsg" style="margin-top:1rem;"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem;">
+      <button class="btn" id="fla-confirm-btn" onclick="saveArriveAll()">📥 Arrive all</button>
+      <button class="btn btn-sec" onclick="closeArriveAll()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATE FORMATTING (dd-mmm-yyyy, e.g. 16-Sep-2026) ────────────────────
+const MONTH_ABBR=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function formatDate(dateInput){
+  if(!dateInput) return '—';
+  let d;
+  if(dateInput instanceof Date){ d=dateInput; }
+  else {
+    // Handles 'YYYY-MM-DD' and full ISO timestamps; parse as local to avoid timezone day-shift on plain dates
+    const s=String(dateInput);
+    const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    d = m ? new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3])) : new Date(s);
+  }
+  if(isNaN(d.getTime())) return String(dateInput);
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mmm=MONTH_ABBR[d.getMonth()];
+  const yyyy=d.getFullYear();
+  return `${dd}-${mmm}-${yyyy}`;
+}
+function formatDateTime(dateInput){
+  if(!dateInput) return '—';
+  const d=new Date(dateInput);
+  if(isNaN(d.getTime())) return String(dateInput);
+  const time=d.toLocaleTimeString('en-JM',{hour:'2-digit',minute:'2-digit'});
+  return `${formatDate(d)} ${time}`;
+}
+
+let cargos=[], flights=[], binItems=[];
+
+// ── HELPERS ───────────────────────────────────────────
+function badgeCls(s){const m={'Arrived':'b-a','Manifested':'b-t','Pending':'b-p','Delayed':'b-d','In customs':'b-c','Delivered':'b-dv'};return m[s]||'b-p';}
+function g(id){return document.getElementById(id).value.trim();}
+function eg(id){return document.getElementById(id).value.trim();}
+function es(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
+
+// ── REMARKS LOG ─────────────────────────────────────────────────────────
+let editRemarks=[];
+
+function normalizeRemarks(remarks){
+  // Supports legacy data where remarks was a single plain string
+  if(!remarks) return [];
+  if(Array.isArray(remarks)) return remarks;
+  if(typeof remarks==='string') return [{text:remarks,date:null,username:null}];
+  return [];
+}
+
+function renderRemarksList(prefix){
+  const list = prefix==='e' ? editRemarks : [];
+  const el=document.getElementById(prefix+'-remarks-list');
+  if(!el)return;
+  if(!list.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--tm);padding:4px 0;">No remarks yet.</div>';
+    return;
+  }
+  el.innerHTML=list.map(r=>`
+    <div style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;margin-bottom:6px;font-size:13px;">
+      <div>${r.text}</div>
+      <div style="font-size:11px;color:var(--tm);margin-top:3px;">${r.username?r.username+' · ':''}${r.date?formatDate(r.date):'—'}</div>
+    </div>`).join('');
+}
+
+function addRemark(prefix){
+  const input=document.getElementById(prefix+'-remarks-new');
+  const text=input.value.trim();
+  if(!text)return;
+  const entry={text,date:new Date().toISOString(),username:currentUsername};
+  if(prefix==='e'){editRemarks.push(entry);renderRemarksList('e');}
+  input.value='';
+}
+
+// ── LOAD DATA ─────────────────────────────────────────
+async function loadCargos(){
+  try{
+    const r=await fetch('/api/shipments');
+    if(r.status===401){window.location.href='/login';return;}
+    cargos=await r.json();renderTable(cargos);updateMetrics();
+  }
+  catch(e){document.getElementById('cargo-table').innerHTML='<tr><td colspan="10" style="text-align:center;color:#C0392B;padding:1.5rem;">Could not connect to server. Make sure server.py is running.</td></tr>';}
+}
+async function loadFlights(){
+  try{const r=await fetch('/api/flights');flights=await r.json();renderFlightsTable();}
+  catch(e){flights=[];}
+}
+async function loadBin(){
+  try{const r=await fetch('/api/bin');binItems=await r.json();updateBinBadge();}
+  catch(e){binItems=[];}
+}
+
+// ── METRICS ───────────────────────────────────────────
+function updateMetrics(){
+  document.getElementById('m-total').textContent=cargos.length;
+  document.getElementById('m-arrived').textContent=cargos.filter(c=>c.status==='Arrived').length;
+  document.getElementById('m-transit').textContent=cargos.filter(c=>c.status==='Manifested').length;
+  document.getElementById('m-delivered').textContent=cargos.filter(c=>c.status==='Delivered').length;
+}
+
+// ── TABLE ─────────────────────────────────────────────
+function renderTable(data,overdueDays){
+  const tb=document.getElementById('cargo-table');
+  if(!data.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--tm);padding:1.5rem;">No shipments found.</td></tr>';return;}
+  const today=new Date();today.setHours(0,0,0,0);
+  tb.innerHTML=data.map(c=>{
+    const baysHtml=(c.bays&&c.bays.length)?c.bays.map(b=>`<div style="font-size:10px;color:var(--ts);">${b.location}${b.pieces?` (${b.pieces} pcs)`:''}</div>`).join(''):(c.bay?`<div style="font-size:11px;">${c.bay}</div>`:'—');
+    let daysTag='';
+    if(c.status==='Arrived'&&c.eta){const fd=new Date(c.eta);fd.setHours(0,0,0,0);const days=Math.floor((today-fd)/(1000*60*60*24));if(days>0)daysTag=`<div style="font-size:10px;color:${overdueDays&&days>overdueDays?'var(--wt)':'var(--tm)'};">${days} day${days!==1?'s':''} in warehouse</div>`;}
+    const rowStyle=overdueDays&&c.status==='Arrived'&&c.eta&&Math.floor((today-new Date(c.eta))/(1000*60*60*24))>overdueDays?'background:var(--wbg);':'';
+    return `<tr style="${rowStyle}">
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${c.awb}</td>
+      <td><div style="font-weight:500;">${c.cname}</div><div style="font-size:10px;color:var(--ts)">${c.cphone||''}</div></td>
+      <td>${c.flight}·${formatDate(c.eta)}</td><td>${c.pol}→${c.pod}</td>
+      <td>${c.pcs_manifested}</td><td>${c.pcs_received!=null?Math.max(0,(c.pcs_received||0)-(c.pcs_delivered||0)):'—'}</td>
+      <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${c.status==='Delivered'?`<div style="font-size:10px;color:var(--pvt);margin-top:2px;">${c.pcs_delivered} pcs·${formatDate(c.date_delivered)}</div>`:''}${daysTag}</td>
+      <td>${baysHtml}</td>
+      <td><button class="btn-edit" onclick="openEdit('${c.awb}')">✏️ Edit</button></td>
+      <td><button class="btn-del" onclick="deleteCargo('${c.awb}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterCargo(){
+  const q=document.getElementById('cargo-search').value.toLowerCase();
+  const flight=document.getElementById('filter-flight').value.toLowerCase().trim();
+  const date=document.getElementById('filter-date').value;
+  const status=document.getElementById('filter-status').value;
+  const overdueDays=parseInt(document.getElementById('filter-overdue-days').value);
+  const today=new Date();today.setHours(0,0,0,0);
+  const filtered=cargos.filter(c=>{
+    const mQ=!q||c.awb.toLowerCase().includes(q)||c.cname.toLowerCase().includes(q)||c.status.toLowerCase().includes(q)||c.pod.toLowerCase().includes(q)||c.airline.toLowerCase().includes(q);
+    const mF=!flight||c.flight.toLowerCase().includes(flight);
+    const mD=!date||c.eta===date;
+    const mS=!status||c.status===status;
+    let mO=true;
+    if(!isNaN(overdueDays)&&overdueDays>0){if(c.status!=='Arrived')return false;const fd=new Date(c.eta);fd.setHours(0,0,0,0);mO=Math.floor((today-fd)/(1000*60*60*24))>overdueDays;}
+    return mQ&&mF&&mD&&mS&&mO;
+  });
+  renderTable(filtered,!isNaN(overdueDays)&&overdueDays>0?overdueDays:null);
+  const summary=document.getElementById('filter-summary');
+  const parts=[];
+  if(flight)parts.push(`Flight: <strong>${flight.toUpperCase()}</strong>`);
+  if(date)parts.push(`Date: <strong>${date}</strong>`);
+  if(status)parts.push(`Status: <strong>${status}</strong>`);
+  if(!isNaN(overdueDays)&&overdueDays>0)parts.push(`<span style="color:var(--wt);">⚠ Overdue >${overdueDays} days: <strong>${filtered.length} shipment${filtered.length!==1?'s':''}</strong></span>`);
+  if(parts.length){summary.innerHTML=`Showing ${filtered.length} of ${cargos.length} — ${parts.join(' · ')}`;summary.style.display='block';}
+  else summary.style.display='none';
+}
+
+function clearFilters(){
+  ['cargo-search','filter-flight','filter-date','filter-overdue-days'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('filter-status').value='';
+  document.getElementById('filter-summary').style.display='none';
+  renderTable(cargos);
+}
+
+// ── FORM TOGGLES ──────────────────────────────────────
+function toggleDelivered(){const s=document.getElementById('f-status').value;document.getElementById('del-fields').style.display=s==='Delivered'?'block':'none';togglePcsReceived('f-pcs-rec','f-status');}
+function eToggleDelivered(){const s=document.getElementById('e-status').value;document.getElementById('e-del-fields').style.display=s==='Delivered'?'block':'none';togglePcsReceived('e-pcs-rec','e-status');}
+
+function togglePcsReceived(inputId,selectId){
+  const s=document.getElementById(selectId).value;
+  const inp=document.getElementById(inputId);
+  const arrived=(s==='Arrived'||s==='Delivered');
+  inp.disabled=!arrived;inp.style.opacity=arrived?'1':'0.45';inp.style.cursor=arrived?'':'not-allowed';
+  const sec=document.getElementById(inputId==='f-pcs-rec'?'f-bays-section':'e-bays-section');
+  if(sec)sec.style.display=s==='Arrived'?'block':'none';
+}
+
+function checkShowAsycuda(){
+  const f=document.getElementById('f-flight').value.trim();
+  const e=document.getElementById('f-eta').value.trim();
+  document.getElementById('asycuda-wrap').style.display=(f&&e)?'block':'none';
+}
+
+function checkFlightLookup(){
+  checkShowAsycuda();
+  const flight=document.getElementById('f-flight').value.trim();
+  const date=document.getElementById('f-eta').value.trim();
+  if(flight&&date&&flights.length){
+    const match=flights.find(f=>f.flight.toLowerCase()===flight.toLowerCase()&&f.date===date);
+    if(match){
+      if(match.origin)document.getElementById('f-pol').value=match.origin;
+      if(match.dest)document.getElementById('f-pod').value=match.dest;
+      if(match.airline)document.getElementById('f-airline').value=match.airline;
+      if(match.asycuda)document.getElementById('f-asycuda').value=match.asycuda;
+      if(match.registration)document.getElementById('f-reg').value=match.registration;
+    }
+  }
+}
+
+function eCheckAsycuda(){
+  const f=document.getElementById('e-flight').value.trim();
+  const e=document.getElementById('e-eta').value.trim();
+  document.getElementById('e-asycuda-wrap').style.display=(f&&e)?'block':'none';
+}
+
+function eCheckFlightLookup(){
+  eCheckAsycuda();
+  const flight=document.getElementById('e-flight').value.trim();
+  const date=document.getElementById('e-eta').value.trim();
+  if(flight&&date&&flights.length){
+    const match=flights.find(f=>f.flight.toLowerCase()===flight.toLowerCase()&&f.date===date);
+    if(match){
+      if(match.origin)document.getElementById('e-pol').value=match.origin;
+      if(match.dest)document.getElementById('e-pod').value=match.dest;
+      if(match.airline)document.getElementById('e-airline').value=match.airline;
+      if(match.asycuda)document.getElementById('e-asycuda').value=match.asycuda;
+      if(match.registration)document.getElementById('e-reg').value=match.registration;
+    }
+  }
+}
+
+// ── CONSOLIDATION ─────────────────────────────────────
+function checkConsolidation(descId,sectionId){
+  const val=document.getElementById(descId).value.toLowerCase();
+  document.getElementById(sectionId).style.display=val.includes('consolidation')?'block':'none';
+  if(!val.includes('consolidation')){const wrapId=sectionId==='f-consolidation-section'?'f-hawb-wrap':'e-hawb-wrap';const wrap=document.getElementById(wrapId);if(wrap)wrap.innerHTML='';}
+}
+
+function addHawbRow(wrapId){
+  const wrap=document.getElementById(wrapId);
+  const row=document.createElement('div');
+  row.className='hawb-row';
+  row.style.cssText='background:white;border:1px solid #B0C8F0;border-radius:var(--r);padding:10px;margin-bottom:8px;';
+  row.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
+    <div class="fgrp"><label style="font-size:11px;color:var(--ts);">House AWB number <span class="rs">*</span></label><input type="text" class="hawb-num" placeholder="e.g. HAWB-0001" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);width:100%;"/></div>
+    <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Consignee <span class="rs">*</span></label><input type="text" class="hawb-consignee" placeholder="Consignee name" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);width:100%;"/></div>
+    <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Commodity <span class="rs">*</span></label><input type="text" class="hawb-commodity" placeholder="e.g. Electronics" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);width:100%;"/></div>
+    <div class="fgrp"><label style="font-size:11px;color:var(--ts);">No. of packages <span class="rs">*</span></label><input type="number" class="hawb-pcs" placeholder="0" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);width:100%;"/></div>
+    <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Total weight (kg) <span class="rs">*</span></label><input type="number" class="hawb-weight" placeholder="0.00" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);width:100%;"/></div>
+    <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Location</label><input type="text" class="hawb-location" placeholder="e.g. Bay A3" style="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);width:100%;"/></div>
+  </div>
+  <button type="button" onclick="this.closest('.hawb-row').remove()" style="padding:4px 10px;border:1px solid #F5C6C6;border-radius:var(--r);background:transparent;color:#C0392B;cursor:pointer;font-size:11px;">✕ Remove</button>`;
+  wrap.appendChild(row);
+}
+
+function getHawbs(wrapId){
+  const rows=document.querySelectorAll('#'+wrapId+' .hawb-row');
+  const hawbs=[];
+  rows.forEach(r=>{const num=r.querySelector('.hawb-num').value.trim();const consignee=r.querySelector('.hawb-consignee').value.trim();const commodity=r.querySelector('.hawb-commodity').value.trim();const pcs=r.querySelector('.hawb-pcs').value.trim();const weight=r.querySelector('.hawb-weight').value.trim();const location=r.querySelector('.hawb-location').value.trim();if(num)hawbs.push({hawb:num,consignee,commodity,pcs:parseInt(pcs)||0,weight:parseFloat(weight)||0,location,delivered:false});});
+  return hawbs;
+}
+
+function populateHawbs(wrapId,hawbs){
+  const wrap=document.getElementById(wrapId);wrap.innerHTML='';
+  if(!hawbs||!hawbs.length)return;
+  hawbs.forEach(h=>{addHawbRow(wrapId);const rows=wrap.querySelectorAll('.hawb-row');const row=rows[rows.length-1];row.querySelector('.hawb-num').value=h.hawb||'';row.querySelector('.hawb-consignee').value=h.consignee||'';row.querySelector('.hawb-commodity').value=h.commodity||'';row.querySelector('.hawb-pcs').value=h.pcs||'';row.querySelector('.hawb-weight').value=h.weight||'';row.querySelector('.hawb-location').value=h.location||'';});
+}
+
+// ── BAY ROWS ──────────────────────────────────────────
+function addBayRow(wrapId){
+  const wrap=document.getElementById(wrapId);
+  const row=document.createElement('div');row.className='bay-row';row.style.cssText='display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;';
+  row.innerHTML=`<input type="text" class="bay-loc" placeholder="Bay (e.g. B-03)" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><input type="number" class="bay-pcs" placeholder="No. of pieces" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><button type="button" onclick="removeBayRow(this)" style="padding:7px 10px;border:1px solid #F5C6C6;border-radius:var(--r);background:transparent;color:#C0392B;cursor:pointer;font-size:13px;">✕</button>`;
+  wrap.appendChild(row);
+}
+function removeBayRow(btn){const wrap=btn.parentElement.parentElement;if(wrap.querySelectorAll('.bay-row').length>1)btn.parentElement.remove();else btn.parentElement.querySelectorAll('input').forEach(i=>i.value='');}
+function getBays(wrapId){const rows=document.querySelectorAll('#'+wrapId+' .bay-row');const bays=[];rows.forEach(r=>{const loc=r.querySelector('.bay-loc').value.trim();const pcs=r.querySelector('.bay-pcs').value.trim();if(loc)bays.push({location:loc,pieces:parseInt(pcs)||0});});return bays;}
+function populateBays(wrapId,bays){
+  const wrap=document.getElementById(wrapId);wrap.innerHTML='';
+  const list=(bays&&bays.length)?bays:[{location:'',pieces:''}];
+  list.forEach(b=>{const row=document.createElement('div');row.className='bay-row';row.style.cssText='display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;';row.innerHTML=`<input type="text" class="bay-loc" value="${b.location||''}" placeholder="Bay (e.g. A-12)" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><input type="number" class="bay-pcs" value="${b.pieces||''}" placeholder="No. of pieces" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><button type="button" onclick="removeBayRow(this)" style="padding:7px 10px;border:1px solid #F5C6C6;border-radius:var(--r);background:transparent;color:#C0392B;cursor:pointer;font-size:13px;">✕</button>`;wrap.appendChild(row);});
+}
+
+// ── REQUIRED ARRAY ────────────────────────────────────
+const REQUIRED=[
+  {id:'f-flight',err:'err-flight',label:'Flight number'},
+  {id:'f-eta',err:'err-eta',label:'Flight date'},
+  {id:'f-airline',err:'err-airline',label:'Airline'},
+  {id:'f-pol',err:'err-pol',label:'Port of loading'},
+  {id:'f-pod',err:'err-pod',label:'Port of discharge'},
+  {id:'f-awb',err:'err-awb',label:'AWB number'},
+  {id:'f-desc',err:'err-desc',label:'Description / commodity'},
+  {id:'f-type',err:'err-type',label:'Cargo type',isSelect:true},
+  {id:'f-gw',err:'err-gw',label:'Gross weight',isNum:true},
+  {id:'f-pcs-man',err:'err-pcs-man',label:'Pieces manifested',isNum:true},
+  {id:'f-status',err:'err-status',label:'Status',isSelect:true},
+  {id:'f-sname',err:'err-sname',label:'Shipper name'},
+  {id:'f-s-street',err:'err-s-street',label:'Shipper street address'},
+  {id:'f-s-parish',err:'err-s-parish',label:'Shipper parish / state'},
+  {id:'f-s-country',err:'err-s-country',label:'Shipper country'},
+  {id:'f-cname',err:'err-cname',label:'Consignee name'},
+  {id:'f-c-street',err:'err-c-street',label:'Consignee street address'},
+  {id:'f-c-parish',err:'err-c-parish',label:'Consignee parish / state'},
+  {id:'f-c-country',err:'err-c-country',label:'Consignee country'},
+];
+
+function clearErrors(){REQUIRED.forEach(f=>{const el=document.getElementById(f.id);if(el)el.classList.remove('invalid');const e=document.getElementById(f.err);if(e){e.textContent='';e.style.display='none';}});}
+function showErr(errId,msg){const e=document.getElementById(errId);if(e){e.textContent=msg;e.style.display='block';}}
+
+// ── ADD CARGO ─────────────────────────────────────────
+function toggleAddCargoForm(){
+  const wrap=document.getElementById('add-cargo-form-wrap');
+  const btn=document.getElementById('add-cargo-toggle-btn');
+  const open = wrap.style.display==='none';
+  wrap.style.display=open?'block':'none';
+  btn.textContent=open?'✕ Close':'+ Add Cargo';
+}
+
+async function addCargo(){
+  clearErrors();
+  const msgEl=document.getElementById('form-msg');msgEl.style.display='none';
+  let errors=[];
+
+  const awb=g('f-awb');
+  if(!awb){document.getElementById('f-awb').classList.add('invalid');showErr('err-awb','AWB number is required.');errors.push('AWB');}
+  else if(cargos.find(c=>c.awb.toLowerCase()===awb.toLowerCase())){document.getElementById('f-awb').classList.add('invalid');showErr('err-awb','This AWB already exists.');errors.push('AWB (duplicate)');}
+
+  REQUIRED.filter(f=>f.id!=='f-awb').forEach(f=>{
+    const el=document.getElementById(f.id);const val=el.value.trim();
+    const empty=f.isSelect?val===''||val==='— Select —':val==='';
+    const badNum=f.isNum&&(val===''||isNaN(parseFloat(val))||parseFloat(val)<0);
+    if(empty||badNum){el.classList.add('invalid');showErr(f.err,f.isNum?`${f.label} must be 0 or more.`:`${f.label} is required.`);errors.push(f.label);}
+  });
+
+  const status=g('f-status');
+  if(status==='Arrived'){const pr=g('f-pcs-rec');if(!pr||isNaN(parseInt(pr))||parseInt(pr)<0){document.getElementById('f-pcs-rec').classList.add('invalid');showErr('err-pcs-rec','Pieces received is required when status is Arrived.');errors.push('Pieces received');}}
+  if(status==='Delivered'){
+    const pd=g('f-pcs-del'),dd=g('f-date-del');
+    if(!pd||isNaN(parseInt(pd))||parseInt(pd)<0){document.getElementById('f-pcs-del').classList.add('invalid');showErr('err-pcs-del','Pieces delivered is required.');errors.push('Pieces delivered');}
+    if(!dd){document.getElementById('f-date-del').classList.add('invalid');showErr('err-date-del','Date delivered is required.');errors.push('Date delivered');}
+  }
+
+  if(errors.length>0){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing or invalid field(s).`;msgEl.style.display='block';return;}
+
+  const payload={
+    awb,flight:g('f-flight'),registration:g('f-reg')||null,airline:g('f-airline'),
+    pol:g('f-pol').toUpperCase(),pod:g('f-pod').toUpperCase(),eta:g('f-eta'),
+    asycuda:g('f-asycuda')||null,desc:g('f-desc'),type:g('f-type')||'General',
+    gw:parseFloat(g('f-gw')),cw:parseFloat(g('f-cw'))||0,
+    pcs_manifested:parseInt(g('f-pcs-man')),
+    pcs_received:(status==='Arrived'||status==='Delivered')?parseInt(g('f-pcs-rec'))||null:null,
+    remarks:g('f-remarks')?[{text:g('f-remarks'),date:new Date().toISOString(),username:currentUsername}]:[],
+    bays:getBays('f-bays-wrap'),
+    hawbs:document.getElementById('f-consolidation-section').style.display!=='none'?getHawbs('f-hawb-wrap'):[],
+    status,
+    pcs_delivered:status==='Delivered'?parseInt(g('f-pcs-del')):null,
+    date_delivered:status==='Delivered'?g('f-date-del'):null,
+    notif_date:g('f-notif-date')||null,notif_method:document.getElementById('f-notif-method').value||null,notif_person:g('f-notif-person')||null,
+    sname:g('f-sname'),sphone:g('f-sphone'),
+    s_street:g('f-s-street'),s_city:g('f-s-city'),s_parish:g('f-s-parish'),s_zip:g('f-s-zip'),s_country:g('f-s-country'),
+    cname:g('f-cname'),cphone:g('f-cphone'),
+    c_street:g('f-c-street'),c_city:g('f-c-city'),c_parish:g('f-c-parish'),c_zip:g('f-c-zip'),c_country:g('f-c-country'),
+    customs:g('f-customs')||'Not submitted',val:parseFloat(g('f-val'))||0
+  };
+
+  try{
+    const res=await fetch('/api/shipments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Save failed.';msgEl.style.display='block';return;}
+    cargos.push(payload);renderTable(cargos);updateMetrics();
+
+    const keepFlight=document.getElementById('f-flight').value;
+    const keepEta=document.getElementById('f-eta').value;
+    const keepReg=document.getElementById('f-reg').value;
+    const keepAirline=document.getElementById('f-airline').value;
+    const keepPol=document.getElementById('f-pol').value;
+    const keepPod=document.getElementById('f-pod').value;
+    const keepAsycuda=document.getElementById('f-asycuda').value;
+
+    ['f-awb','f-desc','f-gw','f-cw','f-pcs-man','f-pcs-rec','f-remarks',
+     'f-sname','f-sphone','f-s-street','f-s-city','f-s-parish','f-s-zip','f-s-country',
+     'f-cname','f-cphone','f-c-street','f-c-city','f-c-parish','f-c-zip','f-c-country',
+     'f-val','f-pcs-del','f-date-del','f-notif-date','f-notif-person'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('f-notif-method').selectedIndex=0;
+
+    document.getElementById('f-flight').value=keepFlight;
+    document.getElementById('f-eta').value=keepEta;
+    document.getElementById('f-reg').value=keepReg;
+    document.getElementById('f-airline').value=keepAirline||'IBC Airways';
+    document.getElementById('f-pol').value=keepPol;
+    document.getElementById('f-pod').value=keepPod;
+    document.getElementById('f-asycuda').value=keepAsycuda;
+    ['f-type','f-status','f-customs'].forEach(id=>document.getElementById(id).selectedIndex=0);
+    document.getElementById('del-fields').style.display='none';
+    document.getElementById('f-bays-section').style.display='none';
+    document.getElementById('f-consolidation-section').style.display='none';
+    document.getElementById('f-hawb-wrap').innerHTML='';
+    populateBays('f-bays-wrap',[]);
+    togglePcsReceived('f-pcs-rec','f-status');
+
+    msgEl.className='fmsg fmsg-ok';msgEl.textContent='AWB '+awb+' saved successfully.';msgEl.style.display='block';
+    setTimeout(()=>msgEl.style.display='none',3000);
+    document.getElementById('f-awb').scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById('f-awb').focus();
+    await loadCargos();
+  }catch(e){msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error. Is the server running?';msgEl.style.display='block';}
+}
+
+// ── DELETE CARGO ──────────────────────────────────────
+async function deleteCargo(awb){
+  const c=cargos.find(x=>x.awb===awb);if(!c)return;
+  const msg=`Move this record to the recycle bin?\n\nAWB: ${c.awb}\nConsignee: ${c.cname}\nFlight: ${c.flight} · ${formatDate(c.eta)}\nStatus: ${c.status}\n\nIt can be restored from the Recycle Bin tab.`;
+  if(!confirm(msg))return;
+  try{await fetch('/api/shipments/'+encodeURIComponent(awb)+'/bin',{method:'POST'});await loadCargos();await loadBin();updateBinBadge();}
+  catch(e){alert('Move to bin failed.');}
+}
+
+// ── EDIT MODAL ────────────────────────────────────────
+let editingAwb=null;
+
+const EDIT_REQUIRED=[
+  {id:'e-flight',err:'eerr-flight',label:'Flight number'},
+  {id:'e-eta',err:'eerr-eta',label:'Flight date'},
+  {id:'e-airline',err:'eerr-airline',label:'Airline'},
+  {id:'e-pol',err:'eerr-pol',label:'Port of loading'},
+  {id:'e-pod',err:'eerr-pod',label:'Port of discharge'},
+  {id:'e-desc',err:'eerr-desc',label:'Description / commodity'},
+  {id:'e-gw',err:'eerr-gw',label:'Gross weight',isNum:true},
+  {id:'e-pcs-man',err:'eerr-pcs-man',label:'Pieces manifested',isNum:true},
+  {id:'e-status',err:'eerr-status',label:'Status',isSelect:true},
+  {id:'e-sname',err:'eerr-sname',label:'Shipper name'},
+  {id:'e-s-street',err:'eerr-s-street',label:'Shipper street address'},
+  {id:'e-s-parish',err:'eerr-s-parish',label:'Shipper parish / state'},
+  {id:'e-s-country',err:'eerr-s-country',label:'Shipper country'},
+  {id:'e-cname',err:'eerr-cname',label:'Consignee name'},
+  {id:'e-c-street',err:'eerr-c-street',label:'Consignee street address'},
+  {id:'e-c-parish',err:'eerr-c-parish',label:'Consignee parish / state'},
+  {id:'e-c-country',err:'eerr-c-country',label:'Consignee country'},
+];
+
+function openEdit(awb){
+  const c=cargos.find(x=>x.awb===awb);if(!c)return;
+  editingAwb=awb;
+  document.getElementById('edit-awb-label').textContent=awb;
+  es('e-flight',c.flight);es('e-eta',c.eta);es('e-reg',c.registration);es('e-airline',c.airline);es('e-pol',c.pol);es('e-pod',c.pod);es('e-asycuda',c.asycuda);
+  es('e-desc',c.desc);es('e-gw',c.gw);es('e-cw',c.cw);es('e-pcs-man',c.pcs_manifested);es('e-pcs-rec',c.pcs_received);
+  editRemarks=normalizeRemarks(c.remarks);
+  document.getElementById('e-remarks-new').value='';
+  renderRemarksList('e');
+  es('e-sname',c.sname);es('e-sphone',c.sphone);es('e-s-street',c.s_street);es('e-s-city',c.s_city);es('e-s-parish',c.s_parish);es('e-s-zip',c.s_zip);es('e-s-country',c.s_country);
+  es('e-cname',c.cname);es('e-cphone',c.cphone);es('e-c-street',c.c_street);es('e-c-city',c.c_city);es('e-c-parish',c.c_parish);es('e-c-zip',c.c_zip);es('e-c-country',c.c_country);
+  es('e-val',c.val);es('e-pcs-del',c.pcs_delivered);es('e-date-del',c.date_delivered);es('e-notif-date',c.notif_date);es('e-notif-person',c.notif_person);
+  document.getElementById('e-notif-method').value=c.notif_method||'';
+  document.getElementById('e-type').value=c.type||'General';
+  document.getElementById('e-status').value=c.status||'';
+  document.getElementById('e-customs').value=c.customs||'Not submitted';
+  document.getElementById('e-del-fields').style.display=c.status==='Delivered'?'block':'none';
+  document.getElementById('e-asycuda-wrap').style.display=(c.flight&&c.eta)?'block':'none';
+  document.getElementById('e-bays-section').style.display=c.status==='Arrived'?'block':'none';
+  populateBays('e-bays-wrap',c.bays||[]);
+  const isConsolidation=(c.desc||'').toLowerCase().includes('consolidation');
+  document.getElementById('e-consolidation-section').style.display=isConsolidation?'block':'none';
+  if(isConsolidation&&c.hawbs&&c.hawbs.length)populateHawbs('e-hawb-wrap',c.hawbs);
+  else document.getElementById('e-hawb-wrap').innerHTML='';
+  togglePcsReceived('e-pcs-rec','e-status');
+  document.getElementById('edit-msg').style.display='none';
+  document.querySelectorAll('#edit-overlay .ferr').forEach(e=>{e.textContent='';e.style.display='none';});
+  document.querySelectorAll('#edit-overlay .invalid').forEach(e=>e.classList.remove('invalid'));
+  document.getElementById('edit-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function closeEdit(){document.getElementById('edit-overlay').style.display='none';document.body.style.overflow='';editingAwb=null;}
+
+async function saveEdit(){
+  if(!editingAwb)return;
+  const msgEl=document.getElementById('edit-msg');msgEl.style.display='none';
+  document.querySelectorAll('#edit-overlay .ferr').forEach(e=>{e.textContent='';e.style.display='none';});
+  document.querySelectorAll('#edit-overlay .invalid').forEach(e=>e.classList.remove('invalid'));
+  let errors=[];
+
+  EDIT_REQUIRED.forEach(f=>{
+    const el=document.getElementById(f.id);const val=el.value.trim();
+    const empty=f.isSelect?val===''||val==='— Select —':val==='';
+    const badNum=f.isNum&&(val===''||isNaN(parseFloat(val))||parseFloat(val)<0);
+    if(empty||badNum){el.classList.add('invalid');const e=document.getElementById(f.err);if(e){e.textContent=f.isNum?`${f.label} must be 0 or more.`:`${f.label} is required.`;e.style.display='block';}errors.push(f.label);}
+  });
+
+  const status=eg('e-status');
+  if(status==='Arrived'){const pr=eg('e-pcs-rec');if(!pr||isNaN(parseInt(pr))||parseInt(pr)<0){document.getElementById('e-pcs-rec').classList.add('invalid');const e=document.getElementById('eerr-pcs-rec');if(e){e.textContent='Pieces received is required when status is Arrived.';e.style.display='block';}errors.push('Pieces received');}}
+  if(status==='Delivered'){
+    const pd=eg('e-pcs-del'),dd=eg('e-date-del');
+    if(!pd||isNaN(parseInt(pd))||parseInt(pd)<0){document.getElementById('e-pcs-del').classList.add('invalid');const e=document.getElementById('eerr-pcs-del');if(e){e.textContent='Pieces delivered is required.';e.style.display='block';}errors.push('Pieces delivered');}
+    if(!dd){document.getElementById('e-date-del').classList.add('invalid');const e=document.getElementById('eerr-date-del');if(e){e.textContent='Date delivered is required.';e.style.display='block';}errors.push('Date delivered');}
+
+    // Enforce: pieces delivered must equal pieces manifested for regular shipments
+    const isConsolidation = document.getElementById('e-consolidation-section').style.display !== 'none';
+    if(!isConsolidation && pd && !isNaN(parseInt(pd))){
+      const manifested = parseInt(eg('e-pcs-man'))||0;
+      const delivered  = parseInt(pd);
+      const prevDelivered = parseInt((cargos.find(x=>x.awb===editingAwb)||{}).pcs_delivered)||0;
+      const totalWouldBe = prevDelivered > delivered ? delivered : delivered; // direct value in edit
+      if(delivered > manifested){
+        document.getElementById('e-pcs-del').classList.add('invalid');
+        const e=document.getElementById('eerr-pcs-del');
+        if(e){e.textContent=`Cannot deliver more pieces (${delivered}) than were manifested (${manifested}).`;e.style.display='block';}
+        errors.push('Pieces delivered count');
+      }
+      if(delivered < manifested){
+        document.getElementById('e-pcs-del').classList.add('invalid');
+        const e=document.getElementById('eerr-pcs-del');
+        if(e){e.textContent=`All ${manifested} manifested pieces must be delivered before status can be set to Delivered. Use the Delivery tab for partial deliveries.`;e.style.display='block';}
+        errors.push('Pieces delivered count');
+      }
+    }
+    // For consolidations, check all HAWBs are delivered
+    if(isConsolidation){
+      const c = cargos.find(x=>x.awb===editingAwb);
+      if(c && c.hawbs && c.hawbs.length){
+        const pending = c.hawbs.filter(h=>!h.delivered);
+        if(pending.length > 0){
+          msgEl.className='fmsg fmsg-err';
+          msgEl.textContent=`Cannot mark as Delivered — ${pending.length} House AWB(s) still pending: ${pending.map(h=>h.hawb).join(', ')}`;
+          msgEl.style.display='block';return;
+        }
+      }
+    }
+  }
+
+  if(errors.length>0){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing or invalid field(s).`;msgEl.style.display='block';return;}
+
+  const updates={
+    flight:eg('e-flight'),registration:eg('e-reg')||null,airline:eg('e-airline'),pol:eg('e-pol').toUpperCase(),pod:eg('e-pod').toUpperCase(),eta:eg('e-eta'),
+    asycuda:eg('e-asycuda')||null,desc:eg('e-desc'),type:document.getElementById('e-type').value||'General',
+    gw:parseFloat(eg('e-gw')),cw:parseFloat(eg('e-cw'))||0,
+    pcs_manifested:parseInt(eg('e-pcs-man')),
+    pcs_received:(status==='Arrived'||status==='Delivered')?parseInt(eg('e-pcs-rec'))||null:null,
+    remarks:editRemarks,
+    bays:getBays('e-bays-wrap'),
+    hawbs:document.getElementById('e-consolidation-section').style.display!=='none'?getHawbs('e-hawb-wrap'):[],
+    status,
+    pcs_delivered:status==='Delivered'?parseInt(eg('e-pcs-del')):null,
+    date_delivered:status==='Delivered'?eg('e-date-del'):null,
+    notif_date:eg('e-notif-date')||null,notif_method:document.getElementById('e-notif-method').value||null,notif_person:eg('e-notif-person')||null,
+    sname:eg('e-sname'),sphone:eg('e-sphone'),
+    s_street:eg('e-s-street'),s_city:eg('e-s-city'),s_parish:eg('e-s-parish'),s_zip:eg('e-s-zip'),s_country:eg('e-s-country'),
+    cname:eg('e-cname'),cphone:eg('e-cphone'),
+    c_street:eg('e-c-street'),c_city:eg('e-c-city'),c_parish:eg('e-c-parish'),c_zip:eg('e-c-zip'),c_country:eg('e-c-country'),
+    customs:document.getElementById('e-customs').value||'Not submitted',val:parseFloat(eg('e-val'))||0
+  };
+
+  try{
+    const res=await fetch('/api/shipments/'+encodeURIComponent(editingAwb),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(updates)});
+    const data=await res.json();
+    if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Update failed.';msgEl.style.display='block';return;}
+    msgEl.className='fmsg fmsg-ok';msgEl.textContent='Record updated successfully.';msgEl.style.display='block';
+    await loadCargos();setTimeout(()=>closeEdit(),1200);
+  }catch(e){msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error. Is the server running?';msgEl.style.display='block';}
+}
+
+document.getElementById('edit-overlay').addEventListener('click',function(e){if(e.target===this)closeEdit();});
+
+// ── DELIVERY TAB ──────────────────────────────────────
+function getTomorrowDate(){
+  const d=new Date();d.setDate(d.getDate()+1);
+  return d.toISOString().split('T')[0];
+}
+
+function renderDeliveryShipmentsTable(){
+  const tb=document.getElementById('del-shipments-table');if(!tb)return;
+  const qAwb=(document.getElementById('del-search-awb')||{}).value||'';
+  const qCon=(document.getElementById('del-search-consignee')||{}).value||'';
+  const qFlt=(document.getElementById('del-search-flight')||{}).value||'';
+  // Show Arrived shipments + partially delivered ones
+  const eligible=cargos.filter(c=>{
+    const isArrived=c.status==='Arrived';
+    const isPartial=c.pcs_delivered>0&&c.status!=='Delivered';
+    if(!isArrived&&!isPartial)return false;
+    const mAwb=!qAwb||c.awb.toLowerCase().includes(qAwb.toLowerCase());
+    const mCon=!qCon||c.cname.toLowerCase().includes(qCon.toLowerCase());
+    const mFlt=!qFlt||c.flight.toLowerCase().includes(qFlt.toLowerCase());
+    return mAwb&&mCon&&mFlt;
+  });
+  if(!eligible.length){
+    tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--tm);padding:1rem;">No arrived shipments found.</td></tr>';return;
+  }
+  tb.innerHTML=eligible.map(c=>{
+    const manifested=parseInt(c.pcs_manifested)||0;
+    const delivered=parseInt(c.pcs_delivered)||0;
+    const remaining=manifested-delivered;
+    const pcsDisplay=delivered>0?`${delivered}/${manifested}`:'—';
+    return `<tr style="cursor:pointer;" onmouseover="this.style.background='var(--sky-light)'" onmouseout="this.style.background=''">
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${c.awb}</td>
+      <td><div style="font-weight:500;">${c.cname}</div><div style="font-size:10px;color:var(--ts)">${c.cphone||''}</div></td>
+      <td>${c.flight} · ${formatDate(c.eta)}</td>
+      <td>${manifested}</td>
+      <td>${pcsDisplay}</td>
+      <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${delivered>0&&c.status!=='Delivered'?`<div style="font-size:10px;color:var(--wt);">${remaining} remaining</div>`:''}</td>
+      <td><button class="btn btn-sec" style="font-size:11px;padding:4px 10px;" onclick="selectForDelivery('${c.awb}')">Select</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function selectForDelivery(awb){
+  document.getElementById('del-awb-lookup').value=awb;
+  deliveryLookup();
+  // Scroll to the lookup section
+  document.getElementById('del-awb-lookup').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function filterDeliveryList(){
+  renderDeliveryShipmentsTable();
+}
+
+function clearDeliverySearch(){
+  ['del-search-awb','del-search-consignee','del-search-flight'].forEach(id=>document.getElementById(id).value='');
+  renderDeliveryShipmentsTable();
+}
+
+function deliveryLookup(){
+  const input=document.getElementById('del-awb-lookup').value.trim().toLowerCase();
+  const preview=document.getElementById('del-preview'),notFound=document.getElementById('del-not-found'),form=document.getElementById('del-form');
+  if(!input){preview.style.display='none';notFound.style.display='none';form.style.display='none';return;}
+  let foundShipment=null,foundHawb=null;
+  for(const c of cargos){if(c.hawbs&&c.hawbs.length){const h=c.hawbs.find(x=>x.hawb.toLowerCase()===input);if(h){foundShipment=c;foundHawb=h;break;}}}
+  if(!foundHawb)foundShipment=cargos.find(x=>x.awb.toLowerCase()===input);
+  if(!foundShipment){
+    preview.style.display='none';
+    notFound.textContent=`No shipment found for "${document.getElementById('del-awb-lookup').value.trim()}". Please check and try again.`;
+    notFound.style.display='block';form.style.display='none';return;
+  }
+  notFound.style.display='none';
+  if(foundHawb){
+    document.getElementById('del-prev-cname').textContent=foundHawb.consignee;
+    document.getElementById('del-prev-flight').textContent=foundShipment.flight+' · '+formatDate(foundShipment.eta);
+    document.getElementById('del-prev-desc').textContent=foundHawb.commodity;
+    document.getElementById('del-prev-pcs').textContent=foundHawb.pcs;
+    document.getElementById('del-prev-status').innerHTML=`<span class="badge ${badgeCls(foundShipment.status)}">${foundShipment.status}</span>`;
+    document.getElementById('del-prev-mawb').textContent=foundShipment.awb;
+    document.getElementById('del-mawb-row').style.display='block';
+    if(!document.getElementById('del-pcs').value)document.getElementById('del-pcs').value=foundHawb.pcs||'';
+    // Hide partial delivery progress for HAWBs
+    const prog=document.getElementById('del-partial-progress');if(prog)prog.style.display='none';
+  }else{
+    document.getElementById('del-prev-cname').textContent=foundShipment.cname;
+    document.getElementById('del-prev-flight').textContent=foundShipment.flight+' · '+formatDate(foundShipment.eta);
+    document.getElementById('del-prev-desc').textContent=foundShipment.desc;
+    document.getElementById('del-mawb-row').style.display='none';
+    document.getElementById('del-prev-status').innerHTML=`<span class="badge ${badgeCls(foundShipment.status)}">${foundShipment.status}</span>`;
+    // Show partial delivery progress
+    const manifested = parseInt(foundShipment.pcs_manifested)||0;
+    const alreadyDelivered = parseInt(foundShipment.pcs_delivered)||0;
+    const remaining = manifested - alreadyDelivered;
+    document.getElementById('del-prev-pcs').textContent=manifested;
+    let prog=document.getElementById('del-partial-progress');
+    if(!prog){
+      prog=document.createElement('div');prog.id='del-partial-progress';
+      document.getElementById('del-prev-pcs').parentElement.after(prog);
+    }
+    if(alreadyDelivered > 0){
+      prog.style.cssText='grid-column:1/-1;background:#EAF6EF;border:1px solid #A8DBBF;border-radius:var(--r);padding:8px 12px;font-size:13px;color:var(--st);';
+      prog.innerHTML=`✅ <strong>${alreadyDelivered} of ${manifested} pieces</strong> already delivered &mdash; <strong>${remaining}</strong> remaining`;
+      prog.style.display='block';
+      if(!document.getElementById('del-pcs').value)document.getElementById('del-pcs').value=remaining>0?remaining:'';
+    } else {
+      prog.style.display='none';
+      if(!document.getElementById('del-pcs').value)document.getElementById('del-pcs').value=manifested||'';
+    }
+  }
+  if(!document.getElementById('del-date').value)document.getElementById('del-date').value='';
+  preview.style.display='block';form.style.display='block';
+}
+
+async function saveDelivery(){
+  const awbInput = document.getElementById('del-awb-lookup').value.trim();
+  const pcs      = document.getElementById('del-pcs').value.trim();
+  const date     = document.getElementById('del-date').value.trim();
+  const collector    = document.getElementById('del-collector').value.trim()||null;
+  const collectorId  = document.getElementById('del-collector-id').value.trim()||null;
+  const msgEl    = document.getElementById('del-msg');
+  msgEl.style.display='none';
+
+  ['del-err-pcs','del-err-date'].forEach(id=>{const e=document.getElementById(id);if(e){e.textContent='';e.style.display='none';}});
+  let errors=[];
+  if(!pcs||isNaN(parseInt(pcs))||parseInt(pcs)<0){const e=document.getElementById('del-err-pcs');if(e){e.textContent='Pieces delivered is required.';e.style.display='block';}errors.push('pcs');}
+  if(!date){const e=document.getElementById('del-err-date');if(e){e.textContent='Date delivered is required.';e.style.display='block';}errors.push('date');}
+  if(errors.length){msgEl.className='fmsg fmsg-err';msgEl.textContent='Please fill in all required fields.';msgEl.style.display='block';return;}
+
+  const inputLower = awbInput.toLowerCase();
+
+  // Determine if this is a HAWB or MAWB lookup
+  let parentShipment=null, foundHawb=null;
+  for(const c of cargos){
+    if(c.hawbs&&c.hawbs.length){
+      const h=c.hawbs.find(x=>x.hawb.toLowerCase()===inputLower);
+      if(h){parentShipment=c;foundHawb=h;break;}
+    }
+  }
+  if(!foundHawb) parentShipment=cargos.find(x=>x.awb.toLowerCase()===inputLower);
+
+  if(!parentShipment){
+    msgEl.className='fmsg fmsg-err';msgEl.textContent='Shipment not found.';msgEl.style.display='block';return;
+  }
+
+  const pcsInt = parseInt(pcs);
+
+  try{
+    let updatePayload={};
+    let successMsg='';
+
+    if(foundHawb){
+      // ── HAWB delivery ──────────────────────────────
+      // Validate pieces against this HAWB's manifested count
+      if(pcsInt > foundHawb.pcs){
+        msgEl.className='fmsg fmsg-err';
+        msgEl.textContent=`Cannot deliver ${pcsInt} pieces — this House AWB only has ${foundHawb.pcs} pieces manifested.`;
+        msgEl.style.display='block';return;
+      }
+      // Mark this HAWB as delivered
+      const updatedHawbs = parentShipment.hawbs.map(h=>
+        h.hawb.toLowerCase()===inputLower
+          ? {...h, delivered:true, pcs_delivered:pcsInt, date_delivered:date, collector_name:collector, collector_id:collectorId}
+          : h
+      );
+      // Check if ALL hawbs are now delivered
+      const allDelivered = updatedHawbs.every(h=>h.delivered);
+      const totalDelivered = updatedHawbs.reduce((sum,h)=>sum+(h.pcs_delivered||0),0);
+
+      updatePayload = {
+        hawbs: updatedHawbs,
+        ...(allDelivered ? {
+          status:'Delivered',
+          pcs_delivered: totalDelivered,
+          date_delivered: date,
+          collector_name: collector,
+          collector_id: collectorId
+        } : {})
+      };
+      successMsg = allDelivered
+        ? `House AWB ${awbInput} delivered. All house bills complete — MAWB ${parentShipment.awb} marked as Delivered.`
+        : `House AWB ${awbInput} delivered. ${updatedHawbs.filter(h=>!h.delivered).length} house bill(s) still pending.`;
+
+    } else {
+      // ── Regular MAWB delivery (supports partial) ──────────────────────
+      const manifested     = parseInt(parentShipment.pcs_manifested)||0;
+      const prevDelivered  = parseInt(parentShipment.pcs_delivered)||0;
+      const remaining      = manifested - prevDelivered;
+      const newTotal       = prevDelivered + pcsInt;
+
+      if(pcsInt <= 0){
+        msgEl.className='fmsg fmsg-err';
+        msgEl.textContent='Pieces delivered must be greater than 0.';
+        msgEl.style.display='block';return;
+      }
+      if(pcsInt > remaining){
+        msgEl.className='fmsg fmsg-err';
+        msgEl.textContent=`Cannot deliver ${pcsInt} pieces — only ${remaining} piece${remaining!==1?'s':''} remaining (${prevDelivered} of ${manifested} already delivered).`;
+        msgEl.style.display='block';return;
+      }
+
+      const allDelivered = newTotal >= manifested;
+
+      // Build delivery history entry
+      const deliveryEntry = {pcs:pcsInt, date, collector_name:collector, collector_id:collectorId};
+      const deliveryHistory = [...(parentShipment.delivery_history||[]), deliveryEntry];
+
+      updatePayload = {
+        pcs_delivered: newTotal,
+        date_delivered: allDelivered ? date : (parentShipment.date_delivered||null),
+        delivery_history: deliveryHistory,
+        collector_name: collector,
+        collector_id: collectorId,
+        status: allDelivered ? 'Delivered' : parentShipment.status
+      };
+
+      if(allDelivered){
+        successMsg=`All ${manifested} pieces delivered — AWB ${awbInput} marked as Delivered.`;
+      } else {
+        successMsg=`${pcsInt} piece${pcsInt!==1?'s':''} delivered. ${newTotal} of ${manifested} total — ${manifested-newTotal} piece${manifested-newTotal!==1?'s':''} still remaining.`;
+      }
+    }
+
+    const res=await fetch('/api/shipments/'+encodeURIComponent(parentShipment.awb),{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(updatePayload)
+    });
+    if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent='Update failed. Please try again.';msgEl.style.display='block';return;}
+
+    await loadCargos();
+    msgEl.className='fmsg fmsg-ok';msgEl.textContent=successMsg;msgEl.style.display='block';
+    ['del-awb-lookup','del-pcs','del-collector','del-collector-id'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('del-preview').style.display='none';
+    document.getElementById('del-form').style.display='none';
+    renderDeliveriesTable();
+    renderDeliveryShipmentsTable();
+    setTimeout(()=>{msgEl.style.display='none';document.getElementById('del-awb-lookup').focus();},3000);
+  }catch(e){msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error. Is the server running?';msgEl.style.display='block';}
+}
+
+let expandedDeliveryHistory=new Set();
+
+function toggleDeliveryHistory(awb){
+  if(expandedDeliveryHistory.has(awb)) expandedDeliveryHistory.delete(awb);
+  else expandedDeliveryHistory.add(awb);
+  renderDeliveriesTable();
+}
+
+function renderDeliveriesTable(){
+  const tb=document.getElementById('deliveries-table');if(!tb)return;
+  const delivered=cargos.filter(c=>c.status==='Delivered'||(c.pcs_delivered&&c.pcs_delivered>0)).sort((a,b)=>(b.date_delivered||'').localeCompare(a.date_delivered||''));
+  if(!delivered.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--tm);padding:1.5rem;">No deliveries recorded yet.</td></tr>';return;}
+  tb.innerHTML=delivered.map(c=>{
+    const manifested=parseInt(c.pcs_manifested)||0;
+    const pcsDelivered=parseInt(c.pcs_delivered)||0;
+    const isPartial=c.status!=='Delivered'&&pcsDelivered>0;
+    const pcsDisplay=isPartial
+      ? `${pcsDelivered} of ${manifested} <span style="font-size:10px;color:var(--wt);">(partial)</span>`
+      : (pcsDelivered||'—');
+    const history=Array.isArray(c.delivery_history)?c.delivery_history:[];
+    const hasHistory=history.length>0;
+    const isExpanded=expandedDeliveryHistory.has(c.awb);
+    const historyBtn=hasHistory
+      ? `<button class="btn-edit" onclick="toggleDeliveryHistory('${c.awb.replace(/'/g,"\\'")}')">${isExpanded?'Hide':'History'} (${history.length})</button>`
+      : '';
+    let historyRow='';
+    if(hasHistory&&isExpanded){
+      const sorted=[...history].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+      historyRow=`<tr><td colspan="7" style="background:var(--off);padding:10px 14px;">
+        <div style="font-size:11px;font-weight:600;color:var(--ts);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Delivery history</div>
+        <table style="width:100%;">
+          <thead><tr><th style="font-size:11px;">Pieces</th><th style="font-size:11px;">Date</th><th style="font-size:11px;">Collected by</th><th style="font-size:11px;">Collector ID</th></tr></thead>
+          <tbody>
+          ${sorted.map(h=>`<tr>
+            <td>${h.pcs!=null?h.pcs:'—'}</td>
+            <td>${formatDate(h.date)}</td>
+            <td>${h.collector_name||'—'}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${h.collector_id||'—'}</td>
+          </tr>`).join('')}
+          </tbody>
+        </table>
+      </td></tr>`;
+    }
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${c.awb}</td>
+      <td><div style="font-weight:500;">${c.cname}</div><div style="font-size:10px;color:var(--ts)">${c.cphone||''}</div></td>
+      <td>${pcsDisplay}</td>
+      <td>${formatDate(c.date_delivered)}</td>
+      <td>${c.collector_name||'—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${c.collector_id||'—'}</td>
+      <td>${historyBtn}</td>
+    </tr>${historyRow}`;
+  }).join('');
+}
+
+// ── FLIGHTS TAB ───────────────────────────────────────
+function renderFlightsTable(){
+  const tb=document.getElementById('flights-table');if(!tb)return;
+  const q=(document.getElementById('fl-search')||{}).value||'';
+  const filtered=flights.filter(f=>!q||f.flight.toLowerCase().includes(q.toLowerCase())||f.date.includes(q)||(f.origin+f.dest).toLowerCase().includes(q.toLowerCase())||(f.airline||'').toLowerCase().includes(q.toLowerCase())||(f.registration||'').toLowerCase().includes(q.toLowerCase())).sort((a,b)=>b.date.localeCompare(a.date));
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--tm);padding:1.5rem;">No flights found.</td></tr>';return;}
+  tb.innerHTML=filtered.map(f=>{
+    const shipCount=cargos.filter(c=>c.flight===f.flight&&c.eta===f.date).length;
+    const manifestedCount=cargos.filter(c=>c.flight===f.flight&&c.eta===f.date&&c.status==='Manifested').length;
+    const arriveBtn=manifestedCount>0?`<button class="btn-edit" style="color:var(--st);border-color:#B8DFC6;" onclick="openArriveAll('${f.flight}','${f.date}')">📥 Arrive all (${manifestedCount})</button>`:'';
+    return `<tr><td style="font-weight:500;">${f.flight}</td><td>${formatDate(f.date)}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${f.registration||'—'}</td><td>${f.origin}→${f.dest}</td><td>${f.airline||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${f.asycuda||'—'}</td><td><span class="badge b-t">${shipCount} shipment${shipCount!==1?'s':''}</span></td><td>${arriveBtn}</td><td><button class="btn-edit" onclick="openFlightEdit('${f.flight}','${f.date}')">✏️ Edit</button></td><td><button class="btn-del" onclick="deleteFlight('${f.flight}','${f.date}')">🗑</button></td></tr>`;
+  }).join('');
+}
+
+function flightLookup(){
+  const flight=(document.getElementById('fl-flight').value||'').trim();
+  const date=(document.getElementById('fl-date').value||'').trim();
+  document.getElementById('fl-asycuda-wrap').style.display=(flight&&date)?'block':'none';
+  if(flight&&date){const existing=flights.find(f=>f.flight.toLowerCase()===flight.toLowerCase()&&f.date===date);if(existing){document.getElementById('fl-airline').value=existing.airline||'IBC Airways';document.getElementById('fl-origin').value=existing.origin||'';document.getElementById('fl-dest').value=existing.dest||'';document.getElementById('fl-asycuda').value=existing.asycuda||'';document.getElementById('fl-reg').value=existing.registration||'';const msg=document.getElementById('fl-msg');msg.className='fmsg fmsg-ok';msg.textContent='Flight found — you can update and re-save.';msg.style.display='block';}else{document.getElementById('fl-msg').style.display='none';}}
+}
+
+function toggleAddFlightForm(){
+  const wrap=document.getElementById('add-flight-form-wrap');
+  const btn=document.getElementById('add-flight-toggle-btn');
+  const open = wrap.style.display==='none';
+  wrap.style.display=open?'block':'none';
+  btn.textContent=open?'✕ Close':'+ Add Flight';
+}
+
+async function saveFlight(){
+  const flight=(document.getElementById('fl-flight').value||'').trim();
+  const date=(document.getElementById('fl-date').value||'').trim();
+  const registration=(document.getElementById('fl-reg').value||'').trim().toUpperCase();
+  const origin=(document.getElementById('fl-origin').value||'').trim().toUpperCase();
+  const dest=(document.getElementById('fl-dest').value||'').trim().toUpperCase();
+  const airline=(document.getElementById('fl-airline').value||'').trim();
+  const asycuda=(document.getElementById('fl-asycuda').value||'').trim();
+  const msgEl=document.getElementById('fl-msg');
+  ['fl-err-flight','fl-err-date','fl-err-origin','fl-err-dest','fl-err-airline'].forEach(id=>{const e=document.getElementById(id);if(e){e.textContent='';e.style.display='none';}});
+  ['fl-flight','fl-date','fl-origin','fl-dest','fl-airline'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
+  let errors=[];
+  [['fl-flight','fl-err-flight',flight,'Flight number'],['fl-date','fl-err-date',date,'Flight date'],['fl-origin','fl-err-origin',origin,'Origin airport'],['fl-dest','fl-err-dest',dest,'Destination airport'],['fl-airline','fl-err-airline',airline,'Airline']].forEach(([id,eid,val,label])=>{if(!val){document.getElementById(id).classList.add('invalid');const e=document.getElementById(eid);if(e){e.textContent=label+' is required.';e.style.display='block';}errors.push(label);}});
+  if(errors.length){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing field(s).`;msgEl.style.display='block';return;}
+  try{
+    const res=await fetch('/api/flights',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flight,date,registration:registration||null,origin,dest,airline,asycuda:asycuda||null})});
+    const data=await res.json();
+    if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Save failed.';msgEl.style.display='block';return;}
+    let updatedCount=0;
+    if(asycuda){const bulkRes=await fetch('/api/shipments/bulk-asycuda',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flight,date,asycuda})});const bulkData=await bulkRes.json();updatedCount=bulkData.updated||0;await loadCargos();}
+    await loadFlights();
+    let saveMsg=`Flight ${flight} on ${date} saved.`;
+    if(asycuda&&updatedCount>0)saveMsg+=` ASYCUDA applied to ${updatedCount} shipment${updatedCount!==1?'s':''}.`;
+    if(asycuda&&updatedCount===0)saveMsg+=` No matching shipments found for this flight/date.`;
+    msgEl.className='fmsg fmsg-ok';msgEl.textContent=saveMsg;msgEl.style.display='block';
+    ['fl-flight','fl-date','fl-reg','fl-origin','fl-dest','fl-asycuda'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fl-airline').value='IBC Airways';
+    document.getElementById('fl-asycuda-wrap').style.display='none';
+    setTimeout(()=>msgEl.style.display='none',3500);
+  }catch(e){msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error.';msgEl.style.display='block';}
+}
+
+async function deleteFlight(flight,date){
+  const f=flights.find(x=>x.flight===flight&&x.date===date);
+  const shipCount=cargos.filter(c=>c.flight===flight&&c.eta===date).length;
+  const msg=`Delete this flight record?\n\nFlight: ${flight}\nDate: ${date}\nAirline: ${f?f.airline:''}\nRoute: ${f?f.origin+' → '+f.dest:''}\nLinked shipments: ${shipCount}\n\nNote: this only deletes the flight record, not the shipments.`;
+  if(!confirm(msg))return;
+  try{await fetch('/api/flights/'+encodeURIComponent(flight)+'/'+encodeURIComponent(date),{method:'DELETE'});await loadFlights();}
+  catch(e){alert('Delete failed.');}
+}
+
+// ── FLIGHT EDIT MODAL ─────────────────────────────────
+let editingFlight=null;
+
+function openFlightEdit(flight,date){
+  const f=flights.find(x=>x.flight===flight&&x.date===date);if(!f)return;
+  editingFlight={flight,date};
+  document.getElementById('fl-edit-label').textContent=flight+' · '+formatDate(date);
+  es('fle-flight',f.flight);es('fle-date',f.date);es('fle-reg',f.registration);es('fle-origin',f.origin);es('fle-dest',f.dest);es('fle-airline',f.airline||'IBC Airways');es('fle-asycuda',f.asycuda);
+  document.getElementById('fle-msg').style.display='none';
+  ['fle-flight','fle-date','fle-origin','fle-dest','fle-airline'].forEach(id=>{document.getElementById(id).classList.remove('invalid');});
+  ['fle-err-flight','fle-err-date','fle-err-origin','fle-err-dest','fle-err-airline'].forEach(id=>{const e=document.getElementById(id);if(e){e.textContent='';e.style.display='none';}});
+  document.getElementById('fl-edit-overlay').style.display='block';document.body.style.overflow='hidden';
+}
+
+function closeFlightEdit(){document.getElementById('fl-edit-overlay').style.display='none';document.body.style.overflow='';editingFlight=null;}
+
+async function saveFlightEdit(){
+  if(!editingFlight)return;
+  const msgEl=document.getElementById('fle-msg');msgEl.style.display='none';
+  const flight=document.getElementById('fle-flight').value.trim();
+  const date=document.getElementById('fle-date').value.trim();
+  const registration=document.getElementById('fle-reg').value.trim().toUpperCase();
+  const origin=document.getElementById('fle-origin').value.trim().toUpperCase();
+  const dest=document.getElementById('fle-dest').value.trim().toUpperCase();
+  const airline=document.getElementById('fle-airline').value.trim();
+  const asycuda=document.getElementById('fle-asycuda').value.trim();
+  let errors=[];
+  [['fle-flight','fle-err-flight',flight,'Flight number'],['fle-date','fle-err-date',date,'Flight date'],['fle-origin','fle-err-origin',origin,'Origin airport'],['fle-dest','fle-err-dest',dest,'Destination airport'],['fle-airline','fle-err-airline',airline,'Airline']].forEach(([id,eid,val,label])=>{if(!val){document.getElementById(id).classList.add('invalid');const e=document.getElementById(eid);if(e){e.textContent=label+' is required.';e.style.display='block';}errors.push(label);}else{document.getElementById(id).classList.remove('invalid');}});
+  if(errors.length){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing field(s).`;msgEl.style.display='block';return;}
+  try{
+    await fetch('/api/flights/'+encodeURIComponent(editingFlight.flight)+'/'+encodeURIComponent(editingFlight.date),{method:'DELETE'});
+    const res=await fetch('/api/flights',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flight,date,registration:registration||null,origin,dest,airline,asycuda:asycuda||null})});
+    const data=await res.json();
+    if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Save failed.';msgEl.style.display='block';return;}
+    let updatedCount=0;
+    if(asycuda){const bulkRes=await fetch('/api/shipments/bulk-asycuda',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flight,date,asycuda})});const bulkData=await bulkRes.json();updatedCount=bulkData.updated||0;await loadCargos();}
+    await loadFlights();
+    msgEl.className='fmsg fmsg-ok';let msg=`Flight ${flight} on ${date} updated.`;if(asycuda&&updatedCount>0)msg+=` ASYCUDA applied to ${updatedCount} shipment${updatedCount!==1?'s':''}.`;if(asycuda&&updatedCount===0)msg+=` No matching shipments found.`;msgEl.textContent=msg;msgEl.style.display='block';
+    setTimeout(()=>closeFlightEdit(),1500);
+  }catch(e){msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error.';msgEl.style.display='block';}
+}
+
+document.getElementById('fl-edit-overlay').addEventListener('click',function(e){if(e.target===this)closeFlightEdit();});
+
+// ── ARRIVE ALL (per flight) ────────────────────────────
+let arrivingFlight=null;
+
+function openArriveAll(flight,date){
+  arrivingFlight={flight,date};
+  document.getElementById('fl-arrive-label').textContent=flight+' · '+formatDate(date);
+  document.getElementById('fla-msg').style.display='none';
+  renderArriveRows();
+  document.getElementById('fl-arrive-overlay').style.display='block';document.body.style.overflow='hidden';
+}
+
+function renderArriveRows(){
+  const tb=document.getElementById('fl-arrive-rows');
+  const emptyEl=document.getElementById('fl-arrive-empty');
+  const confirmBtn=document.getElementById('fla-confirm-btn');
+  if(!arrivingFlight){tb.innerHTML='';return;}
+  const matches=cargos.filter(c=>c.flight===arrivingFlight.flight&&c.eta===arrivingFlight.date&&c.status==='Manifested');
+  if(!matches.length){
+    tb.innerHTML='';emptyEl.style.display='block';confirmBtn.style.display='none';
+    return;
+  }
+  emptyEl.style.display='none';confirmBtn.style.display='inline-block';
+  tb.innerHTML=matches.map(c=>`<tr>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:11px;" data-awb="${c.awb}">${c.awb}</td>
+    <td>${c.cname||'—'}</td>
+    <td>${c.pcs_manifested??'—'}</td>
+    <td><input type="number" min="0" class="fla-pcs-rec" data-awb="${c.awb}" value="${c.pcs_manifested??0}" style="width:90px;padding:6px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;"/></td>
+  </tr>`).join('');
+}
+
+function closeArriveAll(){document.getElementById('fl-arrive-overlay').style.display='none';document.body.style.overflow='';arrivingFlight=null;}
+
+async function saveArriveAll(){
+  if(!arrivingFlight)return;
+  const msgEl=document.getElementById('fla-msg');
+  const inputs=[...document.querySelectorAll('#fl-arrive-rows .fla-pcs-rec')];
+  if(!inputs.length)return;
+
+  let errors=[];
+  const rows=inputs.map(inp=>{
+    const val=inp.value.trim();
+    const n=parseInt(val);
+    const bad=val===''||isNaN(n)||n<0;
+    inp.classList.toggle('invalid',bad);
+    if(bad)errors.push(inp.dataset.awb);
+    return {awb:inp.dataset.awb,pcs_received:n};
+  });
+  if(errors.length){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please enter a valid pieces-received value for ${errors.length} shipment(s).`;msgEl.style.display='block';return;}
+
+  const confirmBtn=document.getElementById('fla-confirm-btn');
+  confirmBtn.disabled=true;confirmBtn.textContent='Arriving…';
+  let okCount=0,failCount=0;
+  for(const row of rows){
+    try{
+      const res=await fetch('/api/shipments/'+encodeURIComponent(row.awb),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'Arrived',pcs_received:row.pcs_received})});
+      if(res.ok)okCount++;else failCount++;
+    }catch(e){failCount++;}
+  }
+  confirmBtn.disabled=false;confirmBtn.textContent='📥 Arrive all';
+
+  await loadCargos();
+  renderFlightsTable();
+  renderArriveRows();
+
+  if(failCount===0){
+    msgEl.className='fmsg fmsg-ok';msgEl.textContent=`${okCount} shipment${okCount!==1?'s':''} marked as Arrived.`;msgEl.style.display='block';
+    setTimeout(()=>closeArriveAll(),1400);
+  }else{
+    msgEl.className='fmsg fmsg-err';msgEl.textContent=`${okCount} succeeded, ${failCount} failed. Fix and try again for the remaining shipment(s).`;msgEl.style.display='block';
+  }
+}
+
+document.getElementById('fl-arrive-overlay').addEventListener('click',function(e){if(e.target===this)closeArriveAll();});
+
+
+// ── INVENTORY ─────────────────────────────────────────
+function renderBars(id,counts,colors){
+  const total=Object.values(counts).reduce((a,b)=>a+b,0)||1;
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);const maxV=sorted[0]?sorted[0][1]:1;
+  document.getElementById(id).innerHTML=sorted.map(([k,n],i)=>`<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>${k}</span><span style="font-weight:500;">${n} <span style="color:var(--ts);font-weight:400;">(${Math.round(n/total*100)}%)</span></span></div><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(n/maxV*100)}%;background:${colors[i%colors.length]};"></div></div></div>`).join('');
+}
+
+function renderInventory(){
+  const bySt={};cargos.forEach(c=>{bySt[c.status]=(bySt[c.status]||0)+1;});
+  renderBars('inv-status',bySt,['#1A6B3C','#0D5C8A','#3D2E9E','#7A5200','#8B1A1A','#8B1560']);
+  const byTy={};cargos.forEach(c=>{byTy[c.type]=(byTy[c.type]||0)+1;});
+  renderBars('inv-type',byTy,['#0D5C8A','#1A6B3C','#8B1A1A','#7A5200','#3D2E9E','#993C1D','#0F6E56']);
+  const byDest={};cargos.forEach(c=>{byDest[c.pod]=(byDest[c.pod]||0)+1;});
+  renderBars('inv-dest',byDest,['#3D2E9E','#0D5C8A','#0F6E56','#993C1D','#854F0B']);
+}
+
+// ── REPORTS ───────────────────────────────────────────
+function reportFiltered(){
+  const flight=(document.getElementById('rpt-flight')||{}).value?.trim().toLowerCase()||'';
+  const cname =(document.getElementById('rpt-cname')||{}).value?.trim().toLowerCase()||'';
+  const from  =(document.getElementById('rpt-from')||{}).value||'';
+  const to    =(document.getElementById('rpt-to')||{}).value||'';
+  return cargos.filter(c=>{
+    const mF=!flight||(c.flight||'').toLowerCase().includes(flight);
+    const mC=!cname||(c.cname||'').toLowerCase().includes(cname);
+    const mFrom=!from||(c.eta||'')>=from;
+    const mTo=!to||(c.eta||'')<=to;
+    return mF&&mC&&mFrom&&mTo;
+  });
+}
+
+function clearReportFilters(){
+  ['rpt-flight','rpt-cname','rpt-from','rpt-to'].forEach(id=>document.getElementById(id).value='');
+  renderReports();
+}
+
+function renderReports(){
+  const data=reportFiltered();
+  const tw=data.reduce((a,c)=>a+c.gw,0);
+  const del=data.filter(c=>c.status==='Delivered').length;
+  const pct=data.length?Math.round((data.filter(c=>c.status==='Arrived'||c.status==='Delivered').length/data.length)*100):0;
+  document.getElementById('rpt-grid').innerHTML=`
+    <div class="rpt-item"><div class="rpt-label">Total AWBs</div><div class="rpt-val">${data.length}</div></div>
+    <div class="rpt-item"><div class="rpt-label">Completion rate</div><div class="rpt-val" style="color:var(--st)">${pct}%</div></div>
+    <div class="rpt-item"><div class="rpt-label">Total gross weight</div><div class="rpt-val">${tw.toLocaleString()} kg</div></div>
+    <div class="rpt-item"><div class="rpt-label">Delivered</div><div class="rpt-val" style="color:var(--pvt)">${del}</div></div>`;
+}
+
+function exportCSV(){
+  const rows=[['AWB','Flight','Registration','Airline','POL','POD','Flight Date','ASYCUDA Ref','Cargo type','Description','Gross wt(kg)','Chargeable wt(kg)','Pcs Manifested','Pcs Received','Bay','Status','Remarks','Pcs Delivered','Date Delivered','Collector','Collector ID','Notification Date','Notification Method','Person Notified','Shipper','Shipper phone','Shipper street','Shipper city','Shipper parish','Shipper zip','Shipper country','Consignee','Consignee phone','Consignee street','Consignee city','Consignee parish','Consignee zip','Consignee country','Customs','Declared value(USD)']];
+  cargos.forEach(c=>{
+    const remarksText=normalizeRemarks(c.remarks).map(r=>(r.date?formatDate(r.date)+': ':'')+r.text).join(' | ');
+    rows.push([c.awb,c.flight,c.registration||'',c.airline,c.pol,c.pod,c.eta,c.asycuda||'',c.type,c.desc,c.gw,c.cw||'',c.pcs_manifested,c.pcs_received||'',c.bays?c.bays.map(b=>b.location).join(';'):'',c.status,remarksText,c.pcs_delivered||'',c.date_delivered||'',c.collector_name||'',c.collector_id||'',c.notif_date||'',c.notif_method||'',c.notif_person||'',c.sname,c.sphone||'',c.s_street||'',c.s_city||'',c.s_parish||'',c.s_zip||'',c.s_country||'',c.cname,c.cphone||'',c.c_street||'',c.c_city||'',c.c_parish||'',c.c_zip||'',c.c_country||'',c.customs,c.val]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${v??''}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='aircargo_report.csv';a.click();
+}
+
+// ── RECYCLE BIN ───────────────────────────────────────
+function updateBinBadge(){const btn=document.getElementById('bin-tab-btn');if(!btn)return;btn.textContent=binItems.length>0?`🗑 Recycle bin (${binItems.length})`:'🗑 Recycle bin';}
+
+function renderBinTable(){
+  const tb=document.getElementById('bin-table');if(!tb)return;
+  const q=(document.getElementById('bin-search')||{}).value||'';
+  const today=new Date();
+  const filtered=binItems.filter(b=>!q||(b.awb||'').toLowerCase().includes(q.toLowerCase())||(b.cname||'').toLowerCase().includes(q.toLowerCase())||(b.flight||'').toLowerCase().includes(q.toLowerCase()));
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--tm);padding:1.5rem;">Recycle bin is empty.</td></tr>';return;}
+  tb.innerHTML=filtered.map(b=>{
+    const deleted=new Date(b.deleted_at);const expires=new Date(b.deleted_at);expires.setDate(expires.getDate()+30);
+    const daysLeft=Math.ceil((expires-today)/(1000*60*60*24));
+    const expireStyle=daysLeft<=7?'color:var(--dt);font-weight:500;':'color:var(--ts);';
+    return `<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${b.awb}</td><td>${b.cname||'—'}</td><td>${b.flight||'—'}</td><td><span class="badge ${badgeCls(b.status)}">${b.status||'—'}</span></td><td style="font-size:12px;">${formatDate(deleted)}</td><td style="font-size:12px;${expireStyle}">${daysLeft>0?daysLeft+' days':'Expired'}</td><td><button class="btn-edit" onclick="restoreFromBin('${b.awb}')">↩ Restore</button></td><td><button class="btn-del" onclick="permanentDelete('${b.awb}')">🗑</button></td></tr>`;
+  }).join('');
+}
+
+async function restoreFromBin(awb){
+  if(!confirm(`Restore AWB ${awb} back to the shipments list?`))return;
+  try{await fetch('/api/bin/'+encodeURIComponent(awb)+'/restore',{method:'POST'});await loadCargos();await loadBin();renderBinTable();updateBinBadge();}
+  catch(e){alert('Restore failed.');}
+}
+
+async function permanentDelete(awb){
+  const b=binItems.find(x=>x.awb===awb);
+  if(!confirm(`Permanently delete this record? This CANNOT be undone.\n\nAWB: ${awb}\nConsignee: ${b?b.cname:''}`))return;
+  try{await fetch('/api/bin/'+encodeURIComponent(awb),{method:'DELETE'});await loadBin();renderBinTable();updateBinBadge();}
+  catch(e){alert('Delete failed.');}
+}
+
+async function emptyBin(){
+  try{await fetch('/api/bin',{method:'DELETE'});await loadBin();renderBinTable();updateBinBadge();}
+  catch(e){alert('Failed to empty bin.');}
+}
+
+// ── SHOW TAB ──────────────────────────────────────────
+function showTab(tab){
+  ['cargo','delivery','flights','inventory','reports','bin','users','actlog','backup'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el) el.classList.toggle('sh', t!==tab);
+  });
+  document.querySelectorAll('.nav button').forEach(b=>{
+    const onclick=b.getAttribute('onclick')||'';
+    b.classList.toggle('active', onclick===`showTab('${tab}')`);
+  });
+  if(tab==='delivery'){renderDeliveriesTable();renderDeliveryShipmentsTable();}
+  if(tab==='flights')renderFlightsTable();
+  if(tab==='inventory')renderInventory();
+  if(tab==='reports')renderReports();
+  if(tab==='bin')renderBinTable();
+  if(tab==='users')renderUsersTable();
+  if(tab==='actlog')loadActivityLog();
+}
+
+// ── SESSION / ROLE ─────────────────────────────────────
+let currentUsername='';
+async function initSession(){
+  try{
+    const r=await fetch('/api/session');
+    if(!r.ok) return;
+    const s=await r.json();
+    currentUsername=s.username||'';
+    const badge=document.getElementById('header-username');
+    if(badge) badge.textContent=s.username+(s.role==='admin'?' · Admin':'');
+    if(s.role==='admin'){
+      document.querySelectorAll('.admin-only').forEach(el=>el.style.display='');
+    }
+  }catch(e){/* not logged in or network error - ignore, page will redirect via server on next nav */}
+}
+
+// ── USERS ───────────────────────────────────────────────
+let users=[];
+let editingUsername=null;
+
+async function loadUsers(){
+  try{const r=await fetch('/api/users');users=r.ok?await r.json():[];}
+  catch(e){users=[];}
+}
+
+async function renderUsersTable(){
+  const tb=document.getElementById('users-table');if(!tb)return;
+  tb.innerHTML='<tr><td colspan="6" class="loading">Loading...</td></tr>';
+  await loadUsers();
+  if(!users.length){
+    tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--tm);padding:1.5rem;">No users found.</td></tr>';
+    return;
+  }
+  tb.innerHTML=users.map(u=>{
+    const created=formatDate(u.created);
+    const statusBadge=u.active!==false?'<span class="badge b-a">Active</span>':'<span class="badge b-d">Deactivated</span>';
+    const roleBadge=u.role==='admin'?'<span class="badge b-c">Admin</span>':'<span class="badge b-t">Staff</span>';
+    return `<tr>
+      <td style="font-weight:500;">${u.username}</td>
+      <td>${roleBadge}</td>
+      <td>${statusBadge}</td>
+      <td>${created}</td>
+      <td><button class="btn-edit" onclick="openUserEditModal('${u.username.replace(/'/g,"\\'")}')">Edit</button></td>
+      <td><button class="btn-del" onclick="deleteUser('${u.username.replace(/'/g,"\\'")}')">Delete</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openUserModal(){
+  editingUsername=null;
+  document.getElementById('user-modal-mode').textContent='Add new user';
+  document.getElementById('user-modal-title').textContent='New user';
+  document.getElementById('um-pw-note').textContent='';
+  document.getElementById('um-username').value='';
+  document.getElementById('um-username').disabled=false;
+  document.getElementById('um-password').value='';
+  document.getElementById('um-role').value='staff';
+  document.getElementById('um-active-wrap').style.display='none';
+  document.getElementById('um-msg').style.display='none';
+  document.getElementById('user-modal-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function openUserEditModal(username){
+  const u=users.find(x=>x.username===username);if(!u)return;
+  editingUsername=username;
+  document.getElementById('user-modal-mode').textContent='Editing user';
+  document.getElementById('user-modal-title').textContent=username;
+  document.getElementById('um-pw-note').textContent='(leave blank to keep current)';
+  document.getElementById('um-username').value=u.username;
+  document.getElementById('um-username').disabled=true;
+  document.getElementById('um-password').value='';
+  document.getElementById('um-role').value=u.role;
+  document.getElementById('um-active').value=u.active!==false?'true':'false';
+  document.getElementById('um-active-wrap').style.display='block';
+  document.getElementById('um-msg').style.display='none';
+  document.getElementById('user-modal-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function closeUserModal(){
+  document.getElementById('user-modal-overlay').style.display='none';
+  document.body.style.overflow='';
+  editingUsername=null;
+}
+
+async function saveUser(){
+  const username=document.getElementById('um-username').value.trim();
+  const password=document.getElementById('um-password').value.trim();
+  const role    =document.getElementById('um-role').value;
+  const active  =document.getElementById('um-active').value==='true';
+  const msgEl   =document.getElementById('um-msg');
+  msgEl.style.display='none';
+
+  if(!username){const e=document.getElementById('um-err-username');if(e){e.textContent='Username is required.';e.style.display='block';}return;}
+  if(!editingUsername && !password){const e=document.getElementById('um-err-password');if(e){e.textContent='Password is required for new users.';e.style.display='block';}return;}
+
+  try{
+    let res;
+    if(editingUsername){
+      const body={role};
+      if(password) body.password=password;
+      body.active=active;
+      res=await fetch('/api/users/'+encodeURIComponent(editingUsername),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    } else {
+      res=await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,role})});
+    }
+    const data=await res.json();
+    if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Save failed.';msgEl.style.display='block';return;}
+    msgEl.className='fmsg fmsg-ok';msgEl.textContent=editingUsername?'User updated.':'User created.';msgEl.style.display='block';
+    await renderUsersTable();
+    setTimeout(()=>closeUserModal(),1200);
+  }catch(e){msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error.';msgEl.style.display='block';}
+}
+
+async function deleteUser(username){
+  if(!confirm(`Delete user "${username}"? They will no longer be able to log in.`))return;
+  try{
+    const res=await fetch('/api/users/'+encodeURIComponent(username),{method:'DELETE'});
+    const data=await res.json();
+    if(!res.ok){alert(data.error||'Delete failed.');return;}
+    await renderUsersTable();
+  }catch(e){alert('Delete failed.');}
+}
+
+document.getElementById('user-modal-overlay').addEventListener('click',function(e){if(e.target===this)closeUserModal();});
+
+// ── ACTIVITY LOG ──────────────────────────────────────────────────────────
+let actLog=[];
+
+async function loadActivityLog(){
+  try{
+    const r=await fetch('/api/activity-log?limit=500');
+    actLog=r.ok?await r.json():[];
+    renderLogTable();
+  }catch(e){actLog=[];renderLogTable();}
+}
+
+function renderLogTable(){
+  const tb=document.getElementById('actlog-table');if(!tb)return;
+  const qUser  =(document.getElementById('log-search-user')||{}).value||'';
+  const qAction=(document.getElementById('log-search-action')||{}).value||'';
+  const qDate  =(document.getElementById('log-filter-date')||{}).value||'';
+
+  const actionLabel={
+    'LOGIN':'🔐 Login','LOGOUT':'🚪 Logout',
+    'ADD_SHIPMENT':'➕ Added shipment','EDIT_SHIPMENT':'✏️ Edited shipment',
+    'DELETE_SHIPMENT':'🗑 Deleted shipment','RESTORE_SHIPMENT':'↩ Restored shipment',
+    'PERM_DELETE':'❌ Permanently deleted','EMPTY_BIN':'🗑 Emptied bin',
+    'ADD_FLIGHT':'✈ Added flight','EDIT_FLIGHT':'✏️ Edited flight','DELETE_FLIGHT':'🗑 Deleted flight',
+    'BULK_ASYCUDA':'📋 Bulk ASYCUDA',
+    'CREATE_USER':'👤 Created user','EDIT_USER':'✏️ Edited user','DELETE_USER':'🗑 Deleted user'
+  };
+
+  const filtered=actLog.filter(l=>{
+    const mU=!qUser   ||(l.username||'').toLowerCase().includes(qUser.toLowerCase());
+    const mA=!qAction ||(l.action||'').toLowerCase().includes(qAction.toLowerCase())||(actionLabel[l.action]||'').toLowerCase().includes(qAction.toLowerCase());
+    const mD=!qDate   ||(l.timestamp||'').startsWith(qDate);
+    return mU&&mA&&mD;
+  });
+
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--tm);padding:1.5rem;">No log entries found.</td></tr>';return;}
+
+  tb.innerHTML=filtered.map(l=>{
+    const ts=new Date(l.timestamp);
+    const dateStr=formatDate(ts);
+    const timeStr=ts.toLocaleTimeString('en-JM',{hour:'2-digit',minute:'2-digit'});
+    const isLogin=l.action==='LOGIN'||l.action==='LOGOUT';
+    const rowStyle=isLogin?'background:var(--off);':'';
+    return `<tr style="${rowStyle}">
+      <td style="font-size:12px;white-space:nowrap;">${dateStr}<div style="font-size:10px;color:var(--ts);">${timeStr}</div></td>
+      <td style="font-weight:500;">${l.username}</td>
+      <td>${actionLabel[l.action]||l.action}</td>
+      <td style="font-size:12px;color:var(--ts);">${l.detail||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterLog(){renderLogTable();}
+
+function clearLogFilters(){
+  ['log-search-user','log-search-action','log-filter-date'].forEach(id=>document.getElementById(id).value='');
+  renderLogTable();
+}
+
+// ── BACKUP & RESTORE ────────────────────────────────────────────────────
+// ── MANIFEST PDF IMPORT ─────────────────────────────────────────────────
+let manifestRows=[];
+
+async function previewManifest(){
+  const fileInput=document.getElementById('manifest-file-input');
+  const msgEl=document.getElementById('manifest-msg');
+  const reviewEl=document.getElementById('manifest-review');
+  msgEl.style.display='none';
+  reviewEl.style.display='none';
+
+  const file=fileInput.files[0];
+  if(!file){
+    msgEl.className='fmsg fmsg-err';msgEl.textContent='Choose a manifest PDF first.';msgEl.style.display='block';
+    return;
+  }
+
+  const formData=new FormData();
+  formData.append('file',file);
+
+  msgEl.className='fmsg';msgEl.style.background='var(--off)';msgEl.style.color='var(--ts)';msgEl.textContent='Reading manifest...';msgEl.style.display='block';
+
+  try{
+    const res=await fetch('/api/import/manifest-preview',{method:'POST',body:formData});
+    const data=await res.json();
+    if(!res.ok){
+      msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Could not parse this PDF.';msgEl.style.display='block';
+      return;
+    }
+    manifestRows=data.rows.map((r,i)=>({...r, _id:i, _include: r.is_skyfr8 && !r.duplicate}));
+    msgEl.className='fmsg fmsg-ok';
+    const excluded=manifestRows.filter(r=>!r.is_skyfr8).length;
+    const dupes=manifestRows.filter(r=>r.duplicate).length;
+    msgEl.textContent=`Found ${manifestRows.length} row(s).`+(excluded?` ${excluded} excluded (different agent).`:'')+(dupes?` ${dupes} already exist.`:'');
+    msgEl.style.display='block';
+    renderManifestReview();
+  }catch(e){
+    msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error while reading the PDF.';msgEl.style.display='block';
+  }
+}
+
+function manifestField(id,key,type){
+  const row=manifestRows.find(r=>r._id===id);
+  const val=row[key]==null?'':row[key];
+  const w = type==='num' ? 'width:70px;' : type==='date' ? 'width:120px;' : 'width:140px;';
+  return `<input type="${type==='date'?'date':'text'}" value="${String(val).replace(/"/g,'&quot;')}" style="${w}font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;" onchange="updateManifestField(${id},'${key}',this.value)"/>`;
+}
+
+function updateManifestField(id,key,value){
+  const row=manifestRows.find(r=>r._id===id);
+  if(!row)return;
+  if(key==='pcs_manifested'){row[key]=parseInt(value)||0;}
+  else if(key==='gw'){row[key]=parseFloat(value)||0;}
+  else{row[key]=value;}
+}
+
+function toggleManifestRow(id,checked){
+  const row=manifestRows.find(r=>r._id===id);
+  if(row)row._include=checked;
+}
+
+function renderManifestReview(){
+  const el=document.getElementById('manifest-review');
+  const includedCount=manifestRows.filter(r=>r._include).length;
+
+  el.innerHTML=`
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr>
+          <th></th><th>AWB</th><th>Flight</th><th>ETA</th>
+          <th>Shipper</th><th>Ship phone</th><th>Consignee</th><th>Cons phone</th>
+          <th>Pcs</th><th>Wt (kg)</th><th>Description</th><th></th>
+        </tr></thead>
+        <tbody>
+        ${manifestRows.map(r=>{
+          const disabled = !r.is_skyfr8;
+          const badge = !r.is_skyfr8
+            ? '<span class="badge b-d">Different agent</span>'
+            : r.duplicate ? '<span class="badge b-t">Already exists</span>' : '';
+          return `<tr style="${disabled?'opacity:0.45;':''}">
+            <td><input type="checkbox" ${r._include?'checked':''} ${disabled?'disabled':''} onchange="toggleManifestRow(${r._id},this.checked)"/></td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">${r.awb}</td>
+            <td>${manifestField(r._id,'flight','text')}</td>
+            <td>${manifestField(r._id,'eta','date')}</td>
+            <td>${manifestField(r._id,'sname','text')}</td>
+            <td>${manifestField(r._id,'sphone','text')}</td>
+            <td>${manifestField(r._id,'cname','text')}</td>
+            <td>${manifestField(r._id,'cphone','text')}</td>
+            <td>${manifestField(r._id,'pcs_manifested','num')}</td>
+            <td>${manifestField(r._id,'gw','num')}</td>
+            <td>${manifestField(r._id,'desc','text')}</td>
+            <td>${badge}</td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:1rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <button class="btn" onclick="confirmManifestImport()">Import selected shipments</button>
+      <span style="font-size:12px;color:var(--ts);">Rows are editable — fix anything before importing.</span>
+    </div>`;
+  el.style.display='block';
+}
+
+async function confirmManifestImport(){
+  const rows=manifestRows.filter(r=>r._include).map(r=>{
+    const {_id,_include,is_skyfr8,duplicate,agent_name,...clean}=r;
+    return clean;
+  });
+  if(!rows.length){
+    alert('No rows selected to import.');
+    return;
+  }
+  if(!confirm(`Import ${rows.length} shipment(s)?`))return;
+
+  const msgEl=document.getElementById('manifest-msg');
+  try{
+    const res=await fetch('/api/import/manifest-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows})});
+    const data=await res.json();
+    if(!res.ok){
+      msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Import failed.';msgEl.style.display='block';
+      return;
+    }
+    msgEl.className='fmsg fmsg-ok';
+    msgEl.textContent=`Imported ${data.added.length} shipment(s).`+(data.skipped.length?` ${data.skipped.length} skipped (already existed).`:'');
+    msgEl.style.display='block';
+    document.getElementById('manifest-review').style.display='none';
+    document.getElementById('manifest-file-input').value='';
+    manifestRows=[];
+    await loadCargos();
+  }catch(e){
+    msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error during import.';msgEl.style.display='block';
+  }
+}
+
+function downloadBackup(){
+  window.location.href='/api/backup';
+}
+
+async function restoreBackup(){
+  const fileInput=document.getElementById('restore-file-input');
+  const msgEl=document.getElementById('restore-msg');
+  msgEl.style.display='none';
+
+  const file=fileInput.files[0];
+  if(!file){
+    msgEl.className='fmsg fmsg-err';msgEl.textContent='Choose a backup .zip file first.';msgEl.style.display='block';
+    return;
+  }
+  if(!confirm('This will overwrite your current data with what\'s in this backup file. A safety copy of your current data is taken automatically first. Continue?')){
+    return;
+  }
+
+  const formData=new FormData();
+  formData.append('file',file);
+
+  try{
+    const res=await fetch('/api/backup/restore',{method:'POST',body:formData});
+    const data=await res.json();
+    if(!res.ok){
+      msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Restore failed.';msgEl.style.display='block';
+      return;
+    }
+    msgEl.className='fmsg fmsg-ok';
+    const suffix=data.logged_out?' User accounts changed — you will be signed out momentarily.':' Reloading data...';
+    msgEl.textContent=`Restored: ${data.restored.join(', ')}.`+suffix;
+    msgEl.style.display='block';
+    fileInput.value='';
+
+    if(data.logged_out){
+      setTimeout(()=>{window.location.href='/login';},2000);
+    } else {
+      setTimeout(async ()=>{
+        await loadCargos();await loadFlights();await loadBin();
+        renderTable(cargos);renderFlightsTable();renderBinTable();updateMetrics();
+      },800);
+    }
+  }catch(e){
+    msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error during restore.';msgEl.style.display='block';
+  }
+}
+
+// ── BACK TO TOP ─────────────────────────────────────────────────────────
+window.addEventListener('scroll', ()=>{
+  const btn=document.getElementById('back-to-top');
+  if(!btn)return;
+  btn.style.display = window.scrollY>300 ? 'flex' : 'none';
+},{passive:true});
+
+loadCargos();
+loadFlights();
+loadBin();
+initSession();
+
+// ── AUTO SIGN-OUT AFTER INACTIVITY ─────────────────────────────────────
+const INACTIVITY_LIMIT_MS = 10*60*1000; // 10 minutes
+const WARNING_BEFORE_MS   = 30*1000;    // show warning 30s before sign-out
+let warnTimer=null, logoutTimer=null, countdownInterval=null, lastReset=0;
+
+function doAutoLogout(){
+  window.location.href='/logout';
+}
+
+function showInactivityWarning(){
+  const el=document.getElementById('inactivity-warning');
+  const secEl=document.getElementById('inactivity-seconds');
+  let secsLeft=Math.round(WARNING_BEFORE_MS/1000);
+  secEl.textContent=secsLeft;
+  el.style.display='flex';
+  countdownInterval=setInterval(()=>{
+    secsLeft--;
+    if(secsLeft<=0){clearInterval(countdownInterval);return;}
+    secEl.textContent=secsLeft;
+  },1000);
+}
+
+function hideInactivityWarning(){
+  document.getElementById('inactivity-warning').style.display='none';
+  if(countdownInterval)clearInterval(countdownInterval);
+}
+
+function resetInactivityTimer(){
+  const now=Date.now();
+  if(now-lastReset<1000)return; // throttle — ignore resets fired within the same second
+  lastReset=now;
+
+  hideInactivityWarning();
+  if(warnTimer)clearTimeout(warnTimer);
+  if(logoutTimer)clearTimeout(logoutTimer);
+
+  warnTimer=setTimeout(showInactivityWarning, INACTIVITY_LIMIT_MS-WARNING_BEFORE_MS);
+  logoutTimer=setTimeout(doAutoLogout, INACTIVITY_LIMIT_MS);
+}
+
+['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(evt=>{
+  document.addEventListener(evt, resetInactivityTimer, {passive:true});
+});
+resetInactivityTimer();
+</script>
+<!-- BACK TO TOP -->
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" style="display:none;position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--navy);color:white;border:none;box-shadow:0 4px 16px rgba(0,0,0,0.25);cursor:pointer;font-size:18px;z-index:1500;align-items:center;justify-content:center;">↑</button>
+
+<!-- INACTIVITY WARNING -->
+<div id="inactivity-warning" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:14px 20px;border-radius:var(--rl);box-shadow:0 8px 32px rgba(0,0,0,0.35);z-index:2000;font-size:13px;align-items:center;gap:14px;max-width:92vw;">
+  <span>⏱ You'll be signed out in <strong id="inactivity-seconds">30</strong>s due to inactivity.</span>
+  <button onclick="resetInactivityTimer()" style="background:var(--sky);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;">Stay signed in</button>
+</div>
+
+</body>
+</html>
