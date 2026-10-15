@@ -129,75 +129,10 @@ tr:hover td{background:var(--off);}
         <button class="btn" onclick="toggleAddCargoForm()" id="add-cargo-toggle-btn">+ Add Cargo</button>
       </div>
       <div id="add-cargo-form-wrap" style="display:none;margin-top:1rem;">
-      <div style="font-size:12px;color:var(--tm);margin-bottom:1rem;"><span class="rs">*</span> Required fields</div>
-
-      <div class="fsec">AWB & Flight Details</div>
       <div class="fg">
-        <div class="fgrp"><label>Flight number <span class="rs">*</span></label><input id="f-flight" placeholder="GXA2965" class="req" oninput="checkFlightLookup()"/><span id="err-flight" class="ferr"></span></div>
-        <div class="fgrp"><label>Flight date <span class="rs">*</span></label><input id="f-eta" type="date" class="req" onchange="checkFlightLookup()"/><span id="err-eta" class="ferr"></span></div>
-        <div class="fgrp"><label>Aircraft registration</label><input id="f-reg" placeholder="e.g. N123SF" style="text-transform:uppercase;"/><span class="hint">Auto-filled from flight record if available</span></div>
-        <div class="fgrp"><label>Airline <span class="rs">*</span></label><input id="f-airline" placeholder="IBC Airways" value="IBC Airways" class="req"/><span id="err-airline" class="ferr"></span></div>
-        <div class="fgrp"><label>Port of loading (IATA) <span class="rs">*</span></label><input id="f-pol" placeholder="MIA" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="err-pol" class="ferr"></span></div>
-        <div class="fgrp"><label>Port of discharge (IATA) <span class="rs">*</span></label><input id="f-pod" placeholder="KIN" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="err-pod" class="ferr"></span></div>
-        <div class="fgrp" id="asycuda-wrap" style="display:none;"><label>ASYCUDA reference number</label><input id="f-asycuda" placeholder="e.g. JMKIN-2026-1514"/><span class="hint">Auto-filled from flight record if available</span></div>
         <div class="fgrp"><label>AWB number <span class="rs">*</span></label><input id="f-awb" placeholder="e.g. 026-12345678" class="req"/><span class="hint">Enter from the air waybill document</span><span id="err-awb" class="ferr"></span></div>
       </div>
-
-      <div class="fsec">Cargo Details</div>
-      <div class="fg">
-        <div class="fgrp"><label>Description / commodity <span class="rs">*</span></label><input id="f-desc" placeholder="Electronics, spare parts..." class="req" oninput="checkConsolidation('f-desc','f-consolidation-section')"/><span id="err-desc" class="ferr"></span></div>
-        <div class="fgrp"><label>Cargo type <span class="rs">*</span></label>
-          <select id="f-type">
-            <option value="General" selected>General</option><option>Perishable</option><option>Dangerous goods</option>
-            <option>Live animals</option><option>Valuables</option><option>Human remains</option><option>Vulnerable</option>
-          </select><span id="err-type" class="ferr"></span>
-        </div>
-        <div class="fgrp"><label>Gross weight (kg) <span class="rs">*</span></label><input id="f-gw" type="number" placeholder="0.00" class="req"/><span id="err-gw" class="ferr"></span></div>
-        <div class="fgrp"><label>Chargeable weight (kg)</label><input id="f-cw" type="number" placeholder="0.00"/></div>
-        <div class="fgrp"><label>No. of pieces manifested <span class="rs">*</span></label><input id="f-pcs-man" type="number" placeholder="1" class="req"/><span id="err-pcs-man" class="ferr"></span></div>
-        <div class="fgrp"><label>Status <span class="rs">*</span></label>
-          <select id="f-status" onchange="toggleDelivered();togglePcsReceived('f-pcs-rec','f-status');">
-            <option value="">— Select —</option><option>Manifested</option><option>Arrived</option><option>Delivered</option>
-          </select><span id="err-status" class="ferr"></span>
-        </div>
-        <div class="fgrp"><label>No. of pieces received</label><input id="f-pcs-rec" type="number" placeholder="1" disabled style="opacity:0.45;cursor:not-allowed;"/><span class="hint">Available when status is Arrived</span><span id="err-pcs-rec" class="ferr"></span></div>
-        <div class="fgrp" style="grid-column:1/-1;"><label>Remarks</label><input id="f-remarks" placeholder="Any additional notes about this shipment..."/></div>
-      </div>
-
-      <!-- Warehouse bays -->
-      <div id="f-bays-section" style="display:none;">
-        <div class="fsec">Warehouse Bay Locations</div>
-        <div id="f-bays-wrap"><div class="bay-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;"><input type="text" class="bay-loc" placeholder="Bay (e.g. A-12)" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><input type="number" class="bay-pcs" placeholder="No. of pieces" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><button type="button" onclick="removeBayRow(this)" style="padding:7px 10px;border:1px solid #F5C6C6;border-radius:var(--r);background:transparent;color:#C0392B;cursor:pointer;font-size:13px;">✕</button></div></div>
-        <button type="button" onclick="addBayRow('f-bays-wrap')" class="btn btn-sec" style="margin-bottom:.75rem;font-size:12px;">+ Add another bay</button>
-      </div>
-
-      <!-- Consolidation section -->
-      <div id="f-consolidation-section" style="display:none;background:#EEF4FF;border:1px solid #B0C8F0;border-radius:var(--r);padding:1rem;margin-bottom:.75rem;">
-        <div class="fsec" style="margin-top:0;border-color:#B0C8F0;color:#1A3A8F;">📦 House AWB entries (Consolidation)</div>
-        <div style="font-size:12px;color:#1A3A8F;margin-bottom:.75rem;">The Master AWB (MAWB) for this consolidation is the AWB number entered above.</div>
-        <div id="f-hawb-wrap"></div>
-        <button type="button" onclick="addHawbRow('f-hawb-wrap')" class="btn btn-sec" style="font-size:12px;margin-top:4px;">+ Add House AWB</button>
-      </div>
-
-      <!-- Delivered fields -->
-      <div id="del-fields" class="del-fields">
-        <div class="fsec" style="margin-top:0;border-color:#F0C8E0;">Delivery Details</div>
-        <div class="fg">
-          <div class="fgrp"><label>No. of pieces delivered <span class="rs">*</span></label><input id="f-pcs-del" type="number" placeholder="0"/><span id="err-pcs-del" class="ferr"></span></div>
-          <div class="fgrp"><label>Date delivered <span class="rs">*</span></label><input id="f-date-del" type="date"/><span id="err-date-del" class="ferr"></span></div>
-        </div>
-      </div>
-
-      <div class="fsec">Notification</div>
-      <div class="fg">
-        <div class="fgrp"><label>Notification date</label><input id="f-notif-date" type="date"/></div>
-        <div class="fgrp"><label>Notification method</label>
-          <select id="f-notif-method">
-            <option value="">— Select —</option><option>Phone call</option><option>SMS</option><option>Email</option><option>WhatsApp</option><option>In person</option><option>Other</option>
-          </select>
-        </div>
-        <div class="fgrp"><label>Person notified</label><input id="f-notif-person" placeholder="Name of person contacted"/></div>
-      </div>
+      <div style="font-size:12px;color:var(--tm);margin-bottom:1rem;"><span class="rs">*</span> Required fields</div>
 
       <div class="fsec">Shipper Information</div>
       <div class="fg">
@@ -221,12 +156,77 @@ tr:hover td{background:var(--off);}
         <div class="fgrp"><label>Country <span class="rs">*</span></label><input id="f-c-country" placeholder="Jamaica" class="req"/><span id="err-c-country" class="ferr"></span></div>
       </div>
 
-      <div class="fsec">Customs</div>
+      <div class="fsec">Cargo Details</div>
       <div class="fg">
-        <div class="fgrp"><label>Customs status</label>
-          <select id="f-customs"><option>Not submitted</option><option>Submitted</option><option>Under examination</option><option>Cleared</option><option>Hold</option></select>
+        <div class="fgrp"><label>Description / commodity <span class="rs">*</span></label><input id="f-desc" placeholder="Electronics, spare parts..." class="req" oninput="checkConsolidation('f-desc','f-consolidation-section')"/><span id="err-desc" class="ferr"></span></div>
+        <div class="fgrp"><label>Cargo type <span class="rs">*</span></label>
+          <select id="f-type">
+            <option value="General" selected>General</option><option>Perishable</option><option>Dangerous goods</option>
+            <option>Live animals</option><option>Valuables</option><option>Human remains</option><option>Vulnerable</option>
+          </select><span id="err-type" class="ferr"></span>
         </div>
-        <div class="fgrp"><label>Declared value (USD)</label><input id="f-val" type="number" placeholder="0.00"/></div>
+        <div class="fgrp"><label>Gross weight (kg) <span class="rs">*</span></label><input id="f-gw" type="number" placeholder="0.00" class="req"/><span id="err-gw" class="ferr"></span></div>
+        <div class="fgrp"><label>Chargeable weight (kg)</label><input id="f-cw" type="number" placeholder="0.00"/></div>
+        <div class="fgrp"><label>Status <span class="rs">*</span></label>
+          <select id="f-status" onchange="toggleDelivered();togglePcsReceived('f-pcs-rec','f-status');">
+            <option value="">— Select —</option><option>Manifested</option><option>Arrived</option><option>Delivered</option>
+          </select><span id="err-status" class="ferr"></span>
+        </div>
+        <div class="fgrp"><label>No. of pieces manifested <span class="rs">*</span></label><input id="f-pcs-man" type="number" placeholder="1" class="req"/><span id="err-pcs-man" class="ferr"></span></div>
+      </div>
+
+      <div class="fsec">Flight Details</div>
+      <div class="fg">
+        <div class="fgrp"><label>Port of loading (IATA) <span class="rs">*</span></label><input id="f-pol" placeholder="MIA" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="err-pol" class="ferr"></span></div>
+        <div class="fgrp"><label>Port of discharge (IATA) <span class="rs">*</span></label><input id="f-pod" placeholder="KIN" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="err-pod" class="ferr"></span></div>
+        <div class="fgrp"><label>Flight number <span class="rs">*</span></label><input id="f-flight" placeholder="GXA2965" class="req" oninput="checkFlightLookup()"/><span id="err-flight" class="ferr"></span></div>
+        <div class="fgrp"><label>Flight date <span class="rs">*</span></label><input id="f-eta" type="date" class="req" onchange="checkFlightLookup()"/><span id="err-eta" class="ferr"></span></div>
+        <div class="fgrp"><label>Aircraft registration</label><input id="f-reg" placeholder="e.g. N123SF" style="text-transform:uppercase;"/><span class="hint">Auto-filled from flight record if available</span></div>
+        <div class="fgrp"><label>Airline <span class="rs">*</span></label><input id="f-airline" placeholder="IBC Airways" value="IBC Airways" class="req"/><span id="err-airline" class="ferr"></span></div>
+        <div class="fgrp" id="asycuda-wrap" style="display:none;"><label>ASYCUDA reference number</label><input id="f-asycuda" placeholder="e.g. JMKIN-2026-1514"/><span class="hint">Auto-filled from flight record if available</span></div>
+      </div>
+
+      <div class="fg">
+        <div class="fgrp"><label>No. of pieces received</label><input id="f-pcs-rec" type="number" placeholder="1" disabled style="opacity:0.45;cursor:not-allowed;"/><span class="hint">Available when status is Arrived</span><span id="err-pcs-rec" class="ferr"></span></div>
+      </div>
+
+      <!-- Warehouse bays -->
+      <div id="f-bays-section" style="display:none;">
+        <div class="fsec">Warehouse Bay Locations</div>
+        <div id="f-bays-wrap"><div class="bay-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;"><input type="text" class="bay-loc" placeholder="Bay (e.g. A-12)" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><input type="number" class="bay-pcs" placeholder="No. of pieces" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><button type="button" onclick="removeBayRow(this)" style="padding:7px 10px;border:1px solid #F5C6C6;border-radius:var(--r);background:transparent;color:#C0392B;cursor:pointer;font-size:13px;">✕</button></div></div>
+        <button type="button" onclick="addBayRow('f-bays-wrap')" class="btn btn-sec" style="margin-bottom:.75rem;font-size:12px;">+ Add another bay</button>
+      </div>
+
+      <div class="fg">
+        <div class="fgrp" style="grid-column:1/-1;"><label>Remarks</label><input id="f-remarks" placeholder="Any additional notes about this shipment..."/></div>
+      </div>
+
+      <!-- Consolidation section -->
+      <div id="f-consolidation-section" style="display:none;background:#EEF4FF;border:1px solid #B0C8F0;border-radius:var(--r);padding:1rem;margin-bottom:.75rem;">
+        <div class="fsec" style="margin-top:0;border-color:#B0C8F0;color:#1A3A8F;">📦 House AWB entries (Consolidation)</div>
+        <div style="font-size:12px;color:#1A3A8F;margin-bottom:.75rem;">The Master AWB (MAWB) for this consolidation is the AWB number entered above.</div>
+        <div id="f-hawb-wrap"></div>
+        <button type="button" onclick="addHawbRow('f-hawb-wrap')" class="btn btn-sec" style="font-size:12px;margin-top:4px;">+ Add House AWB</button>
+      </div>
+
+      <div class="fsec">Notification</div>
+      <div class="fg">
+        <div class="fgrp"><label>Notification date</label><input id="f-notif-date" type="date"/></div>
+        <div class="fgrp"><label>Notification method</label>
+          <select id="f-notif-method">
+            <option value="">— Select —</option><option>Phone call</option><option>SMS</option><option>Email</option><option>WhatsApp</option><option>In person</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fgrp"><label>Person notified</label><input id="f-notif-person" placeholder="Name of person contacted"/></div>
+      </div>
+
+      <!-- Delivered fields -->
+      <div id="del-fields" class="del-fields">
+        <div class="fsec" style="margin-top:0;border-color:#F0C8E0;">Delivery Details</div>
+        <div class="fg">
+          <div class="fgrp"><label>No. of pieces delivered <span class="rs">*</span></label><input id="f-pcs-del" type="number" placeholder="0"/><span id="err-pcs-del" class="ferr"></span></div>
+          <div class="fgrp"><label>Date delivered <span class="rs">*</span></label><input id="f-date-del" type="date"/><span id="err-date-del" class="ferr"></span></div>
+        </div>
       </div>
 
       <div id="form-msg" class="fmsg"></div>
@@ -523,27 +523,6 @@ tr:hover td{background:var(--off);}
   </div>
 </div>
 
-<!-- AMEND DELIVERY MODAL -->
-<div id="amend-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1100;overflow-y:auto;padding:2rem 1rem;">
-  <div style="background:white;border-radius:var(--rl);max-width:820px;margin:0 auto;padding:1.5rem;position:relative;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Amend delivery details</div><div id="amend-awb-label" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--navy);"></div></div>
-      <button onclick="closeAmend()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">&#10005; Close</button>
-    </div>
-    <div id="amend-note" style="font-size:12px;color:var(--ts);margin-bottom:.75rem;"></div>
-    <div style="overflow-x:auto;">
-      <table style="width:100%;"><thead><tr><th style="font-size:11px;"></th><th style="font-size:11px;">Date delivered</th><th style="font-size:11px;">Pieces</th><th style="font-size:11px;">Collected by</th><th style="font-size:11px;">Collector ID</th></tr></thead>
-      <tbody id="amend-rows"></tbody></table>
-    </div>
-    <div id="amend-msg" class="fmsg" style="margin-top:.75rem;"></div>
-    <div style="display:flex;gap:8px;margin-top:1rem;">
-      <button class="btn" id="amend-save-btn" onclick="saveAmend()">&#128190; Save amendment</button>
-      <button class="btn btn-sec" onclick="closeAmend()">Cancel</button>
-    </div>
-    <div style="font-size:11px;color:var(--tm);margin-top:.75rem;">Changes are saved to the shipment, the Delivery tab, reports and exports, and noted in the shipment's remarks with your name and the time.</div>
-  </div>
-</div>
-
 <!-- EDIT SHIPMENT MODAL -->
 <div id="edit-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1000;overflow-y:auto;padding:2rem 1rem;">
   <div style="background:white;border-radius:var(--rl);max-width:760px;margin:0 auto;padding:1.5rem;position:relative;">
@@ -596,7 +575,6 @@ tr:hover td{background:var(--off);}
       <div id="e-hawb-wrap"></div>
       <button type="button" onclick="addHawbRow('e-hawb-wrap')" class="btn btn-sec" style="font-size:12px;margin-top:4px;">+ Add House AWB</button>
     </div>
-    <div id="e-delivery-info" style="display:none;background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:.75rem;"></div>
     <div id="e-del-fields" class="del-fields">
       <div class="fsec" style="margin-top:0;border-color:#F0C8E0;">Delivery Details</div>
       <div class="fg">
@@ -1042,7 +1020,7 @@ async function addCargo(){
     s_street:g('f-s-street'),s_city:g('f-s-city'),s_parish:g('f-s-parish'),s_zip:g('f-s-zip'),s_country:g('f-s-country'),
     cname:g('f-cname'),cphone:g('f-cphone'),
     c_street:g('f-c-street'),c_city:g('f-c-city'),c_parish:g('f-c-parish'),c_zip:g('f-c-zip'),c_country:g('f-c-country'),
-    customs:g('f-customs')||'Not submitted',val:parseFloat(g('f-val'))||0
+    customs:'Not submitted',val:0
   };
 
   try{
@@ -1072,7 +1050,7 @@ async function addCargo(){
     document.getElementById('f-pol').value=keepPol;
     document.getElementById('f-pod').value=keepPod;
     document.getElementById('f-asycuda').value=keepAsycuda;
-    ['f-type','f-status','f-customs'].forEach(id=>document.getElementById(id).selectedIndex=0);
+    ['f-type','f-status'].forEach(id=>document.getElementById(id).selectedIndex=0);
     document.getElementById('del-fields').style.display='none';
     document.getElementById('f-bays-section').style.display='none';
     document.getElementById('f-consolidation-section').style.display='none';
@@ -1120,191 +1098,6 @@ const EDIT_REQUIRED=[
   {id:'e-c-country',err:'eerr-c-country',label:'Consignee country'},
 ];
 
-// ── AMEND DELIVERY DETAILS ───────────────────────────
-let amendAwb=null, amendMode=null;
-const dayOf=v=>String(v==null?'':v).slice(0,10);
-
-// Where this shipment's delivery data lives: per House AWB, per pickup (history), or on the shipment itself
-function amendTargetMode(c){
-  if((c.hawbs||[]).some(h=>h.delivered))return 'hawb';
-  if(Array.isArray(c.delivery_history)&&c.delivery_history.length)return 'history';
-  if(c.collector_name||c.collector_id||c.date_delivered||(parseInt(c.pcs_delivered)>0))return 'single';
-  return null;
-}
-function amendRows(c,mode){
-  if(mode==='hawb')return (c.hawbs||[]).map((h,i)=>({i,h})).filter(x=>x.h.delivered).map(x=>({i:x.i,label:'HAWB '+x.h.hawb,max:parseInt(x.h.pcs)||null,pcs:x.h.pcs_delivered,date:x.h.date_delivered,name:x.h.collector_name,id:x.h.collector_id}));
-  if(mode==='history')return c.delivery_history.map((h,i)=>({i,label:'Pickup '+(i+1),pcs:h.pcs,date:h.date,name:h.collector_name,id:h.collector_id}));
-  return [{i:0,label:'Delivery',pcs:c.pcs_delivered,date:c.date_delivered,name:c.collector_name,id:c.collector_id}];
-}
-function openAmendDelivery(awb){
-  const c=cargos.find(x=>x.awb===awb);if(!c)return;
-  const mode=amendTargetMode(c);if(!mode)return;
-  amendAwb=awb;amendMode=mode;
-  document.getElementById('amend-awb-label').textContent=awb;
-  const man=parseInt(c.pcs_manifested)||0;
-  document.getElementById('amend-note').textContent=mode==='hawb'
-    ? 'Amend each delivered House AWB. Pieces cannot exceed what was manifested for that house bill.'
-    : `Manifested: ${man} piece${man!==1?'s':''}. Total pieces delivered cannot exceed this. If the total no longer equals the manifested pieces, the shipment moves back out of Delivered.`;
-  const inp="padding:6px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;width:100%;";
-  document.getElementById('amend-rows').innerHTML=amendRows(c,mode).map(r=>`<tr data-i="${r.i}"${r.max?` data-max="${r.max}"`:''} data-label="${escHtml(r.label)}">
-    <td style="font-size:12px;white-space:nowrap;font-weight:500;">${escHtml(r.label)}</td>
-    <td><input class="am-date" type="date" value="${escHtml(dayOf(r.date))}" style="${inp}"/></td>
-    <td><input class="am-pcs" type="number" min="1" value="${escHtml(r.pcs==null?'':r.pcs)}" style="${inp}width:80px;"/></td>
-    <td><input class="am-name" type="text" value="${escHtml(r.name)}" placeholder="Name of person collecting" style="${inp}"/></td>
-    <td><input class="am-id" type="text" value="${escHtml(r.id)}" placeholder="Passport / licence no." style="${inp}"/></td>
-  </tr>`).join('');
-  document.getElementById('amend-msg').style.display='none';
-  document.getElementById('amend-save-btn').disabled=false;
-  document.getElementById('amend-overlay').style.display='block';
-  if(document.getElementById('edit-overlay').style.display==='none')document.body.style.overflow='hidden';
-}
-function closeAmend(){
-  document.getElementById('amend-overlay').style.display='none';amendAwb=null;amendMode=null;
-  if(document.getElementById('edit-overlay').style.display==='none')document.body.style.overflow='';
-}
-document.getElementById('amend-overlay').addEventListener('click',function(e){if(e.target===this)closeAmend();});
-
-async function saveAmend(){
-  const msg=document.getElementById('amend-msg');msg.style.display='none';
-  const fail=t=>{msg.className='fmsg fmsg-err';msg.textContent=t;msg.style.display='block';};
-  const c=cargos.find(x=>x.awb===amendAwb);if(!c)return;
-  const mode=amendMode;
-  const rows=[...document.querySelectorAll('#amend-rows tr[data-i]')].map(tr=>({
-    i:parseInt(tr.dataset.i),label:tr.dataset.label,max:tr.dataset.max?parseInt(tr.dataset.max):null,
-    date:tr.querySelector('.am-date').value,pcsRaw:tr.querySelector('.am-pcs').value.trim(),
-    name:tr.querySelector('.am-name').value.trim()||null,id:tr.querySelector('.am-id').value.trim()||null}));
-  for(const r of rows){
-    r.pcs=Number(r.pcsRaw);
-    if(!r.date)return fail(`${r.label}: date delivered is required.`);
-    if(r.pcsRaw===''||!Number.isInteger(r.pcs)||r.pcs<1)return fail(`${r.label}: pieces must be a whole number of at least 1.`);
-    if(r.max&&r.pcs>r.max)return fail(`${r.label}: only ${r.max} piece${r.max!==1?'s were':' was'} manifested for this house bill.`);
-  }
-  const manifested=parseInt(c.pcs_manifested)||0;
-  const latestOf=list=>list.reduce((a,b)=>(dayOf(b.date)>=dayOf(a.date)?b:a));
-  const same=(a,b)=>String(a==null?'':a)===String(b==null?'':b);
-  const changes=[];
-  const diff=(label,field,before,after)=>{if(!same(before,after))changes.push(`${label} ${field}: ${before==null||before===''?'(blank)':before} → ${after==null||after===''?'(blank)':after}`);};
-  let update={}, newStatus=c.status;
-
-  if(mode==='hawb'){
-    const hawbs=c.hawbs.map((h,i)=>{
-      const r=rows.find(x=>x.i===i);if(!r)return h;
-      diff(r.label,'date',dayOf(h.date_delivered),r.date);diff(r.label,'pieces',h.pcs_delivered,r.pcs);
-      diff(r.label,'collector',h.collector_name,r.name);diff(r.label,'collector ID',h.collector_id,r.id);
-      return {...h,pcs_delivered:r.pcs,date_delivered:r.date,collector_name:r.name,collector_id:r.id};
-    });
-    update.hawbs=hawbs;
-    if(hawbs.every(h=>h.delivered)){
-      const last=latestOf(hawbs);
-      update.pcs_delivered=hawbs.reduce((t,h)=>t+(parseInt(h.pcs_delivered)||0),0);
-      update.date_delivered=last.date_delivered;update.collector_name=last.collector_name||null;update.collector_id=last.collector_id||null;
-    }
-  } else {
-    let total, last, hist=null;
-    if(mode==='history'){
-      hist=c.delivery_history.map((h,i)=>{
-        const r=rows.find(x=>x.i===i);
-        diff(r.label,'date',dayOf(h.date),r.date);diff(r.label,'pieces',h.pcs,r.pcs);
-        diff(r.label,'collector',h.collector_name,r.name);diff(r.label,'collector ID',h.collector_id,r.id);
-        return {...h,pcs:r.pcs,date:r.date,collector_name:r.name,collector_id:r.id};
-      });
-      total=hist.reduce((t,h)=>t+h.pcs,0);
-      last=latestOf(hist);last={date:last.date,name:last.collector_name,id:last.collector_id};
-    } else {
-      const r=rows[0];
-      diff('Delivery','date',dayOf(c.date_delivered),r.date);diff('Delivery','pieces',c.pcs_delivered,r.pcs);
-      diff('Delivery','collector',c.collector_name,r.name);diff('Delivery','collector ID',c.collector_id,r.id);
-      total=r.pcs;last={date:r.date,name:r.name,id:r.id};
-    }
-    if(manifested&&total>manifested)return fail(`Total pieces delivered (${total}) cannot exceed the ${manifested} manifested.`);
-    newStatus=(manifested&&total>=manifested)?'Delivered':(c.status==='Delivered'?'Arrived':c.status);
-    update.pcs_delivered=total;update.collector_name=last.name||null;update.collector_id=last.id||null;
-    update.date_delivered=newStatus==='Delivered'?last.date:(mode==='single'?last.date:(c.status==='Delivered'?null:(c.date_delivered||null)));
-    if(hist)update.delivery_history=hist;
-    if(newStatus!==c.status){update.status=newStatus;changes.push(`status: ${c.status} → ${newStatus}`);}
-  }
-
-  if(!changes.length)return fail('No changes to save.');
-  if(update.status&&!confirm(`Delivered pieces (${update.pcs_delivered}) no longer match the ${manifested} manifested, so this shipment will move from ${c.status} to ${update.status}. Continue?`))return;
-
-  const entry={text:'Delivery details amended — '+changes.join('; '),date:new Date().toISOString(),username:currentUsername};
-  update.remarks=[...normalizeRemarks(c.remarks),entry];
-
-  const btn=document.getElementById('amend-save-btn');btn.disabled=true;
-  try{
-    const res=await fetch('/api/shipments/'+encodeURIComponent(c.awb),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(update)});
-    let data={};try{data=await res.json();}catch(e){}
-    if(!res.ok){btn.disabled=false;return fail(data.error||'Update failed. Please try again.');}
-  }catch(e){btn.disabled=false;return fail('Network error. Is the server running?');}
-
-  const awb=c.awb;
-  await loadCargos();
-  renderDeliveriesTable();
-  if(typeof renderDeliveryShipmentsTable==='function')renderDeliveryShipmentsTable();
-  // Keep an open Edit window in step so a later "Save changes" can't write stale delivery values back
-  if(editingAwb===awb){
-    const nc=cargos.find(x=>x.awb===awb);
-    if(nc){
-      es('e-pcs-del',nc.pcs_delivered);es('e-date-del',nc.date_delivered);
-      document.getElementById('e-status').value=nc.status||'';
-      document.getElementById('e-del-fields').style.display=nc.status==='Delivered'?'block':'none';
-      document.getElementById('e-bays-section').style.display=nc.status==='Arrived'?'block':'none';
-      editRemarks.push(entry);renderRemarksList('e');
-      renderDeliveryInfo(nc);
-    }
-  }
-  closeAmend();
-}
-
-// getHawbs() rebuilds rows from the form and loses delivery data; carry it over from the saved record
-function mergeHawbDelivery(rows,awb){
-  const saved=((cargos.find(x=>x.awb===awb)||{}).hawbs)||[];
-  return rows.map(r=>{
-    const o=saved.find(h=>String(h.hawb).toLowerCase()===String(r.hawb).toLowerCase());
-    return o?{...r,delivered:!!o.delivered,pcs_delivered:o.pcs_delivered,date_delivered:o.date_delivered,collector_name:o.collector_name,collector_id:o.collector_id}:r;
-  });
-}
-
-function escHtml(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-// Read-only delivery / collector summary shown when viewing a shipment
-function renderDeliveryInfo(c){
-  const box=document.getElementById('e-delivery-info');
-  // With per-pickup / per-HAWB records, totals are derived, so lock the legacy fields (use Amend instead)
-  const lock=['hawb','history'].includes(amendTargetMode(c));
-  ['e-pcs-del','e-date-del'].forEach(id=>{const el=document.getElementById(id);if(el){el.readOnly=lock;el.style.background=lock?'var(--off)':'';el.title=lock?'Use "Amend delivery details" to change this':'';}});
-  const history=Array.isArray(c.delivery_history)?c.delivery_history:[];
-  const hawbs=(c.hawbs||[]).filter(h=>h.delivered||h.collector_name||h.collector_id);
-  const hasAny=c.collector_name||c.collector_id||c.date_delivered||(c.pcs_delivered>0)||history.length||hawbs.length;
-  if(!hasAny){box.style.display='none';box.innerHTML='';return;}
-  const mono="font-family:'JetBrains Mono',monospace;font-size:12px;";
-  const lbl="font-size:11px;color:var(--ts);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;";
-  const item=(label,val,style)=>`<div><div style="${lbl}">${label}</div><div style="font-size:13px;${style||''}">${val}</div></div>`;
-  const th='font-size:11px;';
-  const amendBtn=amendTargetMode(c)?`<button type="button" class="btn-edit" onclick="openAmendDelivery(editingAwb)">✏️ Amend delivery details</button>`:'';
-  let html=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;"><div style="font-size:11px;font-weight:600;color:var(--ts);text-transform:uppercase;letter-spacing:.05em;">🚚 Delivery information</div>${amendBtn}</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
-      ${item('Collected by',escHtml(c.collector_name)||'—')}
-      ${item('Collector ID',escHtml(c.collector_id)||'—',mono)}
-      ${item('Date delivered',c.date_delivered?formatDate(c.date_delivered):'—')}
-      ${item('Pieces delivered',c.pcs_delivered!=null&&c.pcs_delivered!==''?`${escHtml(c.pcs_delivered)} of ${escHtml(c.pcs_manifested)}`:'—')}
-    </div>`;
-  if(history.length){
-    const sorted=[...history].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-    html+=`<div style="${lbl}margin-top:12px;">Delivery history</div>
-      <table style="width:100%;"><thead><tr><th style="${th}">Date</th><th style="${th}">Pieces</th><th style="${th}">Collected by</th><th style="${th}">Collector ID</th></tr></thead><tbody>
-      ${sorted.map(h=>`<tr><td>${formatDate(h.date)}</td><td>${h.pcs!=null?escHtml(h.pcs):'—'}</td><td>${escHtml(h.collector_name)||'—'}</td><td style="${mono}">${escHtml(h.collector_id)||'—'}</td></tr>`).join('')}
-      </tbody></table>`;
-  }
-  if(hawbs.length){
-    html+=`<div style="${lbl}margin-top:12px;">House AWB deliveries</div>
-      <table style="width:100%;"><thead><tr><th style="${th}">HAWB</th><th style="${th}">Date</th><th style="${th}">Pieces</th><th style="${th}">Collected by</th><th style="${th}">Collector ID</th></tr></thead><tbody>
-      ${hawbs.map(h=>`<tr><td style="${mono}">${escHtml(h.hawb)}</td><td>${h.date_delivered?formatDate(h.date_delivered):'—'}</td><td>${h.pcs_delivered!=null?escHtml(h.pcs_delivered):'—'}</td><td>${escHtml(h.collector_name)||'—'}</td><td style="${mono}">${escHtml(h.collector_id)||'—'}</td></tr>`).join('')}
-      </tbody></table>`;
-  }
-  box.innerHTML=html;box.style.display='block';
-}
-
 function openEdit(awb){
   const c=cargos.find(x=>x.awb===awb);if(!c)return;
   editingAwb=awb;
@@ -1321,7 +1114,6 @@ function openEdit(awb){
   document.getElementById('e-type').value=c.type||'General';
   document.getElementById('e-status').value=c.status||'';
   document.getElementById('e-customs').value=c.customs||'Not submitted';
-  renderDeliveryInfo(c);
   document.getElementById('e-del-fields').style.display=c.status==='Delivered'?'block':'none';
   document.getElementById('e-asycuda-wrap').style.display=(c.flight&&c.eta)?'block':'none';
   document.getElementById('e-bays-section').style.display=c.status==='Arrived'?'block':'none';
@@ -1405,7 +1197,7 @@ async function saveEdit(){
     pcs_received:(status==='Arrived'||status==='Delivered')?parseInt(eg('e-pcs-rec'))||null:null,
     remarks:editRemarks,
     bays:getBays('e-bays-wrap'),
-    hawbs:document.getElementById('e-consolidation-section').style.display!=='none'?mergeHawbDelivery(getHawbs('e-hawb-wrap'),editingAwb):[],
+    hawbs:document.getElementById('e-consolidation-section').style.display!=='none'?getHawbs('e-hawb-wrap'):[],
     status,
     pcs_delivered:status==='Delivered'?parseInt(eg('e-pcs-del')):null,
     date_delivered:status==='Delivered'?eg('e-date-del'):null,
@@ -1718,7 +1510,7 @@ function renderDeliveriesForDay(day,tb){
     <td>${formatDate(e.date)}</td>
     <td>${e.name||'—'}</td>
     <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${e.id||'—'}</td>
-    <td style="white-space:nowrap;"><button class="btn-edit" onclick="openAmendDelivery('${String(e.mawb||e.awb).replace(/'/g,"\\'")}')">✏️ Amend</button></td>
+    <td></td>
   </tr>`).join('');
 }
 
@@ -1767,7 +1559,7 @@ function renderDeliveriesTable(){
       <td>${formatDate(c.date_delivered)}</td>
       <td>${c.collector_name||'—'}</td>
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${c.collector_id||'—'}</td>
-      <td style="white-space:nowrap;">${historyBtn}${amendTargetMode(c)?` <button class="btn-edit" onclick="openAmendDelivery('${c.awb.replace(/'/g,"\\'")}')">✏️ Amend</button>`:''}</td>
+      <td>${historyBtn}</td>
     </tr>${historyRow}`;
   }).join('');
 }
@@ -2593,66 +2385,49 @@ loadBin();
 initSession();
 
 // ── AUTO SIGN-OUT AFTER INACTIVITY ─────────────────────────────────────
-// Signs staff out after 10 minutes with no activity, with a 30-second warning.
-// Uses the real clock (not a long setTimeout) so it still fires after sleep or in a background tab,
-// and shares "last activity" between tabs so an idle tab can't sign out someone working in another.
 const INACTIVITY_LIMIT_MS = 10*60*1000; // 10 minutes
 const WARNING_BEFORE_MS   = 30*1000;    // show warning 30s before sign-out
-const ACTIVITY_KEY = 'skyfr8_last_activity';
-let lastActivity = Date.now(), loggingOut = false;
+let warnTimer=null, logoutTimer=null, countdownInterval=null, lastReset=0;
 
 function doAutoLogout(){
   window.location.href='/logout';
 }
 
-function readSharedActivity(){
-  try{const v=parseInt(localStorage.getItem(ACTIVITY_KEY),10);return isNaN(v)?0:v;}catch(e){return 0;}
-}
-
-function showInactivityWarning(secsLeft){
+function showInactivityWarning(){
   const el=document.getElementById('inactivity-warning');
   const secEl=document.getElementById('inactivity-seconds');
-  if(!el)return;
-  if(secEl)secEl.textContent=Math.max(0,secsLeft);
+  let secsLeft=Math.round(WARNING_BEFORE_MS/1000);
+  secEl.textContent=secsLeft;
   el.style.display='flex';
+  countdownInterval=setInterval(()=>{
+    secsLeft--;
+    if(secsLeft<=0){clearInterval(countdownInterval);return;}
+    secEl.textContent=secsLeft;
+  },1000);
 }
 
 function hideInactivityWarning(){
-  const el=document.getElementById('inactivity-warning');
-  if(el)el.style.display='none';
+  document.getElementById('inactivity-warning').style.display='none';
+  if(countdownInterval)clearInterval(countdownInterval);
 }
 
-// Called on any user activity (and by the "Stay signed in" button, which forces it)
-function markActivity(force){
+function resetInactivityTimer(){
   const now=Date.now();
-  if(!force&&now-lastActivity<1000)return; // throttle: at most once a second
-  lastActivity=now;
-  try{localStorage.setItem(ACTIVITY_KEY,String(now));}catch(e){}
+  if(now-lastReset<1000)return; // throttle — ignore resets fired within the same second
+  lastReset=now;
+
   hideInactivityWarning();
+  if(warnTimer)clearTimeout(warnTimer);
+  if(logoutTimer)clearTimeout(logoutTimer);
+
+  warnTimer=setTimeout(showInactivityWarning, INACTIVITY_LIMIT_MS-WARNING_BEFORE_MS);
+  logoutTimer=setTimeout(doAutoLogout, INACTIVITY_LIMIT_MS);
 }
 
-function checkInactivity(){
-  if(loggingOut)return;
-  const idle=Date.now()-Math.max(lastActivity,readSharedActivity());
-  if(idle>=INACTIVITY_LIMIT_MS){loggingOut=true;hideInactivityWarning();doAutoLogout();return;}
-  if(idle>=INACTIVITY_LIMIT_MS-WARNING_BEFORE_MS)showInactivityWarning(Math.ceil((INACTIVITY_LIMIT_MS-idle)/1000));
-  else hideInactivityWarning();
-}
-
-['mousemove','mousedown','keydown','scroll','wheel','touchstart','click'].forEach(evt=>{
-  document.addEventListener(evt,()=>markActivity(false),{passive:true,capture:true});
+['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(evt=>{
+  document.addEventListener(evt, resetInactivityTimer, {passive:true});
 });
-// Re-check straight away when the tab becomes visible again (timers are slowed in background tabs)
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkInactivity();});
-window.addEventListener('focus',checkInactivity);
-
-function startInactivityTimer(){
-  markActivity(true);
-  setInterval(checkInactivity,1000);
-}
-// The warning box is defined below this script, so wait until the page is fully parsed
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startInactivityTimer);
-else startInactivityTimer();
+resetInactivityTimer();
 </script>
 <!-- BACK TO TOP -->
 <button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" style="display:none;position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--navy);color:white;border:none;box-shadow:0 4px 16px rgba(0,0,0,0.25);cursor:pointer;font-size:18px;z-index:1500;align-items:center;justify-content:center;">↑</button>
@@ -2660,7 +2435,7 @@ else startInactivityTimer();
 <!-- INACTIVITY WARNING -->
 <div id="inactivity-warning" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:14px 20px;border-radius:var(--rl);box-shadow:0 8px 32px rgba(0,0,0,0.35);z-index:2000;font-size:13px;align-items:center;gap:14px;max-width:92vw;">
   <span>⏱ You'll be signed out in <strong id="inactivity-seconds">30</strong>s due to inactivity.</span>
-  <button onclick="markActivity(true)" style="background:var(--sky);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;">Stay signed in</button>
+  <button onclick="resetInactivityTimer()" style="background:var(--sky);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;">Stay signed in</button>
 </div>
 
 </body>
