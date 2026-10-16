@@ -852,7 +852,7 @@ function addLegRow(wrapId,prefill){
       <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Pieces Manifested <span class="rs">*</span></label><input type="number" class="leg-pcs" oninput="updateLegTotals()" style="${inStyle}" placeholder="0"/></div>
       <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Status <span class="rs">*</span></label>
         <select class="leg-status" onchange="toggleLegArrived(this)" style="${inStyle}">
-          <option value="">— Select —</option><option>Manifested</option><option>Arrived</option>
+          <option>Manifested</option><option>Arrived</option>
         </select>
       </div>
       <div class="fgrp leg-arrived-wrap" style="display:none;"><label style="font-size:11px;color:var(--ts);">Pieces received</label><input type="number" class="leg-pcs-rec" style="${inStyle}" placeholder="0"/></div>
@@ -1028,8 +1028,9 @@ function eCheckFlightLookup(){
 // ── CONSOLIDATION ─────────────────────────────────────
 function checkConsolidation(descId,sectionId){
   const val=document.getElementById(descId).value.toLowerCase();
-  document.getElementById(sectionId).style.display=val.includes('consolidation')?'block':'none';
-  if(!val.includes('consolidation')){const wrapId=sectionId==='f-consolidation-section'?'f-hawb-wrap':'e-hawb-wrap';const wrap=document.getElementById(wrapId);if(wrap)wrap.innerHTML='';}
+  const isConsolidated=val.includes('consolidation')||val.includes('consolidated');
+  document.getElementById(sectionId).style.display=isConsolidated?'block':'none';
+  if(!isConsolidated){const wrapId=sectionId==='f-consolidation-section'?'f-hawb-wrap':'e-hawb-wrap';const wrap=document.getElementById(wrapId);if(wrap)wrap.innerHTML='';}
 }
 
 function addHawbRow(wrapId){
@@ -1410,8 +1411,6 @@ function renderDeliveryShipmentsTable(){
 function selectForDelivery(awb){
   document.getElementById('del-awb-lookup').value=awb;
   deliveryLookup();
-  // Scroll to the lookup section
-  document.getElementById('del-awb-lookup').scrollIntoView({behavior:'smooth',block:'center'});
 }
 
 function filterDeliveryList(){
@@ -1474,7 +1473,9 @@ function deliveryLookup(){
     }
   }
   if(!document.getElementById('del-date').value)document.getElementById('del-date').value='';
+  const wasHidden=form.style.display==='none';
   preview.style.display='block';form.style.display='block';
+  if(wasHidden)document.getElementById('del-collector').focus();
 }
 
 async function saveDelivery(){
