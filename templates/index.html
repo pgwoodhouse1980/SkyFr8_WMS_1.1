@@ -217,6 +217,8 @@ tr:hover td{background:var(--off);}
       </div>
     </div>
 
+    <button id="float-save-btn" class="btn" onclick="addCargo()" style="display:none;position:fixed;bottom:24px;right:24px;z-index:500;padding:12px 22px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);">💾 Save cargo</button>
+
     <div class="card">
       <div class="card-title">📋 All shipments</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;">
@@ -847,7 +849,7 @@ function addLegRow(wrapId,prefill){
       <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Aircraft registration</label><input type="text" class="leg-reg" style="text-transform:uppercase;${inStyle}" placeholder="e.g. N123SF"/></div>
       <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Airline <span class="rs">*</span></label><input type="text" class="leg-airline" value="IBC Airways" style="${inStyle}" placeholder="IBC Airways"/></div>
       <div class="fgrp leg-asycuda-wrap" style="display:none;grid-column:1/-1;"><label style="font-size:11px;color:var(--ts);">ASYCUDA reference number</label><input type="text" class="leg-asycuda" style="${inStyle}" placeholder="e.g. JMKIN-2026-1514"/></div>
-      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Pieces on this flight <span class="rs">*</span></label><input type="number" class="leg-pcs" oninput="updateLegTotals()" style="${inStyle}" placeholder="0"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Pieces Manifested <span class="rs">*</span></label><input type="number" class="leg-pcs" oninput="updateLegTotals()" style="${inStyle}" placeholder="0"/></div>
       <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Status <span class="rs">*</span></label>
         <select class="leg-status" onchange="toggleLegArrived(this)" style="${inStyle}">
           <option value="">— Select —</option><option>Manifested</option><option>Arrived</option>
@@ -868,6 +870,25 @@ function addLegRow(wrapId,prefill){
     row.querySelectorAll('.leg-asycuda-wrap').forEach(w=>w.style.display=(prefill.flight&&prefill.eta)?'block':'none');
   }
   renumberLegs(wrapId);
+  autofillLegPcs(row,wrapId);
+}
+
+// Prefill a leg's Pieces Manifested from the Total pieces field: the only leg
+// gets the full total; an added leg (part-shipment) gets whatever's left unallocated.
+function autofillLegPcs(row,wrapId){
+  const totalEl=document.getElementById('f-total-pcs');
+  if(!totalEl)return;
+  const total=parseInt(totalEl.value)||0;
+  if(total<=0)return;
+  const rows=document.querySelectorAll('#'+wrapId+' .leg-row');
+  if(rows.length===1){
+    row.querySelector('.leg-pcs').value=total;
+  }else{
+    let allocated=0;
+    rows.forEach(r=>{if(r!==row)allocated+=parseInt(r.querySelector('.leg-pcs').value)||0;});
+    const remaining=Math.max(0,total-allocated);
+    row.querySelector('.leg-pcs').value=remaining;
+  }
 }
 
 function removeLegRow(btn){
@@ -916,6 +937,8 @@ function updateLegTotals(){
   const msgEl=document.getElementById('f-legs-total-msg');
   if(!totalEl||!msgEl)return;
   const total=parseInt(totalEl.value)||0;
+  const rows=document.querySelectorAll('#f-legs-wrap .leg-row');
+  if(total>0&&rows.length===1)rows[0].querySelector('.leg-pcs').value=total;
   let sum=0;
   document.querySelectorAll('#f-legs-wrap .leg-pcs').forEach(i=>{sum+=parseInt(i.value)||0;});
   const over=total>0&&sum>total;
@@ -1081,6 +1104,7 @@ function toggleAddCargoForm(){
   const open = wrap.style.display==='none';
   wrap.style.display=open?'block':'none';
   btn.textContent=open?'✕ Close':'+ Add Cargo';
+  document.getElementById('float-save-btn').style.display=open?'block':'none';
   const legsWrap=document.getElementById('f-legs-wrap');
   if(open&&legsWrap&&!legsWrap.querySelector('.leg-row')){addLegRow('f-legs-wrap');updateLegTotals();}
 }
