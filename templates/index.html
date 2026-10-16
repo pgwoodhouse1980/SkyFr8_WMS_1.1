@@ -165,36 +165,17 @@ tr:hover td{background:var(--off);}
             <option>Live animals</option><option>Valuables</option><option>Human remains</option><option>Vulnerable</option>
           </select><span id="err-type" class="ferr"></span>
         </div>
+        <div class="fgrp"><label>Total pieces (whole shipment) <span class="rs">*</span></label><input id="f-total-pcs" type="number" placeholder="1" class="req" oninput="updateLegTotals()"/><span class="hint">Sum of pieces across all flights below cannot exceed this</span><span id="err-total-pcs" class="ferr"></span></div>
         <div class="fgrp"><label>Gross weight (kg) <span class="rs">*</span></label><input id="f-gw" type="number" placeholder="0.00" class="req"/><span id="err-gw" class="ferr"></span></div>
         <div class="fgrp"><label>Chargeable weight (kg)</label><input id="f-cw" type="number" placeholder="0.00"/></div>
-        <div class="fgrp"><label>Status <span class="rs">*</span></label>
-          <select id="f-status" onchange="toggleDelivered();togglePcsReceived('f-pcs-rec','f-status');">
-            <option value="">— Select —</option><option>Manifested</option><option>Arrived</option><option>Delivered</option>
-          </select><span id="err-status" class="ferr"></span>
-        </div>
-        <div class="fgrp"><label>No. of pieces manifested <span class="rs">*</span></label><input id="f-pcs-man" type="number" placeholder="1" class="req"/><span id="err-pcs-man" class="ferr"></span></div>
       </div>
 
       <div class="fsec">Flight Details</div>
-      <div class="fg">
-        <div class="fgrp"><label>Port of loading (IATA) <span class="rs">*</span></label><input id="f-pol" placeholder="MIA" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="err-pol" class="ferr"></span></div>
-        <div class="fgrp"><label>Port of discharge (IATA) <span class="rs">*</span></label><input id="f-pod" placeholder="KIN" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="err-pod" class="ferr"></span></div>
-        <div class="fgrp"><label>Flight number <span class="rs">*</span></label><input id="f-flight" placeholder="GXA2965" class="req" oninput="checkFlightLookup()"/><span id="err-flight" class="ferr"></span></div>
-        <div class="fgrp"><label>Flight date <span class="rs">*</span></label><input id="f-eta" type="date" class="req" onchange="checkFlightLookup()"/><span id="err-eta" class="ferr"></span></div>
-        <div class="fgrp"><label>Aircraft registration</label><input id="f-reg" placeholder="e.g. N123SF" style="text-transform:uppercase;"/><span class="hint">Auto-filled from flight record if available</span></div>
-        <div class="fgrp"><label>Airline <span class="rs">*</span></label><input id="f-airline" placeholder="IBC Airways" value="IBC Airways" class="req"/><span id="err-airline" class="ferr"></span></div>
-        <div class="fgrp" id="asycuda-wrap" style="display:none;"><label>ASYCUDA reference number</label><input id="f-asycuda" placeholder="e.g. JMKIN-2026-1514"/><span class="hint">Auto-filled from flight record if available</span></div>
-      </div>
-
-      <div class="fg">
-        <div class="fgrp"><label>No. of pieces received</label><input id="f-pcs-rec" type="number" placeholder="1" disabled style="opacity:0.45;cursor:not-allowed;"/><span class="hint">Available when status is Arrived</span><span id="err-pcs-rec" class="ferr"></span></div>
-      </div>
-
-      <!-- Warehouse bays -->
-      <div id="f-bays-section" style="display:none;">
-        <div class="fsec">Warehouse Bay Locations</div>
-        <div id="f-bays-wrap"><div class="bay-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;"><input type="text" class="bay-loc" placeholder="Bay (e.g. A-12)" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><input type="number" class="bay-pcs" placeholder="No. of pieces" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:white;"/><button type="button" onclick="removeBayRow(this)" style="padding:7px 10px;border:1px solid #F5C6C6;border-radius:var(--r);background:transparent;color:#C0392B;cursor:pointer;font-size:13px;">✕</button></div></div>
-        <button type="button" onclick="addBayRow('f-bays-wrap')" class="btn btn-sec" style="margin-bottom:.75rem;font-size:12px;">+ Add another bay</button>
+      <div style="font-size:12px;color:var(--ts);margin-bottom:.5rem;">Most shipments travel on one flight. If this shipment is split across more than one flight (part-shipment), add each flight it travels on below.</div>
+      <div id="f-legs-wrap"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+        <button type="button" onclick="addLegRow('f-legs-wrap');updateLegTotals();" class="btn btn-sec" style="font-size:12px;">+ Add another flight (part-shipment)</button>
+        <span id="f-legs-total-msg" style="font-size:12px;color:var(--ts);"></span>
       </div>
 
       <div class="fg">
@@ -219,6 +200,8 @@ tr:hover td{background:var(--off);}
         </div>
         <div class="fgrp"><label>Person notified</label><input id="f-notif-person" placeholder="Name of person contacted"/></div>
       </div>
+
+      <div class="fgrp" style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;"><input type="checkbox" id="f-mark-delivered" onchange="toggleMarkDelivered()" style="width:auto;"/><label style="margin:0;">This shipment has already been fully delivered (entering a historical record)</label></div>
 
       <!-- Delivered fields -->
       <div id="del-fields" class="del-fields">
@@ -833,7 +816,7 @@ function clearFilters(){
 }
 
 // ── FORM TOGGLES ──────────────────────────────────────
-function toggleDelivered(){const s=document.getElementById('f-status').value;document.getElementById('del-fields').style.display=s==='Delivered'?'block':'none';togglePcsReceived('f-pcs-rec','f-status');}
+function toggleMarkDelivered(){const c=document.getElementById('f-mark-delivered').checked;document.getElementById('del-fields').style.display=c?'block':'none';}
 function eToggleDelivered(){const s=document.getElementById('e-status').value;document.getElementById('e-del-fields').style.display=s==='Delivered'?'block':'none';togglePcsReceived('e-pcs-rec','e-status');}
 
 function togglePcsReceived(inputId,selectId){
@@ -845,26 +828,156 @@ function togglePcsReceived(inputId,selectId){
   if(sec)sec.style.display=s==='Arrived'?'block':'none';
 }
 
-function checkShowAsycuda(){
-  const f=document.getElementById('f-flight').value.trim();
-  const e=document.getElementById('f-eta').value.trim();
-  document.getElementById('asycuda-wrap').style.display=(f&&e)?'block':'none';
+// ── FLIGHT LEG ROWS (supports part-shipments split across multiple flights) ──
+function addLegRow(wrapId,prefill){
+  const wrap=document.getElementById(wrapId);
+  const row=document.createElement('div');
+  row.className='leg-row';
+  row.style.cssText='background:white;border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:8px;';
+  const inStyle="padding:6px 9px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);width:100%;";
+  row.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-size:12px;font-weight:600;color:var(--tp);">Flight <span class="leg-index">1</span></div>
+      <button type="button" onclick="removeLegRow(this)" style="padding:4px 10px;border:1px solid #F5C6C6;border-radius:var(--r);background:transparent;color:#C0392B;cursor:pointer;font-size:11px;">✕ Remove</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Port of loading (IATA) <span class="rs">*</span></label><input type="text" class="leg-pol" maxlength="3" style="text-transform:uppercase;${inStyle}" placeholder="MIA"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Port of discharge (IATA) <span class="rs">*</span></label><input type="text" class="leg-pod" maxlength="3" style="text-transform:uppercase;${inStyle}" placeholder="KIN"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Flight number <span class="rs">*</span></label><input type="text" class="leg-flight" oninput="checkLegFlightLookup(this)" style="${inStyle}" placeholder="GXA2965"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Flight date <span class="rs">*</span></label><input type="date" class="leg-eta" onchange="checkLegFlightLookup(this)" style="${inStyle}"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Aircraft registration</label><input type="text" class="leg-reg" style="text-transform:uppercase;${inStyle}" placeholder="e.g. N123SF"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Airline <span class="rs">*</span></label><input type="text" class="leg-airline" value="IBC Airways" style="${inStyle}" placeholder="IBC Airways"/></div>
+      <div class="fgrp leg-asycuda-wrap" style="display:none;grid-column:1/-1;"><label style="font-size:11px;color:var(--ts);">ASYCUDA reference number</label><input type="text" class="leg-asycuda" style="${inStyle}" placeholder="e.g. JMKIN-2026-1514"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Pieces on this flight <span class="rs">*</span></label><input type="number" class="leg-pcs" oninput="updateLegTotals()" style="${inStyle}" placeholder="0"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Status <span class="rs">*</span></label>
+        <select class="leg-status" onchange="toggleLegArrived(this)" style="${inStyle}">
+          <option value="">— Select —</option><option>Manifested</option><option>Arrived</option>
+        </select>
+      </div>
+      <div class="fgrp leg-arrived-wrap" style="display:none;"><label style="font-size:11px;color:var(--ts);">Pieces received</label><input type="number" class="leg-pcs-rec" style="${inStyle}" placeholder="0"/></div>
+      <div class="fgrp leg-arrived-wrap" style="display:none;"><label style="font-size:11px;color:var(--ts);">Bay location</label><input type="text" class="leg-bay" style="${inStyle}" placeholder="e.g. A-12"/></div>
+    </div>`;
+  wrap.appendChild(row);
+  if(prefill){
+    row.querySelector('.leg-pol').value=prefill.pol||'';
+    row.querySelector('.leg-pod').value=prefill.pod||'';
+    row.querySelector('.leg-flight').value=prefill.flight||'';
+    row.querySelector('.leg-eta').value=prefill.eta||'';
+    row.querySelector('.leg-reg').value=prefill.registration||'';
+    row.querySelector('.leg-airline').value=prefill.airline||'IBC Airways';
+    row.querySelector('.leg-asycuda').value=prefill.asycuda||'';
+    row.querySelectorAll('.leg-asycuda-wrap').forEach(w=>w.style.display=(prefill.flight&&prefill.eta)?'block':'none');
+  }
+  renumberLegs(wrapId);
 }
 
-function checkFlightLookup(){
-  checkShowAsycuda();
-  const flight=document.getElementById('f-flight').value.trim();
-  const date=document.getElementById('f-eta').value.trim();
+function removeLegRow(btn){
+  const row=btn.closest('.leg-row');
+  const wrapEl=row.parentElement;
+  if(wrapEl.querySelectorAll('.leg-row').length>1){
+    row.remove();
+  }else{
+    row.querySelectorAll('input').forEach(i=>i.value='');
+    const sel=row.querySelector('.leg-status');if(sel)sel.selectedIndex=0;
+    row.querySelectorAll('.leg-arrived-wrap,.leg-asycuda-wrap').forEach(w=>w.style.display='none');
+  }
+  renumberLegs(wrapEl.id);
+  updateLegTotals();
+}
+
+function renumberLegs(wrapId){
+  document.querySelectorAll('#'+wrapId+' .leg-row').forEach((r,i)=>{const idx=r.querySelector('.leg-index');if(idx)idx.textContent=i+1;});
+}
+
+function checkLegFlightLookup(input){
+  const row=input.closest('.leg-row');
+  const flight=row.querySelector('.leg-flight').value.trim();
+  const date=row.querySelector('.leg-eta').value.trim();
+  row.querySelectorAll('.leg-asycuda-wrap').forEach(w=>w.style.display=(flight&&date)?'block':'none');
   if(flight&&date&&flights.length){
     const match=flights.find(f=>f.flight.toLowerCase()===flight.toLowerCase()&&f.date===date);
     if(match){
-      if(match.origin)document.getElementById('f-pol').value=match.origin;
-      if(match.dest)document.getElementById('f-pod').value=match.dest;
-      if(match.airline)document.getElementById('f-airline').value=match.airline;
-      if(match.asycuda)document.getElementById('f-asycuda').value=match.asycuda;
-      if(match.registration)document.getElementById('f-reg').value=match.registration;
+      if(match.origin)row.querySelector('.leg-pol').value=match.origin;
+      if(match.dest)row.querySelector('.leg-pod').value=match.dest;
+      if(match.airline)row.querySelector('.leg-airline').value=match.airline;
+      if(match.asycuda)row.querySelector('.leg-asycuda').value=match.asycuda;
+      if(match.registration)row.querySelector('.leg-reg').value=match.registration;
     }
   }
+}
+
+function toggleLegArrived(select){
+  const row=select.closest('.leg-row');
+  const arrived=select.value==='Arrived';
+  row.querySelectorAll('.leg-arrived-wrap').forEach(w=>w.style.display=arrived?'block':'none');
+}
+
+function updateLegTotals(){
+  const totalEl=document.getElementById('f-total-pcs');
+  const msgEl=document.getElementById('f-legs-total-msg');
+  if(!totalEl||!msgEl)return;
+  const total=parseInt(totalEl.value)||0;
+  let sum=0;
+  document.querySelectorAll('#f-legs-wrap .leg-pcs').forEach(i=>{sum+=parseInt(i.value)||0;});
+  const over=total>0&&sum>total;
+  msgEl.textContent=total>0?`Allocated ${sum} of ${total} piece${total!==1?'s':''}${over?' — exceeds shipment total!':''}`:`Allocated ${sum} piece${sum!==1?'s':''} across flight(s)`;
+  msgEl.style.color=over?'#C0392B':'var(--ts)';
+  msgEl.style.fontWeight=over?'600':'400';
+}
+
+function getLegs(wrapId){
+  const rows=document.querySelectorAll('#'+wrapId+' .leg-row');
+  const legs=[];
+  rows.forEach(r=>{
+    const flight=r.querySelector('.leg-flight').value.trim();
+    const eta=r.querySelector('.leg-eta').value.trim();
+    const pcs=r.querySelector('.leg-pcs').value.trim();
+    const status=r.querySelector('.leg-status').value;
+    if(!flight&&!eta&&!pcs&&!status)return; // skip a fully-empty row
+    const pcsRec=r.querySelector('.leg-pcs-rec').value.trim();
+    const bay=r.querySelector('.leg-bay').value.trim();
+    legs.push({
+      flight,eta,
+      registration:r.querySelector('.leg-reg').value.trim()||null,
+      airline:r.querySelector('.leg-airline').value.trim(),
+      pol:r.querySelector('.leg-pol').value.trim().toUpperCase(),
+      pod:r.querySelector('.leg-pod').value.trim().toUpperCase(),
+      asycuda:r.querySelector('.leg-asycuda').value.trim()||null,
+      pcs_manifested:parseInt(pcs)||0,
+      status,
+      pcs_received:status==='Arrived'?(parseInt(pcsRec)||0):null,
+      bay:status==='Arrived'?(bay||null):null
+    });
+  });
+  return legs;
+}
+
+function validateLegsForm(wrapId){
+  const rows=document.querySelectorAll('#'+wrapId+' .leg-row');
+  const errors=[];
+  rows.forEach((r,i)=>{
+    [r.querySelector('.leg-flight'),r.querySelector('.leg-eta'),r.querySelector('.leg-airline'),r.querySelector('.leg-pol'),r.querySelector('.leg-pod'),r.querySelector('.leg-pcs'),r.querySelector('.leg-status')].forEach(el=>el&&el.classList.remove('invalid'));
+    const flight=r.querySelector('.leg-flight').value.trim();
+    const eta=r.querySelector('.leg-eta').value.trim();
+    const airline=r.querySelector('.leg-airline').value.trim();
+    const pol=r.querySelector('.leg-pol').value.trim();
+    const pod=r.querySelector('.leg-pod').value.trim();
+    const pcs=r.querySelector('.leg-pcs').value.trim();
+    const status=r.querySelector('.leg-status').value;
+    const missing=[];
+    if(!flight){missing.push('Flight number');r.querySelector('.leg-flight').classList.add('invalid');}
+    if(!eta){missing.push('Flight date');r.querySelector('.leg-eta').classList.add('invalid');}
+    if(!airline){missing.push('Airline');r.querySelector('.leg-airline').classList.add('invalid');}
+    if(!pol){missing.push('Port of loading');r.querySelector('.leg-pol').classList.add('invalid');}
+    if(!pod){missing.push('Port of discharge');r.querySelector('.leg-pod').classList.add('invalid');}
+    if(!pcs||isNaN(parseInt(pcs))||parseInt(pcs)<1){missing.push('Pieces');r.querySelector('.leg-pcs').classList.add('invalid');}
+    if(!status){missing.push('Status');r.querySelector('.leg-status').classList.add('invalid');}
+    if(status==='Arrived'){
+      const pcsRec=r.querySelector('.leg-pcs-rec').value.trim();
+      if(!pcsRec||isNaN(parseInt(pcsRec))||parseInt(pcsRec)<0)missing.push('Pieces received');
+    }
+    if(missing.length)errors.push(`Flight ${i+1}: ${missing.join(', ')}`);
+  });
+  return errors;
 }
 
 function eCheckAsycuda(){
@@ -943,17 +1056,11 @@ function populateBays(wrapId,bays){
 
 // ── REQUIRED ARRAY ────────────────────────────────────
 const REQUIRED=[
-  {id:'f-flight',err:'err-flight',label:'Flight number'},
-  {id:'f-eta',err:'err-eta',label:'Flight date'},
-  {id:'f-airline',err:'err-airline',label:'Airline'},
-  {id:'f-pol',err:'err-pol',label:'Port of loading'},
-  {id:'f-pod',err:'err-pod',label:'Port of discharge'},
   {id:'f-awb',err:'err-awb',label:'AWB number'},
   {id:'f-desc',err:'err-desc',label:'Description / commodity'},
   {id:'f-type',err:'err-type',label:'Cargo type',isSelect:true},
+  {id:'f-total-pcs',err:'err-total-pcs',label:'Total pieces',isNum:true},
   {id:'f-gw',err:'err-gw',label:'Gross weight',isNum:true},
-  {id:'f-pcs-man',err:'err-pcs-man',label:'Pieces manifested',isNum:true},
-  {id:'f-status',err:'err-status',label:'Status',isSelect:true},
   {id:'f-sname',err:'err-sname',label:'Shipper name'},
   {id:'f-s-street',err:'err-s-street',label:'Shipper street address'},
   {id:'f-s-parish',err:'err-s-parish',label:'Shipper parish / state'},
@@ -974,6 +1081,8 @@ function toggleAddCargoForm(){
   const open = wrap.style.display==='none';
   wrap.style.display=open?'block':'none';
   btn.textContent=open?'✕ Close':'+ Add Cargo';
+  const legsWrap=document.getElementById('f-legs-wrap');
+  if(open&&legsWrap&&!legsWrap.querySelector('.leg-row')){addLegRow('f-legs-wrap');updateLegTotals();}
 }
 
 async function addCargo(){
@@ -992,29 +1101,51 @@ async function addCargo(){
     if(empty||badNum){el.classList.add('invalid');showErr(f.err,f.isNum?`${f.label} must be 0 or more.`:`${f.label} is required.`);errors.push(f.label);}
   });
 
-  const status=g('f-status');
-  if(status==='Arrived'){const pr=g('f-pcs-rec');if(!pr||isNaN(parseInt(pr))||parseInt(pr)<0){document.getElementById('f-pcs-rec').classList.add('invalid');showErr('err-pcs-rec','Pieces received is required when status is Arrived.');errors.push('Pieces received');}}
-  if(status==='Delivered'){
+  const legErrors=validateLegsForm('f-legs-wrap');
+  errors.push(...legErrors);
+  const legs=getLegs('f-legs-wrap');
+  if(legs.length===0)errors.push('At least one flight is required');
+
+  const totalPcs=parseInt(g('f-total-pcs'))||0;
+  const legsSum=legs.reduce((s,l)=>s+(l.pcs_manifested||0),0);
+  if(legs.length>0&&totalPcs>0&&legsSum>totalPcs)errors.push(`Pieces across flights (${legsSum}) exceed total pieces (${totalPcs})`);
+
+  const markDelivered=document.getElementById('f-mark-delivered').checked;
+  if(markDelivered){
     const pd=g('f-pcs-del'),dd=g('f-date-del');
     if(!pd||isNaN(parseInt(pd))||parseInt(pd)<0){document.getElementById('f-pcs-del').classList.add('invalid');showErr('err-pcs-del','Pieces delivered is required.');errors.push('Pieces delivered');}
     if(!dd){document.getElementById('f-date-del').classList.add('invalid');showErr('err-date-del','Date delivered is required.');errors.push('Date delivered');}
   }
 
-  if(errors.length>0){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing or invalid field(s).`;msgEl.style.display='block';return;}
+  if(errors.length>0){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing or invalid issue(s): ${errors.join(' · ')}`;msgEl.style.display='block';return;}
+
+  const primary=legs[0]||{};
+  const allArrived=legs.length>0&&legs.every(l=>l.status==='Arrived');
+  const derivedStatus=markDelivered?'Delivered':(allArrived?'Arrived':'Manifested');
 
   const payload={
-    awb,flight:g('f-flight'),registration:g('f-reg')||null,airline:g('f-airline'),
-    pol:g('f-pol').toUpperCase(),pod:g('f-pod').toUpperCase(),eta:g('f-eta'),
-    asycuda:g('f-asycuda')||null,desc:g('f-desc'),type:g('f-type')||'General',
+    awb,
+    desc:g('f-desc'),type:g('f-type')||'General',
     gw:parseFloat(g('f-gw')),cw:parseFloat(g('f-cw'))||0,
-    pcs_manifested:parseInt(g('f-pcs-man')),
-    pcs_received:(status==='Arrived'||status==='Delivered')?parseInt(g('f-pcs-rec'))||null:null,
+    legs,
+    // Derived shipment-level fields kept for backward compatibility with the
+    // shipments table, CSV export, public tracking page and flight-matching tools.
+    // The per-flight detail lives in `legs` above.
+    pcs_manifested:totalPcs,
+    flight:legs.map(l=>l.flight).join(', '),
+    eta:primary.eta||'',
+    registration:primary.registration||null,
+    airline:primary.airline||'',
+    pol:primary.pol||'',
+    pod:primary.pod||'',
+    asycuda:primary.asycuda||null,
+    pcs_received:legs.some(l=>l.pcs_received!=null)?legs.reduce((s,l)=>s+(l.pcs_received||0),0):null,
+    bays:legs.filter(l=>l.bay).map(l=>({location:l.bay,pieces:l.pcs_received||l.pcs_manifested||0})),
+    status:derivedStatus,
     remarks:g('f-remarks')?[{text:g('f-remarks'),date:new Date().toISOString(),username:currentUsername}]:[],
-    bays:getBays('f-bays-wrap'),
     hawbs:document.getElementById('f-consolidation-section').style.display!=='none'?getHawbs('f-hawb-wrap'):[],
-    status,
-    pcs_delivered:status==='Delivered'?parseInt(g('f-pcs-del')):null,
-    date_delivered:status==='Delivered'?g('f-date-del'):null,
+    pcs_delivered:markDelivered?parseInt(g('f-pcs-del')):null,
+    date_delivered:markDelivered?g('f-date-del'):null,
     notif_date:g('f-notif-date')||null,notif_method:document.getElementById('f-notif-method').value||null,notif_person:g('f-notif-person')||null,
     sname:g('f-sname'),sphone:g('f-sphone'),
     s_street:g('f-s-street'),s_city:g('f-s-city'),s_parish:g('f-s-parish'),s_zip:g('f-s-zip'),s_country:g('f-s-country'),
@@ -1029,34 +1160,25 @@ async function addCargo(){
     if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Save failed.';msgEl.style.display='block';return;}
     cargos.push(payload);renderTable(cargos);updateMetrics();
 
-    const keepFlight=document.getElementById('f-flight').value;
-    const keepEta=document.getElementById('f-eta').value;
-    const keepReg=document.getElementById('f-reg').value;
-    const keepAirline=document.getElementById('f-airline').value;
-    const keepPol=document.getElementById('f-pol').value;
-    const keepPod=document.getElementById('f-pod').value;
-    const keepAsycuda=document.getElementById('f-asycuda').value;
+    // Keep the first flight's details prefilled for the next entry (common case:
+    // several AWBs arriving on the same flight), same convenience as before.
+    const keepLeg={flight:primary.flight,eta:primary.eta,registration:primary.registration,airline:primary.airline,pol:primary.pol,pod:primary.pod,asycuda:primary.asycuda};
 
-    ['f-awb','f-desc','f-gw','f-cw','f-pcs-man','f-pcs-rec','f-remarks',
+    ['f-awb','f-desc','f-gw','f-cw','f-total-pcs','f-remarks',
      'f-sname','f-sphone','f-s-street','f-s-city','f-s-parish','f-s-zip','f-s-country',
      'f-cname','f-cphone','f-c-street','f-c-city','f-c-parish','f-c-zip','f-c-country',
-     'f-val','f-pcs-del','f-date-del','f-notif-date','f-notif-person'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+     'f-pcs-del','f-date-del','f-notif-date','f-notif-person'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('f-notif-method').selectedIndex=0;
+    document.getElementById('f-type').selectedIndex=0;
 
-    document.getElementById('f-flight').value=keepFlight;
-    document.getElementById('f-eta').value=keepEta;
-    document.getElementById('f-reg').value=keepReg;
-    document.getElementById('f-airline').value=keepAirline||'IBC Airways';
-    document.getElementById('f-pol').value=keepPol;
-    document.getElementById('f-pod').value=keepPod;
-    document.getElementById('f-asycuda').value=keepAsycuda;
-    ['f-type','f-status'].forEach(id=>document.getElementById(id).selectedIndex=0);
+    document.getElementById('f-mark-delivered').checked=false;
     document.getElementById('del-fields').style.display='none';
-    document.getElementById('f-bays-section').style.display='none';
     document.getElementById('f-consolidation-section').style.display='none';
     document.getElementById('f-hawb-wrap').innerHTML='';
-    populateBays('f-bays-wrap',[]);
-    togglePcsReceived('f-pcs-rec','f-status');
+
+    document.getElementById('f-legs-wrap').innerHTML='';
+    addLegRow('f-legs-wrap',keepLeg);
+    updateLegTotals();
 
     msgEl.className='fmsg fmsg-ok';msgEl.textContent='AWB '+awb+' saved successfully.';msgEl.style.display='block';
     setTimeout(()=>msgEl.style.display='none',3000);
