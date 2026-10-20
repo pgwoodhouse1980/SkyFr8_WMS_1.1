@@ -1688,16 +1688,20 @@ function deliveryEventsOnDay(day){
   const same=d=>String(d||'').slice(0,10)===day;
   const events=[];
   cargos.forEach(c=>{
+    const manifested=parseInt(c.pcs_manifested)||0;
+    const gw=parseFloat(c.gw)||0;
+    // Prorate the shipment's gross weight by the share of pieces delivered in this event.
+    const weightFor=pcs=>manifested>0?(gw*(parseInt(pcs)||0)/manifested):0;
     const found=[];
     (Array.isArray(c.delivery_history)?c.delivery_history:[]).forEach(e=>{
-      if(same(e.date))found.push({awb:c.awb,consignee:c.cname,phone:c.cphone,pcs:e.pcs,date:e.date,name:e.collector_name,id:e.collector_id});
+      if(same(e.date))found.push({awb:c.awb,consignee:c.cname,phone:c.cphone,pcs:e.pcs,weight:weightFor(e.pcs),date:e.date,name:e.collector_name,id:e.collector_id});
     });
     (c.hawbs||[]).forEach(hw=>{
-      if(hw.delivered&&same(hw.date_delivered))found.push({awb:hw.hawb,mawb:c.awb,consignee:hw.consignee||c.cname,phone:c.cphone,pcs:hw.pcs_delivered,date:hw.date_delivered,name:hw.collector_name,id:hw.collector_id});
+      if(hw.delivered&&same(hw.date_delivered))found.push({awb:hw.hawb,mawb:c.awb,consignee:hw.consignee||c.cname,phone:c.cphone,pcs:hw.pcs_delivered,weight:parseFloat(hw.weight)||0,date:hw.date_delivered,name:hw.collector_name,id:hw.collector_id});
     });
     const hasDetail=(Array.isArray(c.delivery_history)&&c.delivery_history.length)||(c.hawbs||[]).some(hw=>hw.delivered);
     if(!hasDetail&&same(c.date_delivered)&&(c.pcs_delivered||c.status==='Delivered')){
-      found.push({awb:c.awb,consignee:c.cname,phone:c.cphone,pcs:c.pcs_delivered,date:c.date_delivered,name:c.collector_name,id:c.collector_id});
+      found.push({awb:c.awb,consignee:c.cname,phone:c.cphone,pcs:c.pcs_delivered,weight:weightFor(c.pcs_delivered||manifested),date:c.date_delivered,name:c.collector_name,id:c.collector_id});
     }
     events.push(...found);
   });
@@ -1713,7 +1717,8 @@ function renderDeliveriesForDay(day,tb){
     return;
   }
   const totalPcs=events.reduce((s,e)=>s+(parseInt(e.pcs)||0),0);
-  summary.textContent=`${events.length} deliver${events.length===1?'y':'ies'} · ${totalPcs} piece(s) on ${formatDate(day)}`;
+  const totalWeight=events.reduce((s,e)=>s+(parseFloat(e.weight)||0),0);
+  summary.textContent=`${events.length} deliver${events.length===1?'y':'ies'} · ${totalPcs} piece(s) · ${totalWeight.toLocaleString(undefined,{maximumFractionDigits:1})} kg on ${formatDate(day)}`;
   tb.innerHTML=events.map(e=>`<tr>
     <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${e.awb}${e.mawb?`<div style="font-size:10px;color:var(--ts);">MAWB ${e.mawb}</div>`:''}</td>
     <td><div style="font-weight:500;">${e.consignee||'—'}</div><div style="font-size:10px;color:var(--ts)">${e.phone||''}</div></td>
