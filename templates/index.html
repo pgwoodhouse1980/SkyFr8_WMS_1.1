@@ -226,7 +226,7 @@ tr:hover td{background:var(--off);}
         <input type="text" id="filter-flight" oninput="filterCargo()" placeholder="Filter by flight no." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
         <input type="date" id="filter-date" onchange="filterCargo()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
         <select id="filter-status" onchange="filterCargo()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);">
-          <option value="">All statuses</option><option>Manifested</option><option>Arrived</option><option>Delivered</option>
+          <option value="">All statuses</option><option>Manifested</option><option>Partially arrived</option><option>Arrived</option><option>Delivered</option>
         </select>
         <div style="display:flex;gap:8px;">
           <button onclick="clearFilters()" class="btn btn-sec" title="Clear filters">✕ Clear</button>
@@ -515,31 +515,15 @@ tr:hover td{background:var(--off);}
       <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Editing record</div><div id="edit-awb-label" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--navy);"></div></div>
       <button onclick="closeEdit()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
     </div>
-    <div class="fsec">AWB & Flight Details</div>
-    <div class="fg">
-      <div class="fgrp"><label>Flight number <span class="rs">*</span></label><input id="e-flight" class="req" oninput="eCheckFlightLookup()"/><span id="eerr-flight" class="ferr"></span></div>
-      <div class="fgrp"><label>Flight date <span class="rs">*</span></label><input id="e-eta" type="date" class="req" onchange="eCheckFlightLookup()"/><span id="eerr-eta" class="ferr"></span></div>
-      <div class="fgrp"><label>Aircraft registration</label><input id="e-reg" style="text-transform:uppercase;"/></div>
-      <div class="fgrp"><label>Airline <span class="rs">*</span></label><input id="e-airline" class="req"/><span id="eerr-airline" class="ferr"></span></div>
-      <div class="fgrp"><label>Port of loading (IATA) <span class="rs">*</span></label><input id="e-pol" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="eerr-pol" class="ferr"></span></div>
-      <div class="fgrp"><label>Port of discharge (IATA) <span class="rs">*</span></label><input id="e-pod" maxlength="3" style="text-transform:uppercase;" class="req"/><span id="eerr-pod" class="ferr"></span></div>
-      <div class="fgrp" id="e-asycuda-wrap"><label>ASYCUDA reference number</label><input id="e-asycuda" placeholder="e.g. JMKIN-2026-1514"/><span class="hint">Optional</span></div>
-    </div>
     <div class="fsec">Cargo Details</div>
     <div class="fg">
       <div class="fgrp"><label>Description / commodity <span class="rs">*</span></label><input id="e-desc" class="req" oninput="checkConsolidation('e-desc','e-consolidation-section')"/><span id="eerr-desc" class="ferr"></span></div>
       <div class="fgrp"><label>Cargo type <span class="rs">*</span></label>
         <select id="e-type"><option value="General">General</option><option>Perishable</option><option>Dangerous goods</option><option>Live animals</option><option>Valuables</option><option>Human remains</option><option>Vulnerable</option></select>
       </div>
+      <div class="fgrp"><label>Total pieces (whole shipment) <span class="rs">*</span></label><input id="e-total-pcs" type="number" class="req" oninput="updateLegTotals('e-legs-wrap')"/><span class="hint">Sum of pieces across all flights below cannot exceed this</span><span id="eerr-total-pcs" class="ferr"></span></div>
       <div class="fgrp"><label>Gross weight (kg) <span class="rs">*</span></label><input id="e-gw" type="number" class="req"/><span id="eerr-gw" class="ferr"></span></div>
       <div class="fgrp"><label>Chargeable weight (kg)</label><input id="e-cw" type="number"/></div>
-      <div class="fgrp"><label>No. of pieces manifested <span class="rs">*</span></label><input id="e-pcs-man" type="number" class="req"/><span id="eerr-pcs-man" class="ferr"></span></div>
-      <div class="fgrp"><label>Status <span class="rs">*</span></label>
-        <select id="e-status" onchange="eToggleDelivered();togglePcsReceived('e-pcs-rec','e-status');">
-          <option value="">— Select —</option><option>Manifested</option><option>Arrived</option><option>Delivered</option>
-        </select><span id="eerr-status" class="ferr"></span>
-      </div>
-      <div class="fgrp"><label>No. of pieces received</label><input id="e-pcs-rec" type="number" disabled style="opacity:0.45;cursor:not-allowed;"/><span class="hint" id="e-pcs-rec-hint">Available when status is Arrived</span><span id="eerr-pcs-rec" class="ferr"></span></div>
       <div class="fgrp" style="grid-column:1/-1;">
         <label>Remarks</label>
         <div id="e-remarks-list" style="margin-bottom:8px;"></div>
@@ -549,10 +533,12 @@ tr:hover td{background:var(--off);}
         </div>
       </div>
     </div>
-    <div id="e-bays-section" style="display:none;">
-      <div class="fsec">Warehouse Bay Locations</div>
-      <div id="e-bays-wrap"></div>
-      <button type="button" onclick="addBayRow('e-bays-wrap')" class="btn btn-sec" style="margin-bottom:.75rem;font-size:12px;">+ Add another bay</button>
+    <div class="fsec">Flight Details</div>
+    <div style="font-size:12px;color:var(--ts);margin-bottom:.5rem;">If this shipment is split across more than one flight (part-shipment), add each flight it travels on below.</div>
+    <div id="e-legs-wrap"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+      <button type="button" onclick="addLegRow('e-legs-wrap');updateLegTotals('e-legs-wrap');" class="btn btn-sec" style="font-size:12px;">+ Add another flight (part-shipment)</button>
+      <span id="e-legs-total-msg" style="font-size:12px;color:var(--ts);"></span>
     </div>
     <div id="e-consolidation-section" style="display:none;background:#EEF4FF;border:1px solid #B0C8F0;border-radius:var(--r);padding:1rem;margin-bottom:.75rem;">
       <div class="fsec" style="margin-top:0;border-color:#B0C8F0;color:#1A3A8F;">📦 House AWB entries (Consolidation)</div>
@@ -560,6 +546,7 @@ tr:hover td{background:var(--off);}
       <div id="e-hawb-wrap"></div>
       <button type="button" onclick="addHawbRow('e-hawb-wrap')" class="btn btn-sec" style="font-size:12px;margin-top:4px;">+ Add House AWB</button>
     </div>
+    <div class="fgrp" style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;"><input type="checkbox" id="e-mark-delivered" onchange="eToggleMarkDelivered()" style="width:auto;"/><label style="margin:0;">This shipment has been fully delivered</label></div>
     <div id="e-del-fields" class="del-fields">
       <div class="fsec" style="margin-top:0;border-color:#F0C8E0;">Delivery Details</div>
       <div class="fg">
@@ -694,7 +681,7 @@ function formatDateTime(dateInput){
 let cargos=[], flights=[], binItems=[];
 
 // ── HELPERS ───────────────────────────────────────────
-function badgeCls(s){const m={'Arrived':'b-a','Manifested':'b-t','Pending':'b-p','Delayed':'b-d','In customs':'b-c','Delivered':'b-dv'};return m[s]||'b-p';}
+function badgeCls(s){const m={'Arrived':'b-a','Manifested':'b-t','Partially arrived':'b-p','Pending':'b-p','Delayed':'b-d','In customs':'b-c','Delivered':'b-dv'};return m[s]||'b-p';}
 function g(id){return document.getElementById(id).value.trim();}
 function eg(id){return document.getElementById(id).value.trim();}
 function es(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
@@ -755,31 +742,74 @@ async function loadBin(){
 // ── METRICS ───────────────────────────────────────────
 function updateMetrics(){
   document.getElementById('m-total').textContent=cargos.length;
-  document.getElementById('m-arrived').textContent=cargos.filter(c=>c.status==='Arrived').length;
+  document.getElementById('m-arrived').textContent=cargos.filter(c=>c.status==='Arrived'||c.status==='Partially arrived').length;
   document.getElementById('m-transit').textContent=cargos.filter(c=>c.status==='Manifested').length;
   document.getElementById('m-delivered').textContent=cargos.filter(c=>c.status==='Delivered').length;
 }
 
 // ── TABLE ─────────────────────────────────────────────
+function toggleLegsDetail(awb){
+  const row=document.getElementById('legs-detail-'+cssEscape(awb));
+  const btn=document.getElementById('legs-toggle-'+cssEscape(awb));
+  if(!row)return;
+  const show=row.style.display==='none';
+  row.style.display=show?'table-row':'none';
+  if(btn)btn.textContent=btn.textContent.includes('▾')?btn.textContent.replace('▾','▸'):btn.textContent.replace('▸','▾');
+}
+function cssEscape(s){return String(s).replace(/[^a-zA-Z0-9_-]/g,'_');}
+
 function renderTable(data,overdueDays){
   const tb=document.getElementById('cargo-table');
   if(!data.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--tm);padding:1.5rem;">No shipments found.</td></tr>';return;}
   const today=new Date();today.setHours(0,0,0,0);
+  const daysSince=d=>{const fd=new Date(d);fd.setHours(0,0,0,0);return Math.floor((today-fd)/(1000*60*60*24));};
   tb.innerHTML=data.map(c=>{
+    const legs=Array.isArray(c.legs)?c.legs:[];
+    const multiLeg=legs.length>1;
+    const safeAwb=cssEscape(c.awb);
     const baysHtml=(c.bays&&c.bays.length)?c.bays.map(b=>`<div style="font-size:10px;color:var(--ts);">${b.location}${b.pieces?` (${b.pieces} pcs)`:''}</div>`).join(''):(c.bay?`<div style="font-size:11px;">${c.bay}</div>`:'—');
-    let daysTag='';
-    if(c.status==='Arrived'&&c.eta){const fd=new Date(c.eta);fd.setHours(0,0,0,0);const days=Math.floor((today-fd)/(1000*60*60*24));if(days>0)daysTag=`<div style="font-size:10px;color:${overdueDays&&days>overdueDays?'var(--wt)':'var(--tm)'};">${days} day${days!==1?'s':''} in warehouse</div>`;}
-    const rowStyle=overdueDays&&c.status==='Arrived'&&c.eta&&Math.floor((today-new Date(c.eta))/(1000*60*60*24))>overdueDays?'background:var(--wbg);':'';
-    return `<tr style="${rowStyle}">
+
+    // Days-in-warehouse / overdue: computed from every ARRIVED leg (or the shipment
+    // itself for legacy single-flight records), not just one shipment-level date.
+    const arrivedDates=multiLeg?legs.filter(l=>l.status==='Arrived'&&l.eta).map(l=>l.eta):((c.status==='Arrived'||c.status==='Partially arrived')&&c.eta?[c.eta]:[]);
+    let maxDays=0;arrivedDates.forEach(d=>{const n=daysSince(d);if(n>maxDays)maxDays=n;});
+    const rowOverdue=!!(overdueDays&&maxDays>overdueDays);
+    const daysTag=maxDays>0?`<div style="font-size:10px;color:${rowOverdue?'var(--wt)':'var(--tm)'};">${maxDays} day${maxDays!==1?'s':''} in warehouse</div>`:'';
+    const rowStyle=rowOverdue?'background:var(--wbg);':'';
+
+    const flightCell=multiLeg
+      ? `<div>${legs[0].flight||'—'}·${formatDate(legs[0].eta)}</div><button type="button" onclick="toggleLegsDetail('${c.awb}')" id="legs-toggle-${safeAwb}" style="margin-top:3px;font-size:10px;padding:2px 7px;border:1px solid #B0C8F0;border-radius:999px;background:#EEF4FF;color:#1A3A8F;cursor:pointer;">✈ ${legs.length} flights ▾</button>`
+      : `${c.flight}·${formatDate(c.eta)}`;
+    const routeCell=multiLeg?`${legs[0].pol||'—'}→${legs[0].pod||'—'}`:`${c.pol}→${c.pod}`;
+
+    let row=`<tr style="${rowStyle}">
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${c.awb}</td>
       <td><div style="font-weight:500;">${c.cname}</div><div style="font-size:10px;color:var(--ts)">${c.cphone||''}</div></td>
-      <td>${c.flight}·${formatDate(c.eta)}</td><td>${c.pol}→${c.pod}</td>
+      <td>${flightCell}</td><td>${routeCell}</td>
       <td>${c.pcs_manifested}</td><td>${c.pcs_received!=null?Math.max(0,(c.pcs_received||0)-(c.pcs_delivered||0)):'—'}</td>
       <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${c.status==='Delivered'?`<div style="font-size:10px;color:var(--pvt);margin-top:2px;">${c.pcs_delivered} pcs·${formatDate(c.date_delivered)}</div>`:''}${daysTag}</td>
       <td>${baysHtml}</td>
       <td><button class="btn-edit" onclick="openEdit('${c.awb}')">✏️ Edit</button></td>
       <td><button class="btn-del" onclick="deleteCargo('${c.awb}')">🗑</button></td>
     </tr>`;
+
+    if(multiLeg){
+      const legsHtml=legs.map((l,i)=>{
+        const lDays=l.status==='Arrived'&&l.eta?daysSince(l.eta):0;
+        return `<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:7px 0;${i<legs.length-1?'border-bottom:1px solid var(--border);':''}font-size:12px;">
+          <div style="font-weight:600;color:var(--tp);min-width:58px;">Flight ${i+1}</div>
+          <div style="min-width:130px;">${l.flight||'—'} · ${formatDate(l.eta)}</div>
+          <div style="min-width:70px;">${l.pol||'—'}→${l.pod||'—'}</div>
+          <div style="min-width:100px;">${l.pcs_manifested||0} pcs manifested</div>
+          <div><span class="badge ${badgeCls(l.status)}" style="font-size:10px;">${l.status}</span></div>
+          ${l.status==='Arrived'?`<div>${l.pcs_received||0} received</div>`:''}
+          ${l.bay?`<div>Bay: ${l.bay}</div>`:''}
+          ${lDays>0?`<div style="color:var(--tm);">${lDays} day${lDays!==1?'s':''} in warehouse</div>`:''}
+        </div>`;
+      }).join('');
+      row+=`<tr id="legs-detail-${safeAwb}" style="display:none;background:var(--off);"><td colspan="10" style="padding:4px 16px;">${legsHtml}</td></tr>`;
+    }
+    return row;
   }).join('');
 }
 
@@ -791,12 +821,17 @@ function filterCargo(){
   const overdueDays=parseInt(document.getElementById('filter-overdue-days').value);
   const today=new Date();today.setHours(0,0,0,0);
   const filtered=cargos.filter(c=>{
+    const legs=Array.isArray(c.legs)?c.legs:[];
     const mQ=!q||c.awb.toLowerCase().includes(q)||c.cname.toLowerCase().includes(q)||c.status.toLowerCase().includes(q)||c.pod.toLowerCase().includes(q)||c.airline.toLowerCase().includes(q);
-    const mF=!flight||c.flight.toLowerCase().includes(flight);
-    const mD=!date||c.eta===date;
+    const mF=!flight||(legs.length?legs.some(l=>(l.flight||'').toLowerCase().includes(flight)):c.flight.toLowerCase().includes(flight));
+    const mD=!date||(legs.length?legs.some(l=>l.eta===date):c.eta===date);
     const mS=!status||c.status===status;
     let mO=true;
-    if(!isNaN(overdueDays)&&overdueDays>0){if(c.status!=='Arrived')return false;const fd=new Date(c.eta);fd.setHours(0,0,0,0);mO=Math.floor((today-fd)/(1000*60*60*24))>overdueDays;}
+    if(!isNaN(overdueDays)&&overdueDays>0){
+      if(c.status!=='Arrived'&&c.status!=='Partially arrived')return false;
+      const arrivedDates=legs.length?legs.filter(l=>l.status==='Arrived'&&l.eta).map(l=>l.eta):(c.eta?[c.eta]:[]);
+      mO=arrivedDates.some(d=>{const fd=new Date(d);fd.setHours(0,0,0,0);return Math.floor((today-fd)/(1000*60*60*24))>overdueDays;});
+    }
     return mQ&&mF&&mD&&mS&&mO;
   });
   renderTable(filtered,!isNaN(overdueDays)&&overdueDays>0?overdueDays:null);
@@ -819,16 +854,7 @@ function clearFilters(){
 
 // ── FORM TOGGLES ──────────────────────────────────────
 function toggleMarkDelivered(){const c=document.getElementById('f-mark-delivered').checked;document.getElementById('del-fields').style.display=c?'block':'none';}
-function eToggleDelivered(){const s=document.getElementById('e-status').value;document.getElementById('e-del-fields').style.display=s==='Delivered'?'block':'none';togglePcsReceived('e-pcs-rec','e-status');}
-
-function togglePcsReceived(inputId,selectId){
-  const s=document.getElementById(selectId).value;
-  const inp=document.getElementById(inputId);
-  const arrived=(s==='Arrived'||s==='Delivered');
-  inp.disabled=!arrived;inp.style.opacity=arrived?'1':'0.45';inp.style.cursor=arrived?'':'not-allowed';
-  const sec=document.getElementById(inputId==='f-pcs-rec'?'f-bays-section':'e-bays-section');
-  if(sec)sec.style.display=s==='Arrived'?'block':'none';
-}
+function eToggleMarkDelivered(){const c=document.getElementById('e-mark-delivered').checked;document.getElementById('e-del-fields').style.display=c?'block':'none';}
 
 // ── FLIGHT LEG ROWS (supports part-shipments split across multiple flights) ──
 function addLegRow(wrapId,prefill){
@@ -849,7 +875,7 @@ function addLegRow(wrapId,prefill){
       <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Aircraft registration</label><input type="text" class="leg-reg" style="text-transform:uppercase;${inStyle}" placeholder="e.g. N123SF"/></div>
       <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Airline <span class="rs">*</span></label><input type="text" class="leg-airline" value="IBC Airways" style="${inStyle}" placeholder="IBC Airways"/></div>
       <div class="fgrp leg-asycuda-wrap" style="display:none;grid-column:1/-1;"><label style="font-size:11px;color:var(--ts);">ASYCUDA reference number</label><input type="text" class="leg-asycuda" style="${inStyle}" placeholder="e.g. JMKIN-2026-1514"/></div>
-      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Pieces Manifested <span class="rs">*</span></label><input type="number" class="leg-pcs" oninput="updateLegTotals()" style="${inStyle}" placeholder="0"/></div>
+      <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Pieces Manifested <span class="rs">*</span></label><input type="number" class="leg-pcs" oninput="updateLegTotals('${wrapId}')" style="${inStyle}" placeholder="0"/></div>
       <div class="fgrp"><label style="font-size:11px;color:var(--ts);">Status <span class="rs">*</span></label>
         <select class="leg-status" onchange="toggleLegArrived(this)" style="${inStyle}">
           <option>Manifested</option><option>Arrived</option>
@@ -873,10 +899,12 @@ function addLegRow(wrapId,prefill){
   autofillLegPcs(row,wrapId);
 }
 
+function legsPrefix(wrapId){return wrapId.replace('-legs-wrap','');}
+
 // Prefill a leg's Pieces Manifested from the Total pieces field: the only leg
 // gets the full total; an added leg (part-shipment) gets whatever's left unallocated.
 function autofillLegPcs(row,wrapId){
-  const totalEl=document.getElementById('f-total-pcs');
+  const totalEl=document.getElementById(legsPrefix(wrapId)+'-total-pcs');
   if(!totalEl)return;
   const total=parseInt(totalEl.value)||0;
   if(total<=0)return;
@@ -902,7 +930,7 @@ function removeLegRow(btn){
     row.querySelectorAll('.leg-arrived-wrap,.leg-asycuda-wrap').forEach(w=>w.style.display='none');
   }
   renumberLegs(wrapEl.id);
-  updateLegTotals();
+  updateLegTotals(wrapEl.id);
 }
 
 function renumberLegs(wrapId){
@@ -932,19 +960,40 @@ function toggleLegArrived(select){
   row.querySelectorAll('.leg-arrived-wrap').forEach(w=>w.style.display=arrived?'block':'none');
 }
 
-function updateLegTotals(){
-  const totalEl=document.getElementById('f-total-pcs');
-  const msgEl=document.getElementById('f-legs-total-msg');
+function updateLegTotals(wrapId){
+  wrapId=wrapId||'f-legs-wrap';
+  const prefix=legsPrefix(wrapId);
+  const totalEl=document.getElementById(prefix+'-total-pcs');
+  const msgEl=document.getElementById(prefix+'-legs-total-msg');
   if(!totalEl||!msgEl)return;
   const total=parseInt(totalEl.value)||0;
-  const rows=document.querySelectorAll('#f-legs-wrap .leg-row');
+  const rows=document.querySelectorAll('#'+wrapId+' .leg-row');
   if(total>0&&rows.length===1)rows[0].querySelector('.leg-pcs').value=total;
   let sum=0;
-  document.querySelectorAll('#f-legs-wrap .leg-pcs').forEach(i=>{sum+=parseInt(i.value)||0;});
+  document.querySelectorAll('#'+wrapId+' .leg-pcs').forEach(i=>{sum+=parseInt(i.value)||0;});
   const over=total>0&&sum>total;
   msgEl.textContent=total>0?`Allocated ${sum} of ${total} piece${total!==1?'s':''}${over?' — exceeds shipment total!':''}`:`Allocated ${sum} piece${sum!==1?'s':''} across flight(s)`;
   msgEl.style.color=over?'#C0392B':'var(--ts)';
   msgEl.style.fontWeight=over?'600':'400';
+}
+
+function populateLegs(wrapId,legs){
+  const wrap=document.getElementById(wrapId);
+  wrap.innerHTML='';
+  legs.forEach(l=>{
+    addLegRow(wrapId,{pol:l.pol,pod:l.pod,flight:l.flight,eta:l.eta,registration:l.registration,airline:l.airline,asycuda:l.asycuda});
+    const rows=wrap.querySelectorAll('.leg-row');
+    const row=rows[rows.length-1];
+    row.querySelector('.leg-pcs').value=l.pcs_manifested||'';
+    const statusSel=row.querySelector('.leg-status');
+    statusSel.value=l.status||'Manifested';
+    toggleLegArrived(statusSel);
+    if(l.status==='Arrived'){
+      row.querySelector('.leg-pcs-rec').value=l.pcs_received!=null?l.pcs_received:'';
+      row.querySelector('.leg-bay').value=l.bay||'';
+    }
+  });
+  if(!legs.length)addLegRow(wrapId);
 }
 
 function getLegs(wrapId){
@@ -1001,28 +1050,6 @@ function validateLegsForm(wrapId){
     if(missing.length)errors.push(`Flight ${i+1}: ${missing.join(', ')}`);
   });
   return errors;
-}
-
-function eCheckAsycuda(){
-  const f=document.getElementById('e-flight').value.trim();
-  const e=document.getElementById('e-eta').value.trim();
-  document.getElementById('e-asycuda-wrap').style.display=(f&&e)?'block':'none';
-}
-
-function eCheckFlightLookup(){
-  eCheckAsycuda();
-  const flight=document.getElementById('e-flight').value.trim();
-  const date=document.getElementById('e-eta').value.trim();
-  if(flight&&date&&flights.length){
-    const match=flights.find(f=>f.flight.toLowerCase()===flight.toLowerCase()&&f.date===date);
-    if(match){
-      if(match.origin)document.getElementById('e-pol').value=match.origin;
-      if(match.dest)document.getElementById('e-pod').value=match.dest;
-      if(match.airline)document.getElementById('e-airline').value=match.airline;
-      if(match.asycuda)document.getElementById('e-asycuda').value=match.asycuda;
-      if(match.registration)document.getElementById('e-reg').value=match.registration;
-    }
-  }
 }
 
 // ── CONSOLIDATION ─────────────────────────────────────
@@ -1146,7 +1173,8 @@ async function addCargo(){
 
   const primary=legs[0]||{};
   const allArrived=legs.length>0&&legs.every(l=>l.status==='Arrived');
-  const derivedStatus=markDelivered?'Delivered':(allArrived?'Arrived':'Manifested');
+  const anyArrived=legs.some(l=>l.status==='Arrived');
+  const derivedStatus=markDelivered?'Delivered':(allArrived?'Arrived':(anyArrived?'Partially arrived':'Manifested'));
 
   const payload={
     awb,
@@ -1226,15 +1254,9 @@ async function deleteCargo(awb){
 let editingAwb=null;
 
 const EDIT_REQUIRED=[
-  {id:'e-flight',err:'eerr-flight',label:'Flight number'},
-  {id:'e-eta',err:'eerr-eta',label:'Flight date'},
-  {id:'e-airline',err:'eerr-airline',label:'Airline'},
-  {id:'e-pol',err:'eerr-pol',label:'Port of loading'},
-  {id:'e-pod',err:'eerr-pod',label:'Port of discharge'},
   {id:'e-desc',err:'eerr-desc',label:'Description / commodity'},
+  {id:'e-total-pcs',err:'eerr-total-pcs',label:'Total pieces',isNum:true},
   {id:'e-gw',err:'eerr-gw',label:'Gross weight',isNum:true},
-  {id:'e-pcs-man',err:'eerr-pcs-man',label:'Pieces manifested',isNum:true},
-  {id:'e-status',err:'eerr-status',label:'Status',isSelect:true},
   {id:'e-sname',err:'eerr-sname',label:'Shipper name'},
   {id:'e-s-street',err:'eerr-s-street',label:'Shipper street address'},
   {id:'e-s-parish',err:'eerr-s-parish',label:'Shipper parish / state'},
@@ -1249,8 +1271,7 @@ function openEdit(awb){
   const c=cargos.find(x=>x.awb===awb);if(!c)return;
   editingAwb=awb;
   document.getElementById('edit-awb-label').textContent=awb;
-  es('e-flight',c.flight);es('e-eta',c.eta);es('e-reg',c.registration);es('e-airline',c.airline);es('e-pol',c.pol);es('e-pod',c.pod);es('e-asycuda',c.asycuda);
-  es('e-desc',c.desc);es('e-gw',c.gw);es('e-cw',c.cw);es('e-pcs-man',c.pcs_manifested);es('e-pcs-rec',c.pcs_received);
+  es('e-desc',c.desc);es('e-gw',c.gw);es('e-cw',c.cw);es('e-total-pcs',c.pcs_manifested);
   editRemarks=normalizeRemarks(c.remarks);
   document.getElementById('e-remarks-new').value='';
   renderRemarksList('e');
@@ -1259,17 +1280,22 @@ function openEdit(awb){
   es('e-val',c.val);es('e-pcs-del',c.pcs_delivered);es('e-date-del',c.date_delivered);es('e-notif-date',c.notif_date);es('e-notif-person',c.notif_person);
   document.getElementById('e-notif-method').value=c.notif_method||'';
   document.getElementById('e-type').value=c.type||'General';
-  document.getElementById('e-status').value=c.status||'';
   document.getElementById('e-customs').value=c.customs||'Not submitted';
+  document.getElementById('e-mark-delivered').checked=c.status==='Delivered';
   document.getElementById('e-del-fields').style.display=c.status==='Delivered'?'block':'none';
-  document.getElementById('e-asycuda-wrap').style.display=(c.flight&&c.eta)?'block':'none';
-  document.getElementById('e-bays-section').style.display=c.status==='Arrived'?'block':'none';
-  populateBays('e-bays-wrap',c.bays||[]);
-  const isConsolidation=(c.desc||'').toLowerCase().includes('consolidation');
+  // Populate flight legs: use the shipment's own legs array if present, otherwise
+  // synthesize a single leg from the legacy flat fields so older records still edit cleanly.
+  const legsForEdit=Array.isArray(c.legs)&&c.legs.length?c.legs:[{
+    flight:c.flight,eta:c.eta,registration:c.registration,airline:c.airline,pol:c.pol,pod:c.pod,asycuda:c.asycuda,
+    pcs_manifested:c.pcs_manifested,status:(c.status==='Arrived'||c.status==='Delivered')?'Arrived':'Manifested',
+    pcs_received:c.pcs_received,bay:(c.bays&&c.bays[0]&&c.bays[0].location)||null
+  }];
+  populateLegs('e-legs-wrap',legsForEdit);
+  updateLegTotals('e-legs-wrap');
+  const isConsolidation=(c.desc||'').toLowerCase().includes('consolidation')||(c.desc||'').toLowerCase().includes('consolidated');
   document.getElementById('e-consolidation-section').style.display=isConsolidation?'block':'none';
   if(isConsolidation&&c.hawbs&&c.hawbs.length)populateHawbs('e-hawb-wrap',c.hawbs);
   else document.getElementById('e-hawb-wrap').innerHTML='';
-  togglePcsReceived('e-pcs-rec','e-status');
   document.getElementById('edit-msg').style.display='none';
   document.querySelectorAll('#edit-overlay .ferr').forEach(e=>{e.textContent='';e.style.display='none';});
   document.querySelectorAll('#edit-overlay .invalid').forEach(e=>e.classList.remove('invalid'));
@@ -1293,39 +1319,44 @@ async function saveEdit(){
     if(empty||badNum){el.classList.add('invalid');const e=document.getElementById(f.err);if(e){e.textContent=f.isNum?`${f.label} must be 0 or more.`:`${f.label} is required.`;e.style.display='block';}errors.push(f.label);}
   });
 
-  const status=eg('e-status');
-  if(status==='Arrived'){const pr=eg('e-pcs-rec');if(!pr||isNaN(parseInt(pr))||parseInt(pr)<0){document.getElementById('e-pcs-rec').classList.add('invalid');const e=document.getElementById('eerr-pcs-rec');if(e){e.textContent='Pieces received is required when status is Arrived.';e.style.display='block';}errors.push('Pieces received');}}
-  if(status==='Delivered'){
+  const legErrors=validateLegsForm('e-legs-wrap');
+  errors.push(...legErrors);
+  const legs=getLegs('e-legs-wrap');
+  if(legs.length===0)errors.push('At least one flight is required');
+
+  const totalPcs=parseInt(eg('e-total-pcs'))||0;
+  const legsSum=legs.reduce((s,l)=>s+(l.pcs_manifested||0),0);
+  if(legs.length>0&&totalPcs>0&&legsSum>totalPcs)errors.push(`Pieces across flights (${legsSum}) exceed total pieces (${totalPcs})`);
+
+  const markDelivered=document.getElementById('e-mark-delivered').checked;
+  const isConsolidation=document.getElementById('e-consolidation-section').style.display!=='none';
+  if(markDelivered){
     const pd=eg('e-pcs-del'),dd=eg('e-date-del');
     if(!pd||isNaN(parseInt(pd))||parseInt(pd)<0){document.getElementById('e-pcs-del').classList.add('invalid');const e=document.getElementById('eerr-pcs-del');if(e){e.textContent='Pieces delivered is required.';e.style.display='block';}errors.push('Pieces delivered');}
     if(!dd){document.getElementById('e-date-del').classList.add('invalid');const e=document.getElementById('eerr-date-del');if(e){e.textContent='Date delivered is required.';e.style.display='block';}errors.push('Date delivered');}
 
-    // Enforce: pieces delivered must equal pieces manifested for regular shipments
-    const isConsolidation = document.getElementById('e-consolidation-section').style.display !== 'none';
-    if(!isConsolidation && pd && !isNaN(parseInt(pd))){
-      const manifested = parseInt(eg('e-pcs-man'))||0;
-      const delivered  = parseInt(pd);
-      const prevDelivered = parseInt((cargos.find(x=>x.awb===editingAwb)||{}).pcs_delivered)||0;
-      const totalWouldBe = prevDelivered > delivered ? delivered : delivered; // direct value in edit
-      if(delivered > manifested){
+    // Enforce: pieces delivered must equal the shipment's total pieces for regular shipments
+    if(!isConsolidation&&pd&&!isNaN(parseInt(pd))){
+      const delivered=parseInt(pd);
+      if(delivered>totalPcs){
         document.getElementById('e-pcs-del').classList.add('invalid');
         const e=document.getElementById('eerr-pcs-del');
-        if(e){e.textContent=`Cannot deliver more pieces (${delivered}) than were manifested (${manifested}).`;e.style.display='block';}
+        if(e){e.textContent=`Cannot deliver more pieces (${delivered}) than the shipment total (${totalPcs}).`;e.style.display='block';}
         errors.push('Pieces delivered count');
       }
-      if(delivered < manifested){
+      if(delivered<totalPcs){
         document.getElementById('e-pcs-del').classList.add('invalid');
         const e=document.getElementById('eerr-pcs-del');
-        if(e){e.textContent=`All ${manifested} manifested pieces must be delivered before status can be set to Delivered. Use the Delivery tab for partial deliveries.`;e.style.display='block';}
+        if(e){e.textContent=`All ${totalPcs} total pieces must be delivered before status can be set to Delivered. Use the Delivery tab for partial deliveries.`;e.style.display='block';}
         errors.push('Pieces delivered count');
       }
     }
     // For consolidations, check all HAWBs are delivered
     if(isConsolidation){
-      const c = cargos.find(x=>x.awb===editingAwb);
-      if(c && c.hawbs && c.hawbs.length){
-        const pending = c.hawbs.filter(h=>!h.delivered);
-        if(pending.length > 0){
+      const c=cargos.find(x=>x.awb===editingAwb);
+      if(c&&c.hawbs&&c.hawbs.length){
+        const pending=c.hawbs.filter(h=>!h.delivered);
+        if(pending.length>0){
           msgEl.className='fmsg fmsg-err';
           msgEl.textContent=`Cannot mark as Delivered — ${pending.length} House AWB(s) still pending: ${pending.map(h=>h.hawb).join(', ')}`;
           msgEl.style.display='block';return;
@@ -1334,20 +1365,35 @@ async function saveEdit(){
     }
   }
 
-  if(errors.length>0){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing or invalid field(s).`;msgEl.style.display='block';return;}
+  if(errors.length>0){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing or invalid issue(s): ${errors.join(' · ')}`;msgEl.style.display='block';return;}
+
+  const existing=cargos.find(x=>x.awb===editingAwb)||{};
+  const primary=legs[0]||{};
+  const allArrived=legs.length>0&&legs.every(l=>l.status==='Arrived');
+  const anyArrived=legs.some(l=>l.status==='Arrived');
+  const derivedStatus=markDelivered?'Delivered':(allArrived?'Arrived':(anyArrived?'Partially arrived':'Manifested'));
 
   const updates={
-    flight:eg('e-flight'),registration:eg('e-reg')||null,airline:eg('e-airline'),pol:eg('e-pol').toUpperCase(),pod:eg('e-pod').toUpperCase(),eta:eg('e-eta'),
-    asycuda:eg('e-asycuda')||null,desc:eg('e-desc'),type:document.getElementById('e-type').value||'General',
+    desc:eg('e-desc'),type:document.getElementById('e-type').value||'General',
     gw:parseFloat(eg('e-gw')),cw:parseFloat(eg('e-cw'))||0,
-    pcs_manifested:parseInt(eg('e-pcs-man')),
-    pcs_received:(status==='Arrived'||status==='Delivered')?parseInt(eg('e-pcs-rec'))||null:null,
+    legs,
+    pcs_manifested:totalPcs,
+    flight:legs.map(l=>l.flight).join(', '),
+    eta:primary.eta||'',
+    registration:primary.registration||null,
+    airline:primary.airline||'',
+    pol:primary.pol||'',
+    pod:primary.pod||'',
+    asycuda:primary.asycuda||null,
+    pcs_received:legs.some(l=>l.pcs_received!=null)?legs.reduce((s,l)=>s+(l.pcs_received||0),0):null,
+    bays:legs.filter(l=>l.bay).map(l=>({location:l.bay,pieces:l.pcs_received||l.pcs_manifested||0})),
     remarks:editRemarks,
-    bays:getBays('e-bays-wrap'),
-    hawbs:document.getElementById('e-consolidation-section').style.display!=='none'?getHawbs('e-hawb-wrap'):[],
-    status,
-    pcs_delivered:status==='Delivered'?parseInt(eg('e-pcs-del')):null,
-    date_delivered:status==='Delivered'?eg('e-date-del'):null,
+    hawbs:isConsolidation?getHawbs('e-hawb-wrap'):[],
+    status:derivedStatus,
+    // Preserve any partial-delivery progress already recorded via the Delivery tab
+    // unless this save is explicitly marking the shipment fully delivered.
+    pcs_delivered:markDelivered?parseInt(eg('e-pcs-del')):(existing.pcs_delivered!=null?existing.pcs_delivered:null),
+    date_delivered:markDelivered?eg('e-date-del'):(existing.date_delivered||null),
     notif_date:eg('e-notif-date')||null,notif_method:document.getElementById('e-notif-method').value||null,notif_person:eg('e-notif-person')||null,
     sname:eg('e-sname'),sphone:eg('e-sphone'),
     s_street:eg('e-s-street'),s_city:eg('e-s-city'),s_parish:eg('e-s-parish'),s_zip:eg('e-s-zip'),s_country:eg('e-s-country'),
@@ -1380,7 +1426,7 @@ function renderDeliveryShipmentsTable(){
   const qFlt=(document.getElementById('del-search-flight')||{}).value||'';
   // Show Arrived shipments + partially delivered ones
   const eligible=cargos.filter(c=>{
-    const isArrived=c.status==='Arrived';
+    const isArrived=c.status==='Arrived'||c.status==='Partially arrived';
     const isPartial=c.pcs_delivered>0&&c.status!=='Delivered';
     if(!isArrived&&!isPartial)return false;
     const mAwb=!qAwb||c.awb.toLowerCase().includes(qAwb.toLowerCase());
@@ -1452,25 +1498,35 @@ function deliveryLookup(){
     document.getElementById('del-prev-desc').textContent=foundShipment.desc;
     document.getElementById('del-mawb-row').style.display='none';
     document.getElementById('del-prev-status').innerHTML=`<span class="badge ${badgeCls(foundShipment.status)}">${foundShipment.status}</span>`;
-    // Show partial delivery progress
+    // Show partial delivery progress, capped by what has actually ARRIVED
+    // (not the shipment's total) so part-shipments can't over-deliver pieces
+    // that are still in transit on another flight.
     const manifested = parseInt(foundShipment.pcs_manifested)||0;
     const alreadyDelivered = parseInt(foundShipment.pcs_delivered)||0;
-    const remaining = manifested - alreadyDelivered;
+    const legs = Array.isArray(foundShipment.legs)?foundShipment.legs:[];
+    const arrivedPcs = legs.length
+      ? legs.filter(l=>l.status==='Arrived').reduce((s,l)=>s+(parseInt(l.pcs_received)||0),0)
+      : ((foundShipment.status==='Arrived'||foundShipment.status==='Delivered')?(parseInt(foundShipment.pcs_received)||manifested):0);
+    const notYetArrived = Math.max(0,manifested-arrivedPcs);
+    const availableToDeliver = Math.max(0,Math.min(manifested,arrivedPcs)-alreadyDelivered);
     document.getElementById('del-prev-pcs').textContent=manifested;
     let prog=document.getElementById('del-partial-progress');
     if(!prog){
       prog=document.createElement('div');prog.id='del-partial-progress';
       document.getElementById('del-prev-pcs').parentElement.after(prog);
     }
-    if(alreadyDelivered > 0){
-      prog.style.cssText='grid-column:1/-1;background:#EAF6EF;border:1px solid #A8DBBF;border-radius:var(--r);padding:8px 12px;font-size:13px;color:var(--st);';
-      prog.innerHTML=`✅ <strong>${alreadyDelivered} of ${manifested} pieces</strong> already delivered &mdash; <strong>${remaining}</strong> remaining`;
+    const progParts=[];
+    if(alreadyDelivered>0)progParts.push(`✅ <strong>${alreadyDelivered} of ${manifested} pieces</strong> already delivered`);
+    if(notYetArrived>0)progParts.push(`⏳ <strong>${notYetArrived}</strong> piece${notYetArrived!==1?'s':''} not yet arrived`);
+    if(progParts.length){
+      const caution=notYetArrived>0;
+      prog.style.cssText=caution?'grid-column:1/-1;background:var(--wbg);border:1px solid #F0D070;border-radius:var(--r);padding:8px 12px;font-size:13px;color:var(--wt);':'grid-column:1/-1;background:#EAF6EF;border:1px solid #A8DBBF;border-radius:var(--r);padding:8px 12px;font-size:13px;color:var(--st);';
+      prog.innerHTML=progParts.join(' &mdash; ')+` &mdash; <strong>${availableToDeliver}</strong> available to deliver now`;
       prog.style.display='block';
-      if(!document.getElementById('del-pcs').value)document.getElementById('del-pcs').value=remaining>0?remaining:'';
     } else {
       prog.style.display='none';
-      if(!document.getElementById('del-pcs').value)document.getElementById('del-pcs').value=manifested||'';
     }
+    if(!document.getElementById('del-pcs').value)document.getElementById('del-pcs').value=availableToDeliver>0?availableToDeliver:'';
   }
   if(!document.getElementById('del-date').value)document.getElementById('del-date').value='';
   const wasHidden=form.style.display==='none';
@@ -1551,7 +1607,13 @@ async function saveDelivery(){
       // ── Regular MAWB delivery (supports partial) ──────────────────────
       const manifested     = parseInt(parentShipment.pcs_manifested)||0;
       const prevDelivered  = parseInt(parentShipment.pcs_delivered)||0;
-      const remaining      = manifested - prevDelivered;
+      const legs = Array.isArray(parentShipment.legs)?parentShipment.legs:[];
+      // Cap by pieces actually ARRIVED (summed from arrived legs), not the
+      // shipment's total — pieces still in transit on another flight can't be delivered.
+      const arrivedPcs = legs.length
+        ? legs.filter(l=>l.status==='Arrived').reduce((s,l)=>s+(parseInt(l.pcs_received)||0),0)
+        : ((parentShipment.status==='Arrived'||parentShipment.status==='Delivered')?(parseInt(parentShipment.pcs_received)||manifested):0);
+      const availableToDeliver = Math.max(0,Math.min(manifested,arrivedPcs)-prevDelivered);
       const newTotal       = prevDelivered + pcsInt;
 
       if(pcsInt <= 0){
@@ -1559,9 +1621,11 @@ async function saveDelivery(){
         msgEl.textContent='Pieces delivered must be greater than 0.';
         msgEl.style.display='block';return;
       }
-      if(pcsInt > remaining){
+      if(pcsInt > availableToDeliver){
+        const notYetArrived=Math.max(0,manifested-arrivedPcs);
         msgEl.className='fmsg fmsg-err';
-        msgEl.textContent=`Cannot deliver ${pcsInt} pieces — only ${remaining} piece${remaining!==1?'s':''} remaining (${prevDelivered} of ${manifested} already delivered).`;
+        msgEl.textContent=`Cannot deliver ${pcsInt} pieces — only ${availableToDeliver} piece${availableToDeliver!==1?'s':''} available to deliver right now`+
+          (notYetArrived>0?` (${notYetArrived} of ${manifested} total piece(s) have not arrived yet).`:` (${prevDelivered} of ${manifested} already delivered).`);
         msgEl.style.display='block';return;
       }
 
