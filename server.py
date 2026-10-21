@@ -295,6 +295,8 @@ _TRACK_PUBLIC_FIELDS = [
     "hawbs",
 ]
 
+_TRACK_PUBLIC_LEG_FIELDS = ["flight","eta","airline","pol","pod","asycuda","pcs_manifested","pcs_received","status"]
+
 @app.route("/api/track/shipments", methods=["GET"])
 def track_shipments_public():
     shipments = load_shipments()
@@ -305,6 +307,13 @@ def track_shipments_public():
             {k: h.get(k, "") for k in ("hawb","consignee","commodity","pcs")}
             for h in s.get("hawbs", [])
         ]
+        legs = s.get("legs")
+        if isinstance(legs, list) and legs:
+            # Part-shipments: expose each flight leg (no warehouse bay — internal only)
+            row["legs"] = [
+                {k: leg.get(k, "") for k in _TRACK_PUBLIC_LEG_FIELDS}
+                for leg in legs
+            ]
         public.append(row)
     return jsonify(public)
 
@@ -324,11 +333,22 @@ def add_shipment():
         return jsonify({"error": "AWB number is required."}), 400
     if any(s["awb"].lower() == awb.lower() for s in shipments):
         return jsonify({"error": "AWB already exists."}), 409
-    flight = new.get("flight", "")
-    date   = new.get("eta", "")
-    match  = next((f for f in load_flights() if f["flight"].lower()==flight.lower() and f["date"]==date), None)
-    if match and match.get("asycuda") and not new.get("asycuda"):
-        new["asycuda"] = match["asycuda"]
+    legs = new.get("legs")
+    if isinstance(legs, list) and legs:
+        all_flights = load_flights()
+        for leg in legs:
+            if not leg.get("asycuda"):
+                m = next((f for f in all_flights if f["flight"].lower()==leg.get("flight","").lower() and f["date"]==leg.get("eta","")), None)
+                if m and m.get("asycuda"):
+                    leg["asycuda"] = m["asycuda"]
+        if legs[0].get("asycuda") and not new.get("asycuda"):
+            new["asycuda"] = legs[0]["asycuda"]
+    else:
+        flight = new.get("flight", "")
+        date   = new.get("eta", "")
+        match  = next((f for f in load_flights() if f["flight"].lower()==flight.lower() and f["date"]==date), None)
+        if match and match.get("asycuda") and not new.get("asycuda"):
+            new["asycuda"] = match["asycuda"]
     shipments.append(new)
     save_shipments(shipments)
     log_activity("ADD_SHIPMENT", f"AWB {awb}")
@@ -372,9 +392,24 @@ def bulk_asycuda():
     shipments = load_shipments()
     updated   = 0
     for s in shipments:
-        if s.get("flight","").lower()==flight.lower() and s.get("eta","")==date:
-            s["asycuda"] = asycuda
-            updated += 1
+        legs = s.get("legs")
+        if isinstance(legs, list) and legs:
+            # Part-shipments: the shipment-level 'flight' field is a comma-joined
+            # list of all legs, so match against each individual leg instead.
+            matched = False
+            for leg in legs:
+                if leg.get("flight","").lower()==flight.lower() and leg.get("eta","")==date:
+                    leg["asycuda"] = asycuda
+                    matched = True
+            if matched:
+                updated += 1
+                # Keep the derived top-level asycuda (used by exports/legacy views) in sync
+                if legs[0].get("flight","").lower()==flight.lower() and legs[0].get("eta","")==date:
+                    s["asycuda"] = asycuda
+        else:
+            if s.get("flight","").lower()==flight.lower() and s.get("eta","")==date:
+                s["asycuda"] = asycuda
+                updated += 1
     save_shipments(shipments)
     log_activity("BULK_ASYCUDA", f"Flight {flight} {date}: {updated} AWB(s) → {asycuda}")
     return jsonify({"success": True, "updated": updated})
