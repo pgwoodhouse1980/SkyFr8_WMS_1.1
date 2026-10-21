@@ -758,6 +758,16 @@ function toggleLegsDetail(awb){
 }
 function cssEscape(s){return String(s).replace(/[^a-zA-Z0-9_-]/g,'_');}
 
+// Returns a shipment's flight legs, synthesizing a single leg from the legacy
+// flat fields for any pre-migration record that has no legs array.
+function legsForCargo(c){
+  return (Array.isArray(c.legs)&&c.legs.length)?c.legs:[{
+    flight:c.flight,eta:c.eta,registration:c.registration,airline:c.airline,pol:c.pol,pod:c.pod,asycuda:c.asycuda,
+    pcs_manifested:c.pcs_manifested,status:c.status,pcs_received:c.pcs_received,
+    bay:(c.bays&&c.bays[0]&&c.bays[0].location)||null
+  }];
+}
+
 function renderTable(data,overdueDays){
   const tb=document.getElementById('cargo-table');
   if(!data.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--tm);padding:1.5rem;">No shipments found.</td></tr>';return;}
@@ -1790,8 +1800,8 @@ function renderFlightsTable(){
   const filtered=flights.filter(f=>!q||f.flight.toLowerCase().includes(q.toLowerCase())||f.date.includes(q)||(f.origin+f.dest).toLowerCase().includes(q.toLowerCase())||(f.airline||'').toLowerCase().includes(q.toLowerCase())||(f.registration||'').toLowerCase().includes(q.toLowerCase())).sort((a,b)=>b.date.localeCompare(a.date));
   if(!filtered.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--tm);padding:1.5rem;">No flights found.</td></tr>';return;}
   tb.innerHTML=filtered.map(f=>{
-    const shipCount=cargos.filter(c=>c.flight===f.flight&&c.eta===f.date).length;
-    const manifestedCount=cargos.filter(c=>c.flight===f.flight&&c.eta===f.date&&c.status==='Manifested').length;
+    const shipCount=cargos.filter(c=>legsForCargo(c).some(l=>l.flight===f.flight&&l.eta===f.date)).length;
+    const manifestedCount=cargos.filter(c=>legsForCargo(c).some(l=>l.flight===f.flight&&l.eta===f.date&&l.status==='Manifested')).length;
     const arriveBtn=manifestedCount>0?`<button class="btn-edit" style="color:var(--st);border-color:#B8DFC6;" onclick="openArriveAll('${f.flight}','${f.date}')">📥 Arrive all (${manifestedCount})</button>`:'';
     return `<tr><td style="font-weight:500;">${f.flight}</td><td>${formatDate(f.date)}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${f.registration||'—'}</td><td>${f.origin}→${f.dest}</td><td>${f.airline||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${f.asycuda||'—'}</td><td><span class="badge b-t">${shipCount} shipment${shipCount!==1?'s':''}</span></td><td>${arriveBtn}</td><td><button class="btn-edit" onclick="openFlightEdit('${f.flight}','${f.date}')">✏️ Edit</button></td><td><button class="btn-del" onclick="deleteFlight('${f.flight}','${f.date}')">🗑</button></td></tr>`;
   }).join('');
@@ -1913,17 +1923,23 @@ function renderArriveRows(){
   const emptyEl=document.getElementById('fl-arrive-empty');
   const confirmBtn=document.getElementById('fla-confirm-btn');
   if(!arrivingFlight){tb.innerHTML='';return;}
-  const matches=cargos.filter(c=>c.flight===arrivingFlight.flight&&c.eta===arrivingFlight.date&&c.status==='Manifested');
+  // Match against each shipment's flight LEGS (the shipment-level 'flight' field is
+  // a comma-joined list for part-shipments and never matches a single flight number).
+  const matches=[];
+  cargos.forEach(c=>{
+    const leg=legsForCargo(c).find(l=>l.flight===arrivingFlight.flight&&l.eta===arrivingFlight.date&&l.status==='Manifested');
+    if(leg)matches.push({awb:c.awb,cname:c.cname,legPcs:leg.pcs_manifested});
+  });
   if(!matches.length){
     tb.innerHTML='';emptyEl.style.display='block';confirmBtn.style.display='none';
     return;
   }
   emptyEl.style.display='none';confirmBtn.style.display='inline-block';
-  tb.innerHTML=matches.map(c=>`<tr>
-    <td style="font-family:'JetBrains Mono',monospace;font-size:11px;" data-awb="${c.awb}">${c.awb}</td>
-    <td>${c.cname||'—'}</td>
-    <td>${c.pcs_manifested??'—'}</td>
-    <td><input type="number" min="0" class="fla-pcs-rec" data-awb="${c.awb}" value="${c.pcs_manifested??0}" style="width:90px;padding:6px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;"/></td>
+  tb.innerHTML=matches.map(m=>`<tr>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:11px;" data-awb="${m.awb}">${m.awb}</td>
+    <td>${m.cname||'—'}</td>
+    <td>${m.legPcs??'—'}</td>
+    <td><input type="number" min="0" class="fla-pcs-rec" data-awb="${m.awb}" value="${m.legPcs??0}" style="width:90px;padding:6px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;"/></td>
   </tr>`).join('');
 }
 
@@ -1950,8 +1966,28 @@ async function saveArriveAll(){
   confirmBtn.disabled=true;confirmBtn.textContent='Arriving…';
   let okCount=0,failCount=0;
   for(const row of rows){
+    const c=cargos.find(x=>x.awb===row.awb);
+    if(!c){failCount++;continue;}
+    const legs=legsForCargo(c).map(l=>({...l}));
+    let touched=false;
+    legs.forEach(l=>{
+      if(l.flight===arrivingFlight.flight&&l.eta===arrivingFlight.date&&l.status==='Manifested'){
+        l.status='Arrived';
+        l.pcs_received=row.pcs_received;
+        touched=true;
+      }
+    });
+    if(!touched){failCount++;continue;}
+    const allArrived=legs.every(l=>l.status==='Arrived');
+    const anyArrived=legs.some(l=>l.status==='Arrived');
+    const payload={
+      legs,
+      status:allArrived?'Arrived':(anyArrived?'Partially arrived':'Manifested'),
+      pcs_received:legs.some(l=>l.pcs_received!=null)?legs.reduce((s,l)=>s+(l.pcs_received||0),0):null,
+      bays:legs.filter(l=>l.bay).map(l=>({location:l.bay,pieces:l.pcs_received||l.pcs_manifested||0}))
+    };
     try{
-      const res=await fetch('/api/shipments/'+encodeURIComponent(row.awb),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'Arrived',pcs_received:row.pcs_received})});
+      const res=await fetch('/api/shipments/'+encodeURIComponent(row.awb),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       if(res.ok)okCount++;else failCount++;
     }catch(e){failCount++;}
   }
