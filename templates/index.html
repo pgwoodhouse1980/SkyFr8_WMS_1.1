@@ -1498,16 +1498,17 @@ function deliveryLookup(){
     document.getElementById('del-prev-desc').textContent=foundShipment.desc;
     document.getElementById('del-mawb-row').style.display='none';
     document.getElementById('del-prev-status').innerHTML=`<span class="badge ${badgeCls(foundShipment.status)}">${foundShipment.status}</span>`;
-    // Show partial delivery progress, capped by what has actually ARRIVED
-    // (not the shipment's total) so part-shipments can't over-deliver pieces
-    // that are still in transit on another flight.
+    // Show partial delivery progress. Part-shipments (multiple flight legs) are
+    // also capped by what has actually ARRIVED, since a flight still in transit
+    // can't be delivered early; single-flight shipments use the simple total.
     const manifested = parseInt(foundShipment.pcs_manifested)||0;
     const alreadyDelivered = parseInt(foundShipment.pcs_delivered)||0;
     const legs = Array.isArray(foundShipment.legs)?foundShipment.legs:[];
-    const arrivedPcs = legs.length
+    const isPartShipment = legs.length>1;
+    const arrivedPcs = isPartShipment
       ? legs.filter(l=>l.status==='Arrived').reduce((s,l)=>s+(parseInt(l.pcs_received)||0),0)
-      : ((foundShipment.status==='Arrived'||foundShipment.status==='Delivered')?(parseInt(foundShipment.pcs_received)||manifested):0);
-    const notYetArrived = Math.max(0,manifested-arrivedPcs);
+      : manifested;
+    const notYetArrived = isPartShipment?Math.max(0,manifested-arrivedPcs):0;
     const availableToDeliver = Math.max(0,Math.min(manifested,arrivedPcs)-alreadyDelivered);
     document.getElementById('del-prev-pcs').textContent=manifested;
     let prog=document.getElementById('del-partial-progress');
@@ -1608,11 +1609,13 @@ async function saveDelivery(){
       const manifested     = parseInt(parentShipment.pcs_manifested)||0;
       const prevDelivered  = parseInt(parentShipment.pcs_delivered)||0;
       const legs = Array.isArray(parentShipment.legs)?parentShipment.legs:[];
-      // Cap by pieces actually ARRIVED (summed from arrived legs), not the
-      // shipment's total — pieces still in transit on another flight can't be delivered.
-      const arrivedPcs = legs.length
+      const isPartShipment = legs.length>1;
+      // Part-shipments only: cap by pieces actually ARRIVED (summed from arrived
+      // legs) so a flight still in transit can't be delivered early. Single-flight
+      // shipments are capped by the manifested total only, as before.
+      const arrivedPcs = isPartShipment
         ? legs.filter(l=>l.status==='Arrived').reduce((s,l)=>s+(parseInt(l.pcs_received)||0),0)
-        : ((parentShipment.status==='Arrived'||parentShipment.status==='Delivered')?(parseInt(parentShipment.pcs_received)||manifested):0);
+        : manifested;
       const availableToDeliver = Math.max(0,Math.min(manifested,arrivedPcs)-prevDelivered);
       const newTotal       = prevDelivered + pcsInt;
 
@@ -1625,7 +1628,7 @@ async function saveDelivery(){
         const notYetArrived=Math.max(0,manifested-arrivedPcs);
         msgEl.className='fmsg fmsg-err';
         msgEl.textContent=`Cannot deliver ${pcsInt} pieces — only ${availableToDeliver} piece${availableToDeliver!==1?'s':''} available to deliver right now`+
-          (notYetArrived>0?` (${notYetArrived} of ${manifested} total piece(s) have not arrived yet).`:` (${prevDelivered} of ${manifested} already delivered).`);
+          (isPartShipment&&notYetArrived>0?` (${notYetArrived} of ${manifested} total piece(s) have not arrived yet).`:` (${prevDelivered} of ${manifested} already delivered).`);
         msgEl.style.display='block';return;
       }
 
