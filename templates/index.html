@@ -552,6 +552,8 @@ tr:hover td{background:var(--off);}
       <div class="fg">
         <div class="fgrp"><label>No. of pieces delivered <span class="rs">*</span></label><input id="e-pcs-del" type="number"/><span id="eerr-pcs-del" class="ferr"></span></div>
         <div class="fgrp"><label>Date delivered <span class="rs">*</span></label><input id="e-date-del" type="date"/><span id="eerr-date-del" class="ferr"></span></div>
+        <div class="fgrp"><label>Name of person collecting</label><input id="e-collector-name" placeholder="John Smith"/></div>
+        <div class="fgrp"><label>Collector ID number</label><input id="e-collector-id" placeholder="Passport / Driver's licence no."/></div>
       </div>
     </div>
     <div class="fsec">Notification</div>
@@ -726,7 +728,9 @@ async function loadCargos(){
   try{
     const r=await fetch('/api/shipments');
     if(r.status===401){window.location.href='/login';return;}
-    cargos=await r.json();renderTable(cargos);updateMetrics();
+    cargos=await r.json();
+    filterCargo(); // re-apply whatever search/filter is currently set, instead of resetting to the full list
+    updateMetrics();
   }
   catch(e){document.getElementById('cargo-table').innerHTML='<tr><td colspan="10" style="text-align:center;color:#C0392B;padding:1.5rem;">Could not connect to server. Make sure server.py is running.</td></tr>';}
 }
@@ -797,7 +801,7 @@ function renderTable(data,overdueDays){
       <td><div style="font-weight:500;">${c.cname}</div><div style="font-size:10px;color:var(--ts)">${c.cphone||''}</div></td>
       <td>${flightCell}</td><td>${routeCell}</td>
       <td>${c.pcs_manifested}</td><td>${c.pcs_received!=null?Math.max(0,(c.pcs_received||0)-(c.pcs_delivered||0)):'—'}</td>
-      <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${c.status==='Delivered'?`<div style="font-size:10px;color:var(--pvt);margin-top:2px;">${c.pcs_delivered} pcs·${formatDate(c.date_delivered)}</div>`:''}${daysTag}</td>
+      <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${c.status==='Delivered'?`<div style="font-size:10px;color:var(--pvt);margin-top:2px;">${c.pcs_delivered} pcs·${formatDate(c.date_delivered)}${c.collector_name?` · ${c.collector_name}`:''}</div>`:''}${daysTag}</td>
       <td>${baysHtml}</td>
       <td><button class="btn-edit" onclick="openEdit('${c.awb}')">✏️ Edit</button></td>
       <td><button class="btn-del" onclick="deleteCargo('${c.awb}')">🗑</button></td>
@@ -1287,7 +1291,7 @@ function openEdit(awb){
   renderRemarksList('e');
   es('e-sname',c.sname);es('e-sphone',c.sphone);es('e-s-street',c.s_street);es('e-s-city',c.s_city);es('e-s-parish',c.s_parish);es('e-s-zip',c.s_zip);es('e-s-country',c.s_country);
   es('e-cname',c.cname);es('e-cphone',c.cphone);es('e-c-street',c.c_street);es('e-c-city',c.c_city);es('e-c-parish',c.c_parish);es('e-c-zip',c.c_zip);es('e-c-country',c.c_country);
-  es('e-val',c.val);es('e-pcs-del',c.pcs_delivered);es('e-date-del',c.date_delivered);es('e-notif-date',c.notif_date);es('e-notif-person',c.notif_person);
+  es('e-val',c.val);es('e-pcs-del',c.pcs_delivered);es('e-date-del',c.date_delivered);es('e-collector-name',c.collector_name);es('e-collector-id',c.collector_id);es('e-notif-date',c.notif_date);es('e-notif-person',c.notif_person);
   document.getElementById('e-notif-method').value=c.notif_method||'';
   document.getElementById('e-type').value=c.type||'General';
   document.getElementById('e-customs').value=c.customs||'Not submitted';
@@ -1404,6 +1408,8 @@ async function saveEdit(){
     // unless this save is explicitly marking the shipment fully delivered.
     pcs_delivered:markDelivered?parseInt(eg('e-pcs-del')):(existing.pcs_delivered!=null?existing.pcs_delivered:null),
     date_delivered:markDelivered?eg('e-date-del'):(existing.date_delivered||null),
+    collector_name:markDelivered?(eg('e-collector-name')||null):(existing.collector_name||null),
+    collector_id:markDelivered?(eg('e-collector-id')||null):(existing.collector_id||null),
     notif_date:eg('e-notif-date')||null,notif_method:document.getElementById('e-notif-method').value||null,notif_person:eg('e-notif-person')||null,
     sname:eg('e-sname'),sphone:eg('e-sphone'),
     s_street:eg('e-s-street'),s_city:eg('e-s-city'),s_parish:eg('e-s-parish'),s_zip:eg('e-s-zip'),s_country:eg('e-s-country'),
