@@ -226,7 +226,7 @@ tr:hover td{background:var(--off);}
         <input type="text" id="filter-flight" oninput="filterCargo()" placeholder="Filter by flight no." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
         <input type="date" id="filter-date" onchange="filterCargo()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);"/>
         <select id="filter-status" onchange="filterCargo()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);background:var(--off);">
-          <option value="">All statuses</option><option>Manifested</option><option>Partially arrived</option><option>Arrived</option><option>Delivered</option>
+          <option value="">All statuses</option><option>Manifested</option><option>Partially arrived</option><option>Arrived</option><option>In customs</option><option>Delivered</option>
         </select>
         <div style="display:flex;gap:8px;">
           <button onclick="clearFilters()" class="btn btn-sec" title="Clear filters">✕ Clear</button>
@@ -556,6 +556,15 @@ tr:hover td{background:var(--off);}
         <div class="fgrp"><label>Collector ID number</label><input id="e-collector-id" placeholder="Passport / Driver's licence no."/></div>
       </div>
     </div>
+    <div class="fgrp" style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;"><input type="checkbox" id="e-mark-customs" onchange="eToggleMarkCustoms()" style="width:auto;"/><label style="margin:0;">This shipment has been moved to Customs' warehouse (overdue, pending auction)</label></div>
+    <div id="e-customs-fields" class="del-fields" style="background:var(--cbg);border-color:#CFC8F0;">
+      <div class="fsec" style="margin-top:0;border-color:#CFC8F0;">Customs Removal Details</div>
+      <div class="fg">
+        <div class="fgrp"><label>Date moved to Customs</label><input id="e-customs-date" type="date"/></div>
+        <div class="fgrp" style="grid-column:1/-1;"><label>Notes</label><input id="e-customs-note" placeholder="e.g. Reference / officer name"/></div>
+      </div>
+      <span class="hint">Overrides the normal flight-derived status. Uncheck to let status follow the flight legs again.</span>
+    </div>
     <div class="fsec">Notification</div>
     <div class="fg">
       <div class="fgrp"><label>Notification date</label><input id="e-notif-date" type="date"/></div>
@@ -801,7 +810,7 @@ function renderTable(data,overdueDays){
       <td><div style="font-weight:500;">${c.cname}</div><div style="font-size:10px;color:var(--ts)">${c.cphone||''}</div></td>
       <td>${flightCell}</td><td>${routeCell}</td>
       <td>${c.pcs_manifested}</td><td>${c.pcs_received!=null?Math.max(0,(c.pcs_received||0)-(c.pcs_delivered||0)):'—'}</td>
-      <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${c.status==='Delivered'?`<div style="font-size:10px;color:var(--pvt);margin-top:2px;">${c.pcs_delivered} pcs·${formatDate(c.date_delivered)}${c.collector_name?` · ${c.collector_name}`:''}</div>`:''}${daysTag}</td>
+      <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${c.status==='Delivered'?`<div style="font-size:10px;color:var(--pvt);margin-top:2px;">${c.pcs_delivered} pcs·${formatDate(c.date_delivered)}${c.collector_name?` · ${c.collector_name}`:''}</div>`:''}${c.status==='In customs'?`<div style="font-size:10px;color:var(--ct);margin-top:2px;">Moved ${formatDate(c.customs_removed_date)}${c.customs_removed_note?` · ${c.customs_removed_note}`:''}</div>`:''}${daysTag}</td>
       <td>${baysHtml}</td>
       <td><button class="btn-edit" onclick="openEdit('${c.awb}')">✏️ Edit</button></td>
       <td><button class="btn-del" onclick="deleteCargo('${c.awb}')">🗑</button></td>
@@ -868,7 +877,20 @@ function clearFilters(){
 
 // ── FORM TOGGLES ──────────────────────────────────────
 function toggleMarkDelivered(){const c=document.getElementById('f-mark-delivered').checked;document.getElementById('del-fields').style.display=c?'block':'none';}
-function eToggleMarkDelivered(){const c=document.getElementById('e-mark-delivered').checked;document.getElementById('e-del-fields').style.display=c?'block':'none';}
+function eToggleMarkDelivered(){
+  const c=document.getElementById('e-mark-delivered').checked;
+  document.getElementById('e-del-fields').style.display=c?'block':'none';
+  if(c){document.getElementById('e-mark-customs').checked=false;document.getElementById('e-customs-fields').style.display='none';}
+}
+function eToggleMarkCustoms(){
+  const c=document.getElementById('e-mark-customs').checked;
+  document.getElementById('e-customs-fields').style.display=c?'block':'none';
+  if(c){
+    document.getElementById('e-mark-delivered').checked=false;
+    document.getElementById('e-del-fields').style.display='none';
+    if(!document.getElementById('e-customs-date').value)document.getElementById('e-customs-date').value=new Date().toISOString().slice(0,10);
+  }
+}
 
 // ── FLIGHT LEG ROWS (supports part-shipments split across multiple flights) ──
 function addLegRow(wrapId,prefill){
@@ -1297,11 +1319,14 @@ function openEdit(awb){
   document.getElementById('e-customs').value=c.customs||'Not submitted';
   document.getElementById('e-mark-delivered').checked=c.status==='Delivered';
   document.getElementById('e-del-fields').style.display=c.status==='Delivered'?'block':'none';
+  document.getElementById('e-mark-customs').checked=c.status==='In customs';
+  document.getElementById('e-customs-fields').style.display=c.status==='In customs'?'block':'none';
+  es('e-customs-date',c.customs_removed_date);es('e-customs-note',c.customs_removed_note);
   // Populate flight legs: use the shipment's own legs array if present, otherwise
   // synthesize a single leg from the legacy flat fields so older records still edit cleanly.
   const legsForEdit=Array.isArray(c.legs)&&c.legs.length?c.legs:[{
     flight:c.flight,eta:c.eta,registration:c.registration,airline:c.airline,pol:c.pol,pod:c.pod,asycuda:c.asycuda,
-    pcs_manifested:c.pcs_manifested,status:(c.status==='Arrived'||c.status==='Delivered')?'Arrived':'Manifested',
+    pcs_manifested:c.pcs_manifested,status:(c.status==='Arrived'||c.status==='Delivered'||c.status==='In customs')?'Arrived':'Manifested',
     pcs_received:c.pcs_received,bay:(c.bays&&c.bays[0]&&c.bays[0].location)||null
   }];
   populateLegs('e-legs-wrap',legsForEdit);
@@ -1383,9 +1408,10 @@ async function saveEdit(){
 
   const existing=cargos.find(x=>x.awb===editingAwb)||{};
   const primary=legs[0]||{};
+  const markCustoms=document.getElementById('e-mark-customs').checked;
   const allArrived=legs.length>0&&legs.every(l=>l.status==='Arrived');
   const anyArrived=legs.some(l=>l.status==='Arrived');
-  const derivedStatus=markDelivered?'Delivered':(allArrived?'Arrived':(anyArrived?'Partially arrived':'Manifested'));
+  const derivedStatus=markDelivered?'Delivered':(markCustoms?'In customs':(allArrived?'Arrived':(anyArrived?'Partially arrived':'Manifested')));
 
   const updates={
     desc:eg('e-desc'),type:document.getElementById('e-type').value||'General',
@@ -1410,6 +1436,8 @@ async function saveEdit(){
     date_delivered:markDelivered?eg('e-date-del'):(existing.date_delivered||null),
     collector_name:markDelivered?(eg('e-collector-name')||null):(existing.collector_name||null),
     collector_id:markDelivered?(eg('e-collector-id')||null):(existing.collector_id||null),
+    customs_removed_date:markCustoms?(eg('e-customs-date')||null):null,
+    customs_removed_note:markCustoms?(eg('e-customs-note')||null):null,
     notif_date:eg('e-notif-date')||null,notif_method:document.getElementById('e-notif-method').value||null,notif_person:eg('e-notif-person')||null,
     sname:eg('e-sname'),sphone:eg('e-sphone'),
     s_street:eg('e-s-street'),s_city:eg('e-s-city'),s_parish:eg('e-s-parish'),s_zip:eg('e-s-zip'),s_country:eg('e-s-country'),
