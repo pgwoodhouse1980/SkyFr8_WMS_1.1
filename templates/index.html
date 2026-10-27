@@ -87,6 +87,7 @@ tr:hover td{background:var(--off);}
 </style>
 </head>
 <body>
+<datalist id="known-collectors-list"></datalist>
 <header>
   <div class="hinner">
     <a class="logo" href="/">
@@ -293,7 +294,7 @@ tr:hover td{background:var(--off);}
         <div class="fg">
           <div class="fgrp"><label>No. of pieces delivered <span class="rs">*</span></label><input id="del-pcs" type="number" placeholder="0"/><span id="del-err-pcs" class="ferr"></span></div>
           <div class="fgrp"><label>Date delivered <span class="rs">*</span></label><input id="del-date" type="date"/><span id="del-err-date" class="ferr"></span></div>
-          <div class="fgrp"><label>Name of person collecting</label><input id="del-collector" placeholder="John Smith"/></div>
+          <div class="fgrp"><label>Name of person collecting</label><input id="del-collector" list="known-collectors-list" placeholder="John Smith" oninput="autofillCollectorId('del-collector','del-collector-id')"/></div>
           <div class="fgrp"><label>Collector ID number</label><input id="del-collector-id" placeholder="Passport / Driver's licence no."/></div>
         </div>
         <div id="del-msg" class="fmsg"></div>
@@ -552,7 +553,7 @@ tr:hover td{background:var(--off);}
       <div class="fg">
         <div class="fgrp"><label>No. of pieces delivered <span class="rs">*</span></label><input id="e-pcs-del" type="number"/><span id="eerr-pcs-del" class="ferr"></span></div>
         <div class="fgrp"><label>Date delivered <span class="rs">*</span></label><input id="e-date-del" type="date"/><span id="eerr-date-del" class="ferr"></span></div>
-        <div class="fgrp"><label>Name of person collecting</label><input id="e-collector-name" placeholder="John Smith"/></div>
+        <div class="fgrp"><label>Name of person collecting</label><input id="e-collector-name" list="known-collectors-list" placeholder="John Smith" oninput="autofillCollectorId('e-collector-name','e-collector-id')"/></div>
         <div class="fgrp"><label>Collector ID number</label><input id="e-collector-id" placeholder="Passport / Driver's licence no."/></div>
       </div>
     </div>
@@ -740,8 +741,34 @@ async function loadCargos(){
     cargos=await r.json();
     filterCargo(); // re-apply whatever search/filter is currently set, instead of resetting to the full list
     updateMetrics();
+    buildCollectorIndex();
   }
   catch(e){document.getElementById('cargo-table').innerHTML='<tr><td colspan="10" style="text-align:center;color:#C0392B;padding:1.5rem;">Could not connect to server. Make sure server.py is running.</td></tr>';}
+}
+
+// ── KNOWN COLLECTORS (autofill ID for repeat collectors) ──
+let knownCollectors=new Map(); // lowercased name -> {name, id}
+function buildCollectorIndex(){
+  knownCollectors=new Map();
+  const record=(name,id)=>{
+    const n=(name||'').trim();
+    if(!n||!id)return;
+    knownCollectors.set(n.toLowerCase(),{name:n,id});
+  };
+  cargos.forEach(c=>{
+    record(c.collector_name,c.collector_id);
+    (c.delivery_history||[]).forEach(d=>record(d.collector_name,d.collector_id));
+    (c.hawbs||[]).forEach(h=>record(h.collector_name,h.collector_id));
+  });
+  const dl=document.getElementById('known-collectors-list');
+  if(dl)dl.innerHTML=[...knownCollectors.values()].map(v=>`<option value="${v.name.replace(/"/g,'&quot;')}"></option>`).join('');
+}
+function autofillCollectorId(nameFieldId,idFieldId){
+  const nameEl=document.getElementById(nameFieldId),idEl=document.getElementById(idFieldId);
+  if(!nameEl||!idEl)return;
+  const match=knownCollectors.get(nameEl.value.trim().toLowerCase());
+  // Only fill in the ID if it's empty, so we never clobber something staff already typed.
+  if(match&&!idEl.value.trim())idEl.value=match.id;
 }
 async function loadFlights(){
   try{const r=await fetch('/api/flights');flights=await r.json();renderFlightsTable();}
