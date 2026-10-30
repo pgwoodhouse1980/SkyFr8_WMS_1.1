@@ -351,7 +351,13 @@ tr:hover td{background:var(--off);}
           <div class="fgrp"><label>Final consignee <span class="rs">*</span></label><input id="st-consignee" placeholder="Name on the shipment"/><span id="st-err-consignee" class="ferr"></span></div>
           <div class="fgrp"><label>Commodity</label><input id="st-commodity" placeholder="e.g. Electronics"/></div>
           <div class="fgrp"><label>Pieces</label><input id="st-pcs" type="number"/></div>
-          <div class="fgrp"><label>Weight (kg) <span class="rs">*</span></label><input id="st-weight" type="number" step="0.01"/><span id="st-err-weight" class="ferr"></span></div>
+          <div class="fgrp"><label>Weight <span class="rs">*</span></label>
+            <div style="display:flex;gap:6px;">
+              <input id="st-weight" type="number" step="0.01" style="flex:1;" oninput="updateWeightKgHint('st')"/>
+              <select id="st-weight-unit" style="width:80px;" onchange="updateWeightKgHint('st')"><option value="kg">kg</option><option value="lb">lb</option></select>
+            </div>
+            <span id="st-err-weight" class="ferr"></span><span id="st-weight-hint" class="hint"></span>
+          </div>
           <div class="fgrp"><label>Date arrived <span class="rs">*</span></label><input id="st-arrived" type="date"/><span id="st-err-arrived" class="ferr"></span><span id="st-arrived-hint" class="hint"></span></div>
           <div class="fgrp" style="grid-column:1/-1;"><label>Notes</label><input id="st-notes" placeholder="Optional"/></div>
         </div>
@@ -375,7 +381,7 @@ tr:hover td{background:var(--off);}
       </div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>Courier</th><th>MAWB</th><th>HAWB(s)</th><th>Consignee</th><th>Pcs</th><th>Weight(kg)</th><th>Commodity</th><th>Arrived</th><th>Days in storage</th><th>Free / Billable</th><th>Storage charge</th><th>Status</th><th></th><th></th><th></th></tr></thead>
+          <thead><tr><th>Courier</th><th>MAWB</th><th>HAWB(s)</th><th>Consignee</th><th>Pcs</th><th>Weight</th><th>Commodity</th><th>Arrived</th><th>Days in storage</th><th>Free / Billable</th><th>Storage charge</th><th>Status</th><th></th><th></th><th></th></tr></thead>
           <tbody id="storage-table"><tr><td colspan="15" class="loading">Loading...</td></tr></tbody>
         </table>
       </div>
@@ -397,7 +403,13 @@ tr:hover td{background:var(--off);}
         <div class="fgrp"><label>Final consignee <span class="rs">*</span></label><input id="ste-consignee"/><span id="ste-err-consignee" class="ferr"></span></div>
         <div class="fgrp"><label>Commodity</label><input id="ste-commodity"/></div>
         <div class="fgrp"><label>Pieces</label><input id="ste-pcs" type="number"/></div>
-        <div class="fgrp"><label>Weight (kg) <span class="rs">*</span></label><input id="ste-weight" type="number" step="0.01"/><span id="ste-err-weight" class="ferr"></span></div>
+        <div class="fgrp"><label>Weight <span class="rs">*</span></label>
+          <div style="display:flex;gap:6px;">
+            <input id="ste-weight" type="number" step="0.01" style="flex:1;" oninput="updateWeightKgHint('ste')"/>
+            <select id="ste-weight-unit" style="width:80px;" onchange="updateWeightKgHint('ste')"><option value="kg">kg</option><option value="lb">lb</option></select>
+          </div>
+          <span id="ste-err-weight" class="ferr"></span><span id="ste-weight-hint" class="hint"></span>
+        </div>
         <div class="fgrp"><label>Date arrived <span class="rs">*</span></label><input id="ste-arrived" type="date"/><span id="ste-err-arrived" class="ferr"></span><span id="ste-arrived-hint" class="hint"></span></div>
         <div class="fgrp" style="grid-column:1/-1;"><label>Notes</label><input id="ste-notes"/></div>
       </div>
@@ -2307,7 +2319,7 @@ function computeStorage(item){
   const freeDays=storageSettings.free_days||0;
   const billableDays=Math.max(0,daysElapsed-freeDays);
   const rate=parseFloat(storageSettings.rate_per_kg_per_day)||0;
-  const weight=parseFloat(item.weight)||0;
+  const weight=weightKgOf(item);
   const charge=billableDays*weight*rate;
   return {daysElapsed,freeDays,billableDays,charge};
 }
@@ -2320,7 +2332,7 @@ function mawbLookupInfo(mawb){
   if(!needle)return{state:'empty'};
   const c=cargos.find(x=>(x.awb||'').trim().toLowerCase()===needle);
   if(!c)return{state:'not_found'};
-  if(c.status!=='Arrived')return{state:'pending',status:c.status};
+  if(c.status!=='Arrived'&&c.status!=='Delivered')return{state:'pending',status:c.status};
   const legs=(Array.isArray(c.legs)&&c.legs.length)?c.legs:[{eta:c.eta}];
   const etas=legs.map(l=>l.eta).filter(Boolean).sort();
   if(!etas.length)return{state:'pending',status:c.status};
@@ -2343,13 +2355,13 @@ function applyStorageMawbLookup(prefix){
   }
   if(info.state==='not_found'){
     mawbHint.innerHTML='<span style="color:var(--wt);">No matching AWB in the Cargo module yet.</span>';
-    arrHint.innerHTML='<span style="color:var(--wt);">⚠ Manual entry — will sync once this MAWB appears as Arrived in Cargo.</span>';
+    arrHint.innerHTML='<span style="color:var(--wt);">⚠ Manual entry — will sync once this MAWB shows Arrived or Delivered in Cargo.</span>';
     arrEl.readOnly=false;arrEl.style.background='';
     return;
   }
   if(info.state==='pending'){
-    mawbHint.innerHTML=`<span style="color:var(--wt);">Found in Cargo, but not yet marked Arrived (currently "${info.status}").</span>`;
-    arrHint.innerHTML='<span style="color:var(--wt);">⚠ Manual entry — will sync once Cargo confirms arrival.</span>';
+    mawbHint.innerHTML=`<span style="color:var(--wt);">Found in Cargo, but not yet marked Arrived or Delivered (currently "${info.status}").</span>`;
+    arrHint.innerHTML='<span style="color:var(--wt);">⚠ Manual entry — will sync once Cargo confirms arrival or delivery.</span>';
     arrEl.readOnly=false;arrEl.style.background='';
     return;
   }
@@ -2363,6 +2375,24 @@ function applyStorageMawbLookup(prefix){
     arrEl.readOnly=true;arrEl.style.background='var(--sbg)';
     arrHint.innerHTML=`<span style="color:var(--st);">✓ Synced from Cargo (confirmed Arrived ${formatDate(info.eta)}). <a href="#" onclick="event.preventDefault();${prefix==='st'?'stManualOverride':'steManualOverride'}=true;applyStorageMawbLookup('${prefix}');" style="color:var(--sky);">Enter manually instead</a></span>`;
   }
+}
+
+const LB_TO_KG=0.45359237;
+function toKg(value,unit){const v=parseFloat(value)||0;return unit==='lb'?v*LB_TO_KG:v;}
+// Legacy records only ever stored `weight`, always meant as kg.
+function weightKgOf(item){return item.weight_kg!=null?parseFloat(item.weight_kg):(parseFloat(item.weight)||0);}
+function weightDisplay(item){
+  const val=item.weight_value!=null?item.weight_value:item.weight;
+  const unit=item.weight_unit||'kg';
+  if(val==null)return '0 kg';
+  return unit==='lb'?`${val} lb (${weightKgOf(item).toFixed(2)} kg)`:`${val} kg`;
+}
+function updateWeightKgHint(prefix){
+  const val=document.getElementById(prefix+'-weight').value;
+  const unit=document.getElementById(prefix+'-weight-unit').value;
+  const hint=document.getElementById(prefix+'-weight-hint');
+  if(!val){hint.textContent='';return;}
+  hint.textContent=unit==='lb'?`= ${toKg(val,unit).toFixed(2)} kg (billed per kg)`:'';
 }
 
 function hawbsList(item){
@@ -2405,11 +2435,15 @@ async function saveStorageItem(){
   [['st-courier','st-err-courier',courier,'Courier'],['st-mawb','st-err-mawb',mawb,'MAWB number'],['st-consignee','st-err-consignee',consignee,'Final consignee'],['st-weight','st-err-weight',weight,'Weight'],['st-arrived','st-err-arrived',arrived,'Date arrived']].forEach(([id,eid,val,label])=>{if(!val){document.getElementById(id).classList.add('invalid');const e=document.getElementById(eid);if(e){e.textContent=label+' is required.';e.style.display='block';}errors.push(label);}});
   if(errors.length){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing field(s).`;msgEl.style.display='block';return;}
   try{
-    const res=await fetch('/api/courier-storage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({courier,mawb,hawbs,consignee,commodity:commodity||null,pcs:pcs?parseInt(pcs):null,weight:parseFloat(weight)||0,date_arrived:arrived,notes:notes||null,status:'Active'})});
+    const weightUnit=document.getElementById('st-weight-unit').value;
+    const weightKg=toKg(weight,weightUnit);
+    const res=await fetch('/api/courier-storage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({courier,mawb,hawbs,consignee,commodity:commodity||null,pcs:pcs?parseInt(pcs):null,weight:weightKg,weight_kg:weightKg,weight_value:parseFloat(weight)||0,weight_unit:weightUnit,date_arrived:arrived,notes:notes||null,status:'Active'})});
     const data=await res.json();
     if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Save failed.';msgEl.style.display='block';return;}
     msgEl.className='fmsg fmsg-ok';msgEl.textContent='Shipment added.';msgEl.style.display='block';
     ['st-courier','st-mawb','st-hawbs','st-consignee','st-commodity','st-pcs','st-weight','st-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('st-weight-unit').value='kg';
+    document.getElementById('st-weight-hint').textContent='';
     stManualOverride=false;
     document.getElementById('st-mawb-hint').textContent='';
     document.getElementById('st-arrived-hint').innerHTML='';
@@ -2449,7 +2483,7 @@ function renderStorageTable(){
     }else if(info.state==='matched'&&info.eta!==it.date_arrived){
       arrivedCell=`${formatDate(it.date_arrived)}<br><button class="btn-edit" style="font-size:10px;padding:2px 6px;color:var(--dt);border-color:var(--dt);" onclick="quickSyncStorageArrival('${it.id}')" title="Cargo now shows Arrived ${formatDate(info.eta)}">⚠ Sync to ${formatDate(info.eta)}</button>`;
     }else{
-      arrivedCell=`${formatDate(it.date_arrived)}<br><span style="font-size:10px;color:var(--wt);">⚠ ${info.state==='not_found'?'not in Cargo':'not yet Arrived'}</span>`;
+      arrivedCell=`${formatDate(it.date_arrived)}<br><span style="font-size:10px;color:var(--wt);">⚠ ${info.state==='not_found'?'not in Cargo':'not yet Arrived/Delivered'}</span>`;
     }
     return `<tr>
       <td>${it.courier||'—'}</td>
@@ -2457,7 +2491,7 @@ function renderStorageTable(){
       <td style="font-size:11px;">${hawbsList(it).join(', ')||'—'}</td>
       <td>${it.consignee||'—'}</td>
       <td>${it.pcs??'—'}</td>
-      <td>${it.weight??0}</td>
+      <td>${weightDisplay(it)}</td>
       <td>${it.commodity||'—'}</td>
       <td>${arrivedCell}</td>
       <td>${s.daysElapsed}</td>
@@ -2501,7 +2535,11 @@ function openStorageEdit(id){
   document.getElementById('st-edit-label').textContent=(it.mawb||'')+' · '+(it.consignee||'');
   es('ste-courier',it.courier);es('ste-mawb',it.mawb);
   document.getElementById('ste-hawbs').value=hawbsList(it).join('\n');
-  es('ste-consignee',it.consignee);es('ste-commodity',it.commodity);es('ste-pcs',it.pcs);es('ste-weight',it.weight);es('ste-arrived',it.date_arrived);es('ste-notes',it.notes);
+  es('ste-consignee',it.consignee);es('ste-commodity',it.commodity);es('ste-pcs',it.pcs);
+  es('ste-weight',it.weight_value!=null?it.weight_value:it.weight);
+  document.getElementById('ste-weight-unit').value=it.weight_unit||'kg';
+  updateWeightKgHint('ste');
+  es('ste-arrived',it.date_arrived);es('ste-notes',it.notes);
   steManualOverride=false;
   applyStorageMawbLookup('ste');
   const released=it.status==='Released';
@@ -2540,7 +2578,9 @@ async function saveStorageEdit(){
   [['ste-courier','ste-err-courier',courier,'Courier'],['ste-mawb','ste-err-mawb',mawb,'MAWB number'],['ste-consignee','ste-err-consignee',consignee,'Final consignee'],['ste-weight','ste-err-weight',weight,'Weight'],['ste-arrived','ste-err-arrived',arrived,'Date arrived']].forEach(([id,eid,val,label])=>{if(!val){document.getElementById(id).classList.add('invalid');const e=document.getElementById(eid);if(e){e.textContent=label+' is required.';e.style.display='block';}errors.push(label);}});
   if(errors.length){msgEl.className='fmsg fmsg-err';msgEl.textContent=`Please fix ${errors.length} missing field(s).`;msgEl.style.display='block';return;}
   try{
-    const res=await fetch('/api/courier-storage/'+encodeURIComponent(editingStorageId),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({courier,mawb,hawbs,consignee,commodity:commodity||null,pcs:pcs?parseInt(pcs):null,weight:parseFloat(weight)||0,date_arrived:arrived,notes:notes||null,status:released?'Released':'Active',date_released:released?(releasedDate||todayISO()):null})});
+    const weightUnit=document.getElementById('ste-weight-unit').value;
+    const weightKg=toKg(weight,weightUnit);
+    const res=await fetch('/api/courier-storage/'+encodeURIComponent(editingStorageId),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({courier,mawb,hawbs,consignee,commodity:commodity||null,pcs:pcs?parseInt(pcs):null,weight:weightKg,weight_kg:weightKg,weight_value:parseFloat(weight)||0,weight_unit:weightUnit,date_arrived:arrived,notes:notes||null,status:released?'Released':'Active',date_released:released?(releasedDate||todayISO()):null})});
     const data=await res.json();
     if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Save failed.';msgEl.style.display='block';return;}
     await loadCourierStorage();
@@ -2596,10 +2636,11 @@ async function saveStorageSettings(){
 
 // ── Export ──
 function exportStorageCSV(){
-  const rows=[['Courier','MAWB','HAWB(s)','Consignee','Pieces','Weight(kg)','Commodity','Date arrived','Days in storage','Free days','Billable days','Storage charge(JMD)','Status','Date released','Notes']];
+  const rows=[['Courier','MAWB','HAWB(s)','Consignee','Pieces','Weight entered','Unit','Weight(kg)','Commodity','Date arrived','Days in storage','Free days','Billable days','Storage charge(JMD)','Status','Date released','Notes']];
   courierStorage.forEach(it=>{
     const s=computeStorage(it);
-    rows.push([it.courier||'',it.mawb||'',hawbsList(it).join('; '),it.consignee||'',it.pcs??'',it.weight??'',it.commodity||'',it.date_arrived||'',s.daysElapsed,s.freeDays,s.billableDays,s.charge.toFixed(2),it.status||'Active',it.date_released||'',it.notes||'']);
+    const wVal=it.weight_value!=null?it.weight_value:it.weight;
+    rows.push([it.courier||'',it.mawb||'',hawbsList(it).join('; '),it.consignee||'',it.pcs??'',wVal??'',it.weight_unit||'kg',weightKgOf(it).toFixed(2),it.commodity||'',it.date_arrived||'',s.daysElapsed,s.freeDays,s.billableDays,s.charge.toFixed(2),it.status||'Active',it.date_released||'',it.notes||'']);
   });
   const csv=rows.map(r=>r.map(v=>`"${(v??'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='courier_storage_'+todayISO()+'.csv';a.click();
