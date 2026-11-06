@@ -330,6 +330,7 @@ tr:hover td{background:var(--off);}
       <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.75rem;font-size:13px;color:var(--ts);">
         <div>Rate: <strong id="ss-rate-display" style="color:var(--tp);">—</strong></div>
         <div>Free period: <strong id="ss-freedays-display" style="color:var(--tp);">—</strong></div>
+        <div>Minimum charge: <strong id="ss-mincharge-display" style="color:var(--tp);">—</strong></div>
         <div>Open days: <strong id="ss-weekdays-display" style="color:var(--tp);">—</strong></div>
         <div>Holidays on file: <strong id="ss-holidays-display" style="color:var(--tp);">—</strong></div>
       </div>
@@ -381,16 +382,16 @@ tr:hover td{background:var(--off);}
       </div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>Courier</th><th>MAWB</th><th>HAWB(s)</th><th>Consignee</th><th>Pcs</th><th>Weight</th><th>Commodity</th><th>Arrived</th><th>Days in storage</th><th>Free / Billable</th><th>Storage charge</th><th>Status</th><th></th><th></th><th></th></tr></thead>
-          <tbody id="storage-table"><tr><td colspan="15" class="loading">Loading...</td></tr></tbody>
+          <thead><tr><th>Courier</th><th>MAWB</th><th>HAWB(s)</th><th>Consignee</th><th>Pcs</th><th>Weight</th><th>Commodity</th><th>Arrived</th><th>Days in storage</th><th>Free / Billable</th><th>Storage charge</th><th>Status</th><th></th><th></th><th></th><th></th></tr></thead>
+          <tbody id="storage-table"><tr><td colspan="16" class="loading">Loading...</td></tr></tbody>
         </table>
       </div>
     </div>
   </div>
 
   <!-- STORAGE ITEM EDIT MODAL -->
-  <div id="st-edit-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,20,35,0.55);z-index:1200;overflow-y:auto;">
-    <div style="max-width:720px;margin:2.5rem auto;background:var(--card);border-radius:var(--rl);padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+  <div id="st-edit-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1200;overflow-y:auto;">
+    <div style="max-width:720px;margin:2.5rem auto;background:white;border-radius:var(--rl);padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <div class="card-title" style="margin-bottom:0;">✏️ Edit courier shipment — <span id="st-edit-label"></span></div>
         <button onclick="closeStorageEdit()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--tm);">✕</button>
@@ -420,14 +421,17 @@ tr:hover td{background:var(--off);}
       <div id="ste-msg" class="fmsg"></div>
       <div style="display:flex;gap:8px;justify-content:space-between;margin-top:1rem;">
         <button class="btn-del" onclick="deleteStorageItem()">🗑 Delete</button>
-        <button class="btn" onclick="saveStorageEdit()">💾 Save changes</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" style="background:var(--off);color:var(--tp);border:1px solid var(--border);" onclick="printStorageInvoice(editingStorageId)">🖨 Print invoice</button>
+          <button class="btn" onclick="saveStorageEdit()">💾 Save changes</button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- STORAGE SETTINGS MODAL -->
   <div id="st-settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,20,35,0.55);z-index:1200;overflow-y:auto;">
-    <div style="max-width:640px;margin:2.5rem auto;background:var(--card);border-radius:var(--rl);padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="max-width:640px;margin:2.5rem auto;background:white;border-radius:var(--rl);padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <div class="card-title" style="margin-bottom:0;">⚙ Storage billing settings</div>
         <button onclick="closeStorageSettings()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--tm);">✕</button>
@@ -435,6 +439,7 @@ tr:hover td{background:var(--off);}
       <div class="fg">
         <div class="fgrp"><label>Rate (JMD per kg per day)</label><input id="ss-rate" type="number" step="0.01"/></div>
         <div class="fgrp"><label>Free business days</label><input id="ss-freedays" type="number" step="1"/></div>
+        <div class="fgrp"><label>Minimum storage charge (JMD)</label><input id="ss-mincharge" type="number" step="0.01"/><span class="hint">Applied once a shipment is billable at all — never charged during the free period.</span></div>
       </div>
       <span class="hint">Weekends are always excluded from both the free period and ongoing accrual. Add any warehouse closure days below alongside public holidays.</span>
       <div class="fsec">Holiday / closure calendar</div>
@@ -2269,7 +2274,7 @@ function exportCSV(){
 
 // ── CUSTOMS STORAGE (uncleared courier shipments + storage billing) ──
 let courierStorage=[];
-let storageSettings={rate_per_kg_per_day:0,free_days:3,open_weekdays:[1,2,3,4,5],holidays:[]};
+let storageSettings={rate_per_kg_per_day:0,free_days:3,minimum_charge:3000,open_weekdays:[1,2,3,4,5],holidays:[]};
 let editingStorageId=null;
 
 async function loadCourierStorage(){
@@ -2290,6 +2295,7 @@ function renderStorageSettingsSummary(){
   const el=id=>document.getElementById(id);
   if(el('ss-rate-display'))el('ss-rate-display').textContent='J$'+rate.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' /kg/day';
   if(el('ss-freedays-display'))el('ss-freedays-display').textContent=(storageSettings.free_days||0)+' business day(s)';
+  if(el('ss-mincharge-display'))el('ss-mincharge-display').textContent='J$'+(parseFloat(storageSettings.minimum_charge)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   if(el('ss-weekdays-display'))el('ss-weekdays-display').textContent=wd.slice().sort().map(d=>names[d]).join('–');
   if(el('ss-holidays-display'))el('ss-holidays-display').textContent=(storageSettings.holidays||[]).length;
   const warn=document.getElementById('storage-rate-warn');
@@ -2320,8 +2326,13 @@ function computeStorage(item){
   const billableDays=Math.max(0,daysElapsed-freeDays);
   const rate=parseFloat(storageSettings.rate_per_kg_per_day)||0;
   const weight=weightKgOf(item);
-  const charge=billableDays*weight*rate;
-  return {daysElapsed,freeDays,billableDays,charge};
+  const minCharge=parseFloat(storageSettings.minimum_charge)||0;
+  const rawCharge=billableDays*weight*rate;
+  // The minimum only kicks in once the shipment is actually billable (past the free period) —
+  // it isn't charged during the free days.
+  const charge=billableDays>0?Math.max(rawCharge,minCharge):0;
+  const minimumApplied=billableDays>0&&minCharge>rawCharge;
+  return {daysElapsed,freeDays,billableDays,rawCharge,charge,minimumApplied};
 }
 // ── MAWB → Cargo arrival-date lookup ──
 // The two modules share the MAWB number: once a shipment is confirmed Arrived
@@ -2377,6 +2388,7 @@ function applyStorageMawbLookup(prefix){
   }
 }
 
+const SKYFR8_LOGO_DATAURI="data:image/png;base64,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";
 const LB_TO_KG=0.45359237;
 function toKg(value,unit){const v=parseFloat(value)||0;return unit==='lb'?v*LB_TO_KG:v;}
 // Legacy records only ever stored `weight`, always meant as kg.
@@ -2465,7 +2477,7 @@ function renderStorageTable(){
     const hay=[it.courier,it.mawb,hawbsList(it).join(' '),it.consignee].join(' ').toLowerCase();
     return hay.includes(q);
   }).sort((a,b)=>(a.date_arrived||'').localeCompare(b.date_arrived||''));
-  if(!filtered.length){tb.innerHTML='<tr><td colspan="15" style="text-align:center;color:var(--tm);padding:1.5rem;">No courier shipments found.</td></tr>';return;}
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="16" style="text-align:center;color:var(--tm);padding:1.5rem;">No courier shipments found.</td></tr>';return;}
   tb.innerHTML=filtered.map(it=>{
     const s=computeStorage(it);
     const released=(it.status==='Released');
@@ -2500,6 +2512,7 @@ function renderStorageTable(){
       <td>${statusBadge}</td>
       <td>${releaseBtn}</td>
       <td><button class="btn-edit" onclick="openStorageEdit('${it.id}')">✏️ Edit</button></td>
+      <td><button class="btn-edit" onclick="printStorageInvoice('${it.id}')" title="Print invoice">🖨</button></td>
       <td><button class="btn-del" onclick="quickDeleteStorage('${it.id}')">🗑</button></td>
     </tr>`;
   }).join('');
@@ -2599,6 +2612,7 @@ let pendingHolidays=[];
 function openStorageSettings(){
   document.getElementById('ss-rate').value=storageSettings.rate_per_kg_per_day??0;
   document.getElementById('ss-freedays').value=storageSettings.free_days??3;
+  document.getElementById('ss-mincharge').value=storageSettings.minimum_charge??3000;
   pendingHolidays=(storageSettings.holidays||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
   renderHolidayRows();
   document.getElementById('ss-msg').style.display='none';
@@ -2626,12 +2640,92 @@ async function saveStorageSettings(){
   const msgEl=document.getElementById('ss-msg');
   const rate=parseFloat(document.getElementById('ss-rate').value)||0;
   const freeDays=parseInt(document.getElementById('ss-freedays').value)||0;
+  const minCharge=parseFloat(document.getElementById('ss-mincharge').value)||0;
   try{
-    const res=await fetch('/api/storage-settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({rate_per_kg_per_day:rate,free_days:freeDays,holidays:pendingHolidays})});
+    const res=await fetch('/api/storage-settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({rate_per_kg_per_day:rate,free_days:freeDays,minimum_charge:minCharge,holidays:pendingHolidays})});
     if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent='Save failed.';msgEl.style.display='block';return;}
     await loadStorageSettings();
     closeStorageSettings();
   }catch(e){msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error.';msgEl.style.display='block';}
+}
+
+// ── Print invoice ──
+function printStorageInvoice(id){
+  const it=courierStorage.find(x=>x.id===id);
+  if(!it){alert('Could not find that shipment.');return;}
+  const s=computeStorage(it);
+  const rate=parseFloat(storageSettings.rate_per_kg_per_day)||0;
+  const weightKg=weightKgOf(it);
+  const invNo='INV-'+(it.id||'').toUpperCase().slice(0,8)+'-'+todayISO().replace(/-/g,'');
+  const released=it.status==='Released';
+  const asOfLabel=released?`Released ${formatDate(it.date_released)} (charge frozen)`:`Active — as of ${formatDate(todayISO())}`;
+  const money=n=>'J$'+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  const esc=v=>(v==null?'':String(v)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const hawbRows=hawbsList(it);
+
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(invNo)}</title>
+  <style>
+    *{box-sizing:border-box;}
+    body{font-family:'Inter',Arial,sans-serif;color:#0B1F3A;max-width:780px;margin:0 auto;padding:2.5rem 2rem;}
+    .letterhead{text-align:center;margin-bottom:1.75rem;}
+    .letterhead img{max-width:340px;width:100%;height:auto;}
+    .inv-meta{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;border-bottom:2px solid #0B1F3A;padding-bottom:1rem;}
+    .inv-meta h1{font-size:20px;margin:0 0 4px;letter-spacing:.04em;}
+    .inv-meta .num{font-family:monospace;font-size:13px;color:#4A637F;}
+    .inv-meta .right{text-align:right;font-size:13px;color:#4A637F;}
+    .section-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8BA3BC;font-weight:600;margin:1.5rem 0 .5rem;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th,td{text-align:left;padding:7px 8px;border-bottom:1px solid #DDE4ED;}
+    th{background:#F7F9FC;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#4A637F;}
+    .charge-table td:last-child,.charge-table th:last-child{text-align:right;}
+    .total-row td{font-weight:700;font-size:15px;border-top:2px solid #0B1F3A;border-bottom:none;padding-top:10px;}
+    .status-tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${released?'#FFF0F9':'#FDF3DC'};color:${released?'#8B1560':'#7A5200'};}
+    .notes{margin-top:1.5rem;font-size:12px;color:#4A637F;background:#F7F9FC;padding:.75rem 1rem;border-radius:8px;}
+    .sign{display:flex;gap:2rem;margin-top:3rem;}
+    .sign div{flex:1;border-top:1px solid #0B1F3A;padding-top:6px;font-size:11px;color:#4A637F;}
+    .print-bar{text-align:center;margin-bottom:1.5rem;}
+    .print-bar button{padding:8px 20px;border-radius:8px;border:1px solid #DDE4ED;background:#0B1F3A;color:white;font-size:13px;cursor:pointer;}
+    @media print{.print-bar{display:none;}body{padding:0;}}
+  </style></head><body>
+    <div class="print-bar"><button onclick="window.print()">🖨 Print</button></div>
+    <div class="letterhead"><img src="${SKYFR8_LOGO_DATAURI}" alt="Sky Fr8 Limited"/></div>
+    <div class="inv-meta">
+      <div><h1>CUSTOMS STORAGE INVOICE</h1><div class="num">${esc(invNo)}</div></div>
+      <div class="right">Invoice date: ${formatDate(todayISO())}<br><span class="status-tag">${esc(asOfLabel)}</span></div>
+    </div>
+
+    <div class="section-title">Bill to</div>
+    <div style="font-size:14px;font-weight:600;">${esc(it.consignee)||'—'}</div>
+
+    <div class="section-title">Shipment details</div>
+    <table>
+      <tr><th>Courier</th><td>${esc(it.courier)||'—'}</td><th>MAWB</th><td>${esc(it.mawb)||'—'}</td></tr>
+      <tr><th>HAWB(s)</th><td colspan="3">${hawbRows.length?esc(hawbRows.join(', ')):'—'}</td></tr>
+      <tr><th>Commodity</th><td>${esc(it.commodity)||'—'}</td><th>Pieces</th><td>${it.pcs??'—'}</td></tr>
+      <tr><th>Weight</th><td colspan="3">${esc(weightDisplay(it))}</td></tr>
+      <tr><th>Date arrived</th><td colspan="3">${formatDate(it.date_arrived)}</td></tr>
+    </table>
+
+    <div class="section-title">Storage charge</div>
+    <table class="charge-table">
+      <tr><th>Description</th><th>Detail</th><th>Amount</th></tr>
+      <tr><td>Business days in storage</td><td>${s.daysElapsed} day(s)</td><td></td></tr>
+      <tr><td>Free period</td><td>${s.freeDays} day(s)</td><td></td></tr>
+      <tr><td>Billable days</td><td>${s.billableDays} day(s)</td><td></td></tr>
+      <tr><td>Weight</td><td>${weightKg.toFixed(2)} kg</td><td></td></tr>
+      <tr><td>Rate</td><td>${money(rate)} / kg / day</td><td></td></tr>
+      ${s.minimumApplied?`<tr><td>Calculated (${s.billableDays} day(s) × ${weightKg.toFixed(2)}kg × ${money(rate)})</td><td>Below minimum</td><td>${money(s.rawCharge)}</td></tr>
+      <tr><td>Minimum storage charge applied</td><td></td><td>${money(storageSettings.minimum_charge)}</td></tr>`:''}
+      <tr class="total-row"><td colspan="2">Total due</td><td>${money(s.charge)}</td></tr>
+    </table>
+    ${it.notes?`<div class="notes"><strong>Notes:</strong> ${esc(it.notes)}</div>`:''}
+
+    <div class="sign"><div>Received by (name &amp; signature)</div><div>Date</div></div>
+  </body></html>`;
+
+  const w=window.open('','_blank');
+  if(!w){alert('Please allow pop-ups to print the invoice.');return;}
+  w.document.open();w.document.write(html);w.document.close();
 }
 
 // ── Export ──
