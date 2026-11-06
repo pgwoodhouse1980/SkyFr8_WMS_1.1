@@ -105,16 +105,16 @@ tr:hover td{background:var(--off);}
 
 <main>
   <div class="nav" id="main-nav">
-    <button class="active" onclick="showTab('cargo')">📦 Cargo</button>
+    <button class="active" onclick="showTab('flights')">✈ Flights</button>
+    <button onclick="showTab('cargo')">📦 Shipments</button>
     <button onclick="showTab('delivery')">🚚 Delivery</button>
-    <button onclick="showTab('storage')">🏷 Customs Storage</button>
-    <button onclick="showTab('flights')">✈ Flights</button>
+    <button onclick="showTab('storage')">🏷 Courier Storage</button>
     <button onclick="showTab('inventory')">📊 Inventory</button>
     <button onclick="showTab('reports')">📈 Reports</button>
-    <button onclick="showTab('bin')" id="bin-tab-btn">🗑 Recycle bin</button>
-    <button class="admin-only" onclick="showTab('users')" style="display:none;">👥 Users</button>
     <button class="admin-only" onclick="showTab('actlog')" style="display:none;">📋 Activity log</button>
     <button class="admin-only" onclick="showTab('backup')" style="display:none;">🗂 Data Management</button>
+    <button class="admin-only" onclick="showTab('users')" style="display:none;">👥 Users</button>
+    <button onclick="showTab('bin')" id="bin-tab-btn">🗑 Recycle bin</button>
   </div>
 
   <div class="metrics">
@@ -124,12 +124,12 @@ tr:hover td{background:var(--off);}
     <div class="metric"><div class="ml">Delivered</div><div class="mv" id="m-delivered" style="color:var(--pvt)">—</div></div>
   </div>
 
-  <!-- CARGO TAB -->
-  <div id="tab-cargo">
+  <!-- SHIPMENTS TAB -->
+  <div id="tab-cargo" class="sh">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div class="card-title" style="margin-bottom:0;">➕ Add air cargo</div>
-        <button class="btn" onclick="toggleAddCargoForm()" id="add-cargo-toggle-btn">+ Add Cargo</button>
+        <button class="btn" onclick="toggleAddCargoForm()" id="add-cargo-toggle-btn">+ Add Shipment</button>
       </div>
       <div id="add-cargo-form-wrap" style="display:none;margin-top:1rem;">
       <div class="fg">
@@ -159,7 +159,7 @@ tr:hover td{background:var(--off);}
         <div class="fgrp"><label>Country <span class="rs">*</span></label><input id="f-c-country" placeholder="Jamaica" class="req"/><span id="err-c-country" class="ferr"></span></div>
       </div>
 
-      <div class="fsec">Cargo Details</div>
+      <div class="fsec">Shipment Details</div>
       <div class="fg">
         <div class="fgrp"><label>Description / commodity <span class="rs">*</span></label><input id="f-desc" placeholder="Electronics, spare parts..." class="req" oninput="checkConsolidation('f-desc','f-consolidation-section')"/><span id="err-desc" class="ferr"></span></div>
         <div class="fgrp"><label>Cargo type <span class="rs">*</span></label>
@@ -216,11 +216,11 @@ tr:hover td{background:var(--off);}
       </div>
 
       <div id="form-msg" class="fmsg"></div>
-      <button class="btn" onclick="addCargo()">💾 Save cargo</button>
+      <button class="btn" onclick="addCargo()">💾 Save shipment</button>
       </div>
     </div>
 
-    <button id="float-save-btn" class="btn" onclick="addCargo()" style="display:none;position:fixed;bottom:24px;right:24px;z-index:500;padding:12px 22px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);">💾 Save cargo</button>
+    <button id="float-save-btn" class="btn" onclick="addCargo()" style="display:none;position:fixed;bottom:24px;right:24px;z-index:500;padding:12px 22px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);">💾 Save shipment</button>
 
     <div class="card">
       <div class="card-title">📋 All shipments</div>
@@ -320,7 +320,7 @@ tr:hover td{background:var(--off);}
     </div>
   </div>
 
-  <!-- CUSTOMS STORAGE TAB (uncleared courier shipments + storage billing) -->
+  <!-- COURIER STORAGE TAB (uncleared courier shipments + storage billing) -->
   <div id="tab-storage" class="sh">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -460,7 +460,7 @@ tr:hover td{background:var(--off);}
   </div>
 
   <!-- FLIGHTS TAB -->
-  <div id="tab-flights" class="sh">
+  <div id="tab-flights">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div class="card-title" style="margin-bottom:0;">✈ Add flight routing</div>
@@ -657,7 +657,7 @@ tr:hover td{background:var(--off);}
       <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Editing record</div><div id="edit-awb-label" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--navy);"></div></div>
       <button onclick="closeEdit()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
     </div>
-    <div class="fsec">Cargo Details</div>
+    <div class="fsec">Shipment Details</div>
     <div class="fg">
       <div class="fgrp"><label>Description / commodity <span class="rs">*</span></label><input id="e-desc" class="req" oninput="checkConsolidation('e-desc','e-consolidation-section')"/><span id="eerr-desc" class="ferr"></span></div>
       <div class="fgrp"><label>Cargo type <span class="rs">*</span></label>
@@ -1336,7 +1336,7 @@ function toggleAddCargoForm(){
   const btn=document.getElementById('add-cargo-toggle-btn');
   const open = wrap.style.display==='none';
   wrap.style.display=open?'block':'none';
-  btn.textContent=open?'✕ Close':'+ Add Cargo';
+  btn.textContent=open?'✕ Close':'+ Add Shipment';
   document.getElementById('float-save-btn').style.display=open?'block':'none';
   const legsWrap=document.getElementById('f-legs-wrap');
   if(open&&legsWrap&&!legsWrap.querySelector('.leg-row')){addLegRow('f-legs-wrap');updateLegTotals();}
@@ -2272,7 +2272,7 @@ function exportCSV(){
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='aircargo_report.csv';a.click();
 }
 
-// ── CUSTOMS STORAGE (uncleared courier shipments + storage billing) ──
+// ── COURIER STORAGE (uncleared courier shipments + storage billing) ──
 let courierStorage=[];
 let storageSettings={rate_per_kg_per_day:0,free_days:3,minimum_charge:3000,open_weekdays:[1,2,3,4,5],holidays:[]};
 let editingStorageId=null;
@@ -2334,9 +2334,9 @@ function computeStorage(item){
   const minimumApplied=billableDays>0&&minCharge>rawCharge;
   return {daysElapsed,freeDays,billableDays,rawCharge,charge,minimumApplied};
 }
-// ── MAWB → Cargo arrival-date lookup ──
+// ── MAWB → Shipments arrival-date lookup ──
 // The two modules share the MAWB number: once a shipment is confirmed Arrived
-// in the Cargo module, its arrival date drives Customs Storage billing too.
+// in Shipments, its arrival date drives Courier Storage billing too.
 let stManualOverride=false, steManualOverride=false;
 function mawbLookupInfo(mawb){
   const needle=(mawb||'').trim().toLowerCase();
@@ -2365,26 +2365,26 @@ function applyStorageMawbLookup(prefix){
     return;
   }
   if(info.state==='not_found'){
-    mawbHint.innerHTML='<span style="color:var(--wt);">No matching AWB in the Cargo module yet.</span>';
-    arrHint.innerHTML='<span style="color:var(--wt);">⚠ Manual entry — will sync once this MAWB shows Arrived or Delivered in Cargo.</span>';
+    mawbHint.innerHTML='<span style="color:var(--wt);">No matching AWB in Shipments yet.</span>';
+    arrHint.innerHTML='<span style="color:var(--wt);">⚠ Manual entry — will sync once this MAWB shows Arrived or Delivered in Shipments.</span>';
     arrEl.readOnly=false;arrEl.style.background='';
     return;
   }
   if(info.state==='pending'){
-    mawbHint.innerHTML=`<span style="color:var(--wt);">Found in Cargo, but not yet marked Arrived or Delivered (currently "${info.status}").</span>`;
-    arrHint.innerHTML='<span style="color:var(--wt);">⚠ Manual entry — will sync once Cargo confirms arrival or delivery.</span>';
+    mawbHint.innerHTML=`<span style="color:var(--wt);">Found in Shipments, but not yet marked Arrived or Delivered (currently "${info.status}").</span>`;
+    arrHint.innerHTML='<span style="color:var(--wt);">⚠ Manual entry — will sync once Shipments confirms arrival or delivery.</span>';
     arrEl.readOnly=false;arrEl.style.background='';
     return;
   }
   // matched
-  mawbHint.innerHTML='<span style="color:var(--st);">✓ Matched to Cargo — confirmed Arrived.</span>';
+  mawbHint.innerHTML='<span style="color:var(--st);">✓ Matched to Shipments — confirmed Arrived.</span>';
   if(manualOverride){
-    arrHint.innerHTML=`<span style="color:var(--wt);">Manual override. Cargo shows arrival on ${formatDate(info.eta)}. <a href="#" onclick="event.preventDefault();${prefix==='st'?'stManualOverride':'steManualOverride'}=false;applyStorageMawbLookup('${prefix}');" style="color:var(--sky);">Use Cargo date</a></span>`;
+    arrHint.innerHTML=`<span style="color:var(--wt);">Manual override. Shipments shows arrival on ${formatDate(info.eta)}. <a href="#" onclick="event.preventDefault();${prefix==='st'?'stManualOverride':'steManualOverride'}=false;applyStorageMawbLookup('${prefix}');" style="color:var(--sky);">Use Shipments date</a></span>`;
     arrEl.readOnly=false;arrEl.style.background='';
   }else{
     arrEl.value=info.eta;
     arrEl.readOnly=true;arrEl.style.background='var(--sbg)';
-    arrHint.innerHTML=`<span style="color:var(--st);">✓ Synced from Cargo (confirmed Arrived ${formatDate(info.eta)}). <a href="#" onclick="event.preventDefault();${prefix==='st'?'stManualOverride':'steManualOverride'}=true;applyStorageMawbLookup('${prefix}');" style="color:var(--sky);">Enter manually instead</a></span>`;
+    arrHint.innerHTML=`<span style="color:var(--st);">✓ Synced from Shipments (confirmed Arrived ${formatDate(info.eta)}). <a href="#" onclick="event.preventDefault();${prefix==='st'?'stManualOverride':'steManualOverride'}=true;applyStorageMawbLookup('${prefix}');" style="color:var(--sky);">Enter manually instead</a></span>`;
   }
 }
 
@@ -2491,11 +2491,11 @@ function renderStorageTable(){
     if(released){
       arrivedCell=formatDate(it.date_arrived); // frozen record; not worth flagging
     }else if(info.state==='matched'&&info.eta===it.date_arrived){
-      arrivedCell=`${formatDate(it.date_arrived)} <span style="color:var(--st);" title="Synced with Cargo">✓</span>`;
+      arrivedCell=`${formatDate(it.date_arrived)} <span style="color:var(--st);" title="Synced with Shipments">✓</span>`;
     }else if(info.state==='matched'&&info.eta!==it.date_arrived){
-      arrivedCell=`${formatDate(it.date_arrived)}<br><button class="btn-edit" style="font-size:10px;padding:2px 6px;color:var(--dt);border-color:var(--dt);" onclick="quickSyncStorageArrival('${it.id}')" title="Cargo now shows Arrived ${formatDate(info.eta)}">⚠ Sync to ${formatDate(info.eta)}</button>`;
+      arrivedCell=`${formatDate(it.date_arrived)}<br><button class="btn-edit" style="font-size:10px;padding:2px 6px;color:var(--dt);border-color:var(--dt);" onclick="quickSyncStorageArrival('${it.id}')" title="Shipments now shows Arrived ${formatDate(info.eta)}">⚠ Sync to ${formatDate(info.eta)}</button>`;
     }else{
-      arrivedCell=`${formatDate(it.date_arrived)}<br><span style="font-size:10px;color:var(--wt);">⚠ ${info.state==='not_found'?'not in Cargo':'not yet Arrived/Delivered'}</span>`;
+      arrivedCell=`${formatDate(it.date_arrived)}<br><span style="font-size:10px;color:var(--wt);">⚠ ${info.state==='not_found'?'not in Shipments':'not yet Arrived/Delivered'}</span>`;
     }
     return `<tr>
       <td>${it.courier||'—'}</td>
@@ -2690,7 +2690,7 @@ function printStorageInvoice(id){
     <div class="print-bar"><button onclick="window.print()">🖨 Print</button></div>
     <div class="letterhead"><img src="${SKYFR8_LOGO_DATAURI}" alt="Sky Fr8 Limited"/></div>
     <div class="inv-meta">
-      <div><h1>CUSTOMS STORAGE INVOICE</h1><div class="num">${esc(invNo)}</div></div>
+      <div><h1>COURIER STORAGE INVOICE</h1><div class="num">${esc(invNo)}</div></div>
       <div class="right">Invoice date: ${formatDate(todayISO())}<br><span class="status-tag">${esc(asOfLabel)}</span></div>
     </div>
 
