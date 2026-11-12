@@ -342,6 +342,29 @@ def get_session():
 def track():
     return send_from_directory("templates", "track.html")
 
+# Lets search engines index the public tracking page while keeping the
+# staff portal (login-gated, no public value) out of search results.
+@app.route("/robots.txt")
+def robots_txt():
+    body = (
+        "User-agent: *\n"
+        "Disallow: /\n"
+        "Allow: /track\n"
+        "Allow: /static/\n"
+        "Sitemap: https://skyfr8wms11.up.railway.app/sitemap.xml\n"
+    )
+    return app.response_class(body, mimetype="text/plain")
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        "  <url><loc>https://skyfr8wms11.up.railway.app/track</loc></url>\n"
+        "</urlset>\n"
+    )
+    return app.response_class(body, mimetype="application/xml")
+
 # ── PUBLIC TRACKING (no login required) ───────────────
 # Exposes only what the customer-facing /track page actually displays —
 # no declared value, warehouse bay, internal remarks, or staff notification
@@ -356,25 +379,48 @@ _TRACK_PUBLIC_FIELDS = [
 
 _TRACK_PUBLIC_LEG_FIELDS = ["flight","eta","airline","pol","pod","asycuda","pcs_manifested","pcs_received","status"]
 
+def _track_norm(s):
+    return re.sub(r"[\s\-\+]", "", (s or "")).lower()
+
+def _track_public_row(s):
+    row = {k: s.get(k, "") for k in _TRACK_PUBLIC_FIELDS}
+    row["hawbs"] = [
+        {k: h.get(k, "") for k in ("hawb","consignee","commodity","pcs")}
+        for h in s.get("hawbs", [])
+    ]
+    legs = s.get("legs")
+    if isinstance(legs, list) and legs:
+        # Part-shipments: expose each flight leg (no warehouse bay — internal only)
+        row["legs"] = [
+            {k: leg.get(k, "") for k in _TRACK_PUBLIC_LEG_FIELDS}
+            for leg in legs
+        ]
+    return row
+
+# Public and unauthenticated, so this only ever returns shipments that match
+# the caller's own search — never the full book of business. Without a query
+# it returns nothing, rather than handing every customer's name/phone/address
+# to anyone who hits the endpoint.
 @app.route("/api/track/shipments", methods=["GET"])
 def track_shipments_public():
+    q = (request.args.get("q") or "").strip()
+    if not q:
+        return jsonify([])
     shipments = load_shipments()
-    public = []
+    qn = _track_norm(q)
+
+    # Exact AWB match
+    exact = next((s for s in shipments if _track_norm(s.get("awb")) == qn), None)
+    if exact:
+        return jsonify([_track_public_row(exact)])
+
+    # HAWB match
     for s in shipments:
-        row = {k: s.get(k, "") for k in _TRACK_PUBLIC_FIELDS}
-        row["hawbs"] = [
-            {k: h.get(k, "") for k in ("hawb","consignee","commodity","pcs")}
-            for h in s.get("hawbs", [])
-        ]
-        legs = s.get("legs")
-        if isinstance(legs, list) and legs:
-            # Part-shipments: expose each flight leg (no warehouse bay — internal only)
-            row["legs"] = [
-                {k: leg.get(k, "") for k in _TRACK_PUBLIC_LEG_FIELDS}
-                for leg in legs
-            ]
-        public.append(row)
-    return jsonify(public)
+        for h in s.get("hawbs", []):
+            if _track_norm(h.get("hawb")) == qn:
+                return jsonify([_track_public_row(s)])
+
+    return jsonify([])
 
 # ── SHIPMENTS ──────────────────────────────────────────
 @app.route("/api/shipments", methods=["GET"])
