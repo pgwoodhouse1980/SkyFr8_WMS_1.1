@@ -4,6 +4,34 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Sky Fr8 Limited — Track Your Shipment</title>
+<meta name="description" content="Track your Sky Fr8 Limited air cargo shipment in real time. Enter your Air Waybill (AWB) number to get live status, flight details, and estimated arrival."/>
+<link rel="canonical" href="https://skyfr8wms11.up.railway.app/track"/>
+<!-- Open Graph / social preview -->
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Sky Fr8 Limited"/>
+<meta property="og:title" content="Sky Fr8 Limited — Track Your Shipment"/>
+<meta property="og:description" content="Enter your Air Waybill (AWB) number to get a live update on your Sky Fr8 shipment."/>
+<meta property="og:url" content="https://skyfr8wms11.up.railway.app/track"/>
+<meta property="og:image" content="https://skyfr8wms11.up.railway.app/static/sky-fr8-logo.png"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Sky Fr8 Limited — Track Your Shipment"/>
+<meta name="twitter:description" content="Enter your Air Waybill (AWB) number to get a live update on your Sky Fr8 shipment."/>
+<meta name="twitter:image" content="https://skyfr8wms11.up.railway.app/static/sky-fr8-logo.png"/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Sky Fr8 Limited",
+  "url": "https://skyfr8wms11.up.railway.app/",
+  "logo": "https://skyfr8wms11.up.railway.app/static/sky-fr8-logo.png",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "13 West Avenue, Kingston Gardens",
+    "addressLocality": "Kingston 4",
+    "addressCountry": "JM"
+  }
+}
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -222,30 +250,29 @@ async function trackShipment(){
   res.innerHTML='<div style="text-align:center;padding:2rem;color:var(--tm);">Searching...</div>';
   res.style.display='block';how.style.display='none';
 
-  let shipments=[];
+  // The server only ever returns a shipment matching this exact AWB/HAWB —
+  // it never hands back the full shipment list, so no other customer's
+  // details pass through the browser along the way.
+  let matches=[];
   try{
-    const r=await fetch('/api/track/shipments');
+    const r=await fetch('/api/track/shipments?q='+encodeURIComponent(q));
     if(!r.ok) throw new Error('HTTP '+r.status);
-    shipments=await r.json();
-    if(!Array.isArray(shipments)) throw new Error('Unexpected response');
+    matches=await r.json();
+    if(!Array.isArray(matches)) throw new Error('Unexpected response');
   }catch(e){
     res.innerHTML='<div class="nf"><h3>Connection error</h3><p>Could not connect to the server. Please try again or contact us.</p></div>';
     return;
   }
 
-  // 1. Exact AWB match
-  let found=shipments.find(c=>norm(c.awb)===norm(q));
-
-  // 2. HAWB match
-  let foundHawb=null;
-  if(!found){
-    for(const c of shipments){
-      if(c.hawbs&&c.hawbs.length){const h=c.hawbs.find(x=>norm(x.hawb)===norm(q));if(h){found=c;foundHawb=h;break;}}
-    }
-  }
-
-  // 3. Nothing found
+  const found=matches[0];
   if(found){
+    // A match is either an exact AWB hit or an exact HAWB hit — figure out
+    // which, so the card labels it correctly (and shows the right
+    // consignee/description/pieces, which differ for a house AWB).
+    let foundHawb=null;
+    if(norm(found.awb)!==norm(q)&&found.hawbs&&found.hawbs.length){
+      foundHawb=found.hawbs.find(h=>norm(h.hawb)===norm(q))||null;
+    }
     res.innerHTML=buildShipmentHTML(found,foundHawb,q);
     return;
   }
@@ -254,6 +281,18 @@ async function trackShipment(){
 }
 
 document.getElementById('awb-input').addEventListener('keydown',e=>{if(e.key==='Enter')trackShipment();});
+
+// Deep-link support: /track?awb=175-12345678 (or ?q=) prefills and runs the
+// search automatically, so a link or QR code can take someone straight to
+// their shipment instead of making them retype the number.
+(function(){
+  const params=new URLSearchParams(window.location.search);
+  const deepLinkQ=params.get('awb')||params.get('q');
+  if(deepLinkQ){
+    document.getElementById('awb-input').value=deepLinkQ;
+    trackShipment();
+  }
+})();
 </script>
 <button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" style="display:none;position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--navy);color:white;border:none;box-shadow:0 4px 16px rgba(0,0,0,0.25);cursor:pointer;font-size:18px;z-index:1500;align-items:center;justify-content:center;">↑</button>
 <script>
