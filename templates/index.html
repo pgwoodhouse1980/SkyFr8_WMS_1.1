@@ -239,15 +239,15 @@ tr:hover td{background:var(--off);}
       <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--wbg);border:1px solid #F0D070;border-radius:var(--r);margin-bottom:1rem;">
         <span style="font-size:13px;color:var(--wt);font-weight:500;">🛃 Overdue for customs —</span>
         <span style="font-size:13px;color:var(--wt);">Show Arrived shipments in warehouse more than</span>
-        <input type="number" id="filter-overdue-days" min="1" placeholder="e.g. 7" oninput="filterCargo()" style="width:70px;padding:5px 8px;border:1px solid #D0A800;border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--wt);background:white;text-align:center;"/>
-        <span style="font-size:13px;color:var(--wt);">days</span>
+        <input type="number" id="filter-overdue-days" min="1" placeholder="e.g. 3" oninput="filterCargo()" style="width:70px;padding:5px 8px;border:1px solid #D0A800;border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--wt);background:white;text-align:center;"/>
+        <span style="font-size:13px;color:var(--wt);">business days (weekends excluded)</span>
         <button onclick="document.getElementById('filter-overdue-days').value='';filterCargo();" style="padding:4px 10px;border:1px solid #D0A800;border-radius:var(--r);background:transparent;color:var(--wt);font-size:12px;cursor:pointer;">✕</button>
       </div>
       <div id="filter-summary" style="font-size:12px;color:var(--ts);margin-bottom:.75rem;display:none;"></div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>AWB</th><th>Consignee</th><th>Flight</th><th>Route</th><th>Manifested</th><th>On-hand</th><th>Status</th><th>Bay(s)</th><th></th><th></th></tr></thead>
-          <tbody id="cargo-table"><tr><td colspan="10" class="loading">Loading shipments...</td></tr></tbody>
+          <thead><tr><th>AWB</th><th>Consignee</th><th>Flight</th><th>Route</th><th>Manifested</th><th>On-hand</th><th>Weight</th><th>Status</th><th>Bay(s)</th><th></th><th></th></tr></thead>
+          <tbody id="cargo-table"><tr><td colspan="11" class="loading">Loading shipments...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -885,7 +885,7 @@ async function loadCargos(){
     buildCollectorIndex();
     if(document.getElementById('storage-table'))renderStorageTable(); // keep MAWB→arrival sync indicators current
   }
-  catch(e){document.getElementById('cargo-table').innerHTML='<tr><td colspan="10" style="text-align:center;color:#C0392B;padding:1.5rem;">Could not connect to server. Make sure server.py is running.</td></tr>';}
+  catch(e){document.getElementById('cargo-table').innerHTML='<tr><td colspan="11" style="text-align:center;color:#C0392B;padding:1.5rem;">Could not connect to server. Make sure server.py is running.</td></tr>';}
 }
 
 // ── KNOWN COLLECTORS (autofill ID for repeat collectors) ──
@@ -952,21 +952,25 @@ function legsForCargo(c){
 
 function renderTable(data,overdueDays){
   const tb=document.getElementById('cargo-table');
-  if(!data.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--tm);padding:1.5rem;">No shipments found.</td></tr>';return;}
-  const today=new Date();today.setHours(0,0,0,0);
-  const daysSince=d=>{const fd=new Date(d);fd.setHours(0,0,0,0);return Math.floor((today-fd)/(1000*60*60*24));};
+  if(!data.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--tm);padding:1.5rem;">No shipments found.</td></tr>';return;}
+  const asOf=todayISO();
+  // Business days elapsed since arrival — skips weekends (and any logged holidays),
+  // same rule the Courier Storage tab uses, via businessDaysElapsed().
+  const daysSince=d=>businessDaysElapsed(d,asOf);
   tb.innerHTML=data.map(c=>{
     const legs=Array.isArray(c.legs)?c.legs:[];
     const multiLeg=legs.length>1;
     const safeAwb=cssEscape(c.awb);
     const baysHtml=(c.bays&&c.bays.length)?c.bays.map(b=>`<div style="font-size:10px;color:var(--ts);">${b.location}${b.pieces?` (${b.pieces} pcs)`:''}</div>`).join(''):(c.bay?`<div style="font-size:11px;">${c.bay}</div>`:'—');
+    const weightHtml=c.gw!=null&&c.gw!==''?`${parseFloat(c.gw).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} kg`:'—';
 
     // Days-in-warehouse / overdue: computed from every ARRIVED leg (or the shipment
     // itself for legacy single-flight records), not just one shipment-level date.
+    // Counted in business days (weekends/holidays excluded) to match the free-storage window.
     const arrivedDates=multiLeg?legs.filter(l=>l.status==='Arrived'&&l.eta).map(l=>l.eta):((c.status==='Arrived'||c.status==='Partially arrived')&&c.eta?[c.eta]:[]);
     let maxDays=0;arrivedDates.forEach(d=>{const n=daysSince(d);if(n>maxDays)maxDays=n;});
     const rowOverdue=!!(overdueDays&&maxDays>overdueDays);
-    const daysTag=maxDays>0?`<div style="font-size:10px;color:${rowOverdue?'var(--wt)':'var(--tm)'};">${maxDays} day${maxDays!==1?'s':''} in warehouse</div>`:'';
+    const daysTag=maxDays>0?`<div style="font-size:10px;color:${rowOverdue?'var(--wt)':'var(--tm)'};">${maxDays} business day${maxDays!==1?'s':''} in warehouse</div>`:'';
     const rowStyle=rowOverdue?'background:var(--wbg);':'';
 
     const flightCell=multiLeg
@@ -979,6 +983,7 @@ function renderTable(data,overdueDays){
       <td><div style="font-weight:500;">${c.cname}</div><div style="font-size:10px;color:var(--ts)">${c.cphone||''}</div></td>
       <td>${flightCell}</td><td>${routeCell}</td>
       <td>${c.pcs_manifested}</td><td>${c.pcs_received!=null?Math.max(0,(c.pcs_received||0)-(c.pcs_delivered||0)):'—'}</td>
+      <td>${weightHtml}</td>
       <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${c.status==='Delivered'?`<div style="font-size:10px;color:var(--pvt);margin-top:2px;">${c.pcs_delivered} pcs·${formatDate(c.date_delivered)}${c.collector_name?` · ${c.collector_name}`:''}</div>`:''}${c.status==='In customs'?`<div style="font-size:10px;color:var(--ct);margin-top:2px;">Moved ${formatDate(c.customs_removed_date)}${c.customs_removed_note?` · ${c.customs_removed_note}`:''}</div>`:''}${daysTag}</td>
       <td>${baysHtml}</td>
       <td><button class="btn-edit" onclick="openEdit('${c.awb}')">✏️ Edit</button></td>
@@ -996,10 +1001,10 @@ function renderTable(data,overdueDays){
           <div><span class="badge ${badgeCls(l.status)}" style="font-size:10px;">${l.status}</span></div>
           ${l.status==='Arrived'?`<div>${l.pcs_received||0} received</div>`:''}
           ${l.bay?`<div>Bay: ${l.bay}</div>`:''}
-          ${lDays>0?`<div style="color:var(--tm);">${lDays} day${lDays!==1?'s':''} in warehouse</div>`:''}
+          ${lDays>0?`<div style="color:var(--tm);">${lDays} business day${lDays!==1?'s':''} in warehouse</div>`:''}
         </div>`;
       }).join('');
-      row+=`<tr id="legs-detail-${safeAwb}" style="display:none;background:var(--off);"><td colspan="10" style="padding:4px 16px;">${legsHtml}</td></tr>`;
+      row+=`<tr id="legs-detail-${safeAwb}" style="display:none;background:var(--off);"><td colspan="11" style="padding:4px 16px;">${legsHtml}</td></tr>`;
     }
     return row;
   }).join('');
@@ -1011,7 +1016,7 @@ function filterCargo(){
   const date=document.getElementById('filter-date').value;
   const status=document.getElementById('filter-status').value;
   const overdueDays=parseInt(document.getElementById('filter-overdue-days').value);
-  const today=new Date();today.setHours(0,0,0,0);
+  const asOf=todayISO();
   const filtered=cargos.filter(c=>{
     const legs=Array.isArray(c.legs)?c.legs:[];
     const mQ=!q||c.awb.toLowerCase().includes(q)||c.cname.toLowerCase().includes(q)||c.status.toLowerCase().includes(q)||c.pod.toLowerCase().includes(q)||c.airline.toLowerCase().includes(q);
@@ -1022,7 +1027,8 @@ function filterCargo(){
     if(!isNaN(overdueDays)&&overdueDays>0){
       if(c.status!=='Arrived'&&c.status!=='Partially arrived')return false;
       const arrivedDates=legs.length?legs.filter(l=>l.status==='Arrived'&&l.eta).map(l=>l.eta):(c.eta?[c.eta]:[]);
-      mO=arrivedDates.some(d=>{const fd=new Date(d);fd.setHours(0,0,0,0);return Math.floor((today-fd)/(1000*60*60*24))>overdueDays;});
+      // Business days elapsed (weekends/holidays excluded) — same rule as the free-storage window.
+      mO=arrivedDates.some(d=>businessDaysElapsed(d,asOf)>overdueDays);
     }
     return mQ&&mF&&mD&&mS&&mO;
   });
@@ -1032,7 +1038,7 @@ function filterCargo(){
   if(flight)parts.push(`Flight: <strong>${flight.toUpperCase()}</strong>`);
   if(date)parts.push(`Date: <strong>${date}</strong>`);
   if(status)parts.push(`Status: <strong>${status}</strong>`);
-  if(!isNaN(overdueDays)&&overdueDays>0)parts.push(`<span style="color:var(--wt);">⚠ Overdue >${overdueDays} days: <strong>${filtered.length} shipment${filtered.length!==1?'s':''}</strong></span>`);
+  if(!isNaN(overdueDays)&&overdueDays>0)parts.push(`<span style="color:var(--wt);">⚠ Overdue >${overdueDays} business days: <strong>${filtered.length} shipment${filtered.length!==1?'s':''}</strong></span>`);
   if(parts.length){summary.innerHTML=`Showing ${filtered.length} of ${cargos.length} — ${parts.join(' · ')}`;summary.style.display='block';}
   else summary.style.display='none';
 }
