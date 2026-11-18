@@ -26,6 +26,7 @@ ACTLOG_FILE  = os.path.join(os.path.dirname(__file__), "data", "activity_log.jso
 ACTLOG_MAX_ENTRIES = 5000
 STORAGE_FILE          = os.path.join(os.path.dirname(__file__), "data", "courier_storage.json")
 STORAGE_SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "data", "storage_settings.json")
+CUSTOMERS_FILE        = os.path.join(os.path.dirname(__file__), "data", "customers.json")
 
 BACKUP_FILES = {
     "shipments.json": DATA_FILE,
@@ -35,6 +36,7 @@ BACKUP_FILES = {
     "activity_log.json": ACTLOG_FILE,
     "courier_storage.json": STORAGE_FILE,
     "storage_settings.json": STORAGE_SETTINGS_FILE,
+    "customers.json": CUSTOMERS_FILE,
 }
 PRE_RESTORE_DIR = os.path.join(os.path.dirname(__file__), "data", "pre_restore_backups")
 
@@ -63,6 +65,8 @@ def save_bin(d): save_json(BIN_FILE, d)
 
 def load_courier_storage(): return load_json(STORAGE_FILE)
 def save_courier_storage(d): save_json(STORAGE_FILE, d)
+def load_customers(): return load_json(CUSTOMERS_FILE)
+def save_customers(d): save_json(CUSTOMERS_FILE, d)
 
 # Jamaica's standard public holidays, pre-loaded as a starting point for the
 # storage-fee business-day calendar. Weekend-dated holidays are included too
@@ -658,6 +662,57 @@ def update_storage_settings():
     settings.update(data)
     save_storage_settings(settings)
     log_activity("EDIT_STORAGE_SETTINGS")
+    return jsonify({"success": True})
+
+# ── CUSTOMERS (CRM) ────────────────────────────────────
+@app.route("/api/customers", methods=["GET"])
+def get_customers():
+    if not is_logged_in(): return jsonify({"error": "Unauthorised"}), 401
+    return jsonify(load_customers())
+
+@app.route("/api/customers", methods=["POST"])
+def add_customer():
+    if not is_logged_in(): return jsonify({"error": "Unauthorised"}), 401
+    customers = load_customers()
+    new = request.get_json()
+    company = (new.get("company") or "").strip()
+    if not company:
+        return jsonify({"error": "Customer name is required."}), 400
+    if any((c.get("company") or "").lower() == company.lower() for c in customers):
+        return jsonify({"error": "A customer with this name already exists."}), 409
+    new["company"] = company
+    new["id"] = secrets.token_hex(8)
+    new.setdefault("created", datetime.now().isoformat())
+    customers.append(new)
+    save_customers(customers)
+    log_activity("ADD_CUSTOMER", company)
+    return jsonify({"success": True, "id": new["id"]}), 201
+
+@app.route("/api/customers/<cid>", methods=["PUT"])
+def update_customer(cid):
+    if not is_logged_in(): return jsonify({"error": "Unauthorised"}), 401
+    customers = load_customers()
+    data = request.get_json()
+    if "company" in data and not (data.get("company") or "").strip():
+        return jsonify({"error": "Customer name is required."}), 400
+    for i, c in enumerate(customers):
+        if c.get("id") == cid:
+            customers[i].update(data)
+            save_customers(customers)
+            log_activity("EDIT_CUSTOMER", customers[i].get("company", cid))
+            return jsonify({"success": True})
+    return jsonify({"error": "Customer not found."}), 404
+
+@app.route("/api/customers/<cid>", methods=["DELETE"])
+def delete_customer(cid):
+    if not is_logged_in(): return jsonify({"error": "Unauthorised"}), 401
+    customers = load_customers()
+    deleted = next((c for c in customers if c.get("id") == cid), None)
+    new_list = [c for c in customers if c.get("id") != cid]
+    if len(new_list) == len(customers):
+        return jsonify({"error": "Customer not found."}), 404
+    save_customers(new_list)
+    log_activity("DELETE_CUSTOMER", deleted.get("company", cid) if deleted else cid)
     return jsonify({"success": True})
 
 # ── USERS (admin only) ────────────────────────────────
