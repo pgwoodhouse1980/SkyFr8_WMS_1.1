@@ -111,6 +111,7 @@ tr:hover td{background:var(--off);}
     <button onclick="showTab('storage')">🏷 Courier Storage</button>
     <button onclick="showTab('inventory')">📊 Inventory</button>
     <button onclick="showTab('reports')">📈 Reports</button>
+    <button onclick="showTab('customers')">📇 Customers</button>
     <button class="admin-only" onclick="showTab('actlog')" style="display:none;">📋 Activity log</button>
     <button class="admin-only" onclick="showTab('backup')" style="display:none;">🗂 Data Management</button>
     <button class="admin-only" onclick="showTab('users')" style="display:none;">👥 Users</button>
@@ -526,6 +527,25 @@ tr:hover td{background:var(--off);}
     </div>
   </div>
 
+  <!-- CUSTOMERS TAB (CRM) -->
+  <div id="tab-customers" class="sh">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1rem;">
+        <div class="card-title" style="margin-bottom:0;">📇 Customers</div>
+        <button class="btn" onclick="openCustomerModal()">+ Add customer</button>
+      </div>
+      <div class="sbar">
+        <input type="text" id="cust-search" oninput="renderCustomersTable()" placeholder="Search by customer, contact, email or phone..."/>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Customer</th><th>Contact</th><th>Phone</th><th>Email</th><th>Shipments</th><th>Manifested</th><th>Arrived</th><th>Delivered</th><th>Total weight</th><th></th><th></th></tr></thead>
+          <tbody id="customers-table"><tr><td colspan="11" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- RECYCLE BIN TAB -->
   <div id="tab-bin" class="sh">
     <div class="card">
@@ -646,6 +666,59 @@ tr:hover td{background:var(--off);}
     <div style="display:flex;gap:8px;margin-top:1rem;">
       <button class="btn" onclick="saveUser()">Save</button>
       <button class="btn btn-sec" onclick="closeUserModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER MODAL -->
+<div id="cust-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1000;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:white;border-radius:var(--rl);max-width:460px;margin:0 auto;padding:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;" id="cust-modal-mode">Add new customer</div><div id="cust-modal-title" style="font-size:18px;font-weight:600;color:var(--navy);">New customer</div></div>
+      <button onclick="closeCustomerModal()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
+    </div>
+    <div id="cm-msg" class="fmsg" style="display:none;"></div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Customer <span class="rs">*</span></label>
+      <input id="cm-company" placeholder="e.g. Reliable Couriers"/>
+      <span class="hint">Matched against the Consignee name on shipments.</span>
+      <span id="cm-err-company" class="ferr"></span>
+    </div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Contact person</label>
+      <input id="cm-contact" placeholder="e.g. Jane Smith"/>
+    </div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Phone</label>
+      <input id="cm-phone" placeholder="e.g. 876-555-0100"/>
+    </div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Email</label>
+      <input id="cm-email" type="email" placeholder="e.g. jane@example.com"/>
+    </div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Notes</label>
+      <textarea id="cm-notes" rows="3" placeholder="Anything worth remembering about this customer"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1rem;">
+      <button class="btn" onclick="saveCustomer()">Save</button>
+      <button class="btn btn-sec" onclick="closeCustomerModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER SHIPMENT HISTORY MODAL -->
+<div id="cust-history-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1000;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:white;border-radius:var(--rl);max-width:900px;margin:0 auto;padding:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div style="font-size:18px;font-weight:600;color:var(--navy);" id="ch-title">Shipment history</div>
+      <button onclick="closeCustomerHistory()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>AWB</th><th>Flight</th><th>ETA</th><th>Status</th><th>Pieces</th><th>Weight</th><th>Commodity</th><th>Customs</th></tr></thead>
+        <tbody id="ch-table"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -2786,7 +2859,7 @@ async function emptyBin(){
 
 // ── SHOW TAB ──────────────────────────────────────────
 function showTab(tab){
-  ['cargo','delivery','storage','flights','inventory','reports','bin','users','actlog','backup'].forEach(t=>{
+  ['cargo','delivery','storage','flights','inventory','reports','customers','bin','users','actlog','backup'].forEach(t=>{
     const el=document.getElementById('tab-'+t);
     if(el) el.classList.toggle('sh', t!==tab);
   });
@@ -2799,6 +2872,7 @@ function showTab(tab){
   if(tab==='flights')renderFlightsTable();
   if(tab==='inventory')renderInventory();
   if(tab==='reports')renderReports();
+  if(tab==='customers'){loadCustomers().then(renderCustomersTable);}
   if(tab==='bin')renderBinTable();
   if(tab==='users')renderUsersTable();
   if(tab==='actlog')loadActivityLog();
@@ -2930,6 +3004,196 @@ async function deleteUser(username){
 }
 
 document.getElementById('user-modal-overlay').addEventListener('click',function(e){if(e.target===this)closeUserModal();});
+
+// ── CUSTOMERS (CRM) ─────────────────────────────────────────────────────────
+let customers=[];
+let editingCustomerId=null;
+
+function custEsc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function custAttr(s){return (s==null?'':String(s)).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function custNorm(s){return (s||'').trim().toLowerCase();}
+
+async function loadCustomers(){
+  try{const r=await fetch('/api/customers');customers=r.ok?await r.json():[];}
+  catch(e){customers=[];}
+}
+
+function custStatsFor(name){
+  const n=custNorm(name);
+  const matches=cargos.filter(c=>custNorm(c.cname)===n);
+  const stats={count:matches.length,manifested:0,arrived:0,delivered:0,weight:0,rows:matches};
+  matches.forEach(c=>{
+    if(c.status==='Manifested')stats.manifested++;
+    else if(c.status==='Arrived')stats.arrived++;
+    else if(c.status==='Delivered')stats.delivered++;
+    stats.weight+=Number(c.cw||c.gw||0)||0;
+  });
+  return stats;
+}
+
+function renderCustomersTable(){
+  const tb=document.getElementById('customers-table');if(!tb)return;
+  const q=custNorm(document.getElementById('cust-search')?document.getElementById('cust-search').value:'');
+
+  // Union of CRM-registered customers and consignee names already seen on shipments
+  // that haven't been added to the CRM yet, so nothing in the shipment history is hidden.
+  const knownNames=new Set(customers.map(c=>custNorm(c.company)));
+  const unregistered=new Map();
+  (cargos||[]).forEach(c=>{
+    const n=custNorm(c.cname);
+    if(n && !knownNames.has(n) && !unregistered.has(n)) unregistered.set(n,c.cname);
+  });
+
+  let rows=customers.map(c=>({id:c.id,company:c.company,contact:c.contact||'',phone:c.phone||'',email:c.email||'',registered:true}));
+  unregistered.forEach((displayName)=>rows.push({id:null,company:displayName,contact:'',phone:'',email:'',registered:false}));
+
+  if(q){
+    rows=rows.filter(r=>custNorm(r.company).includes(q)||custNorm(r.contact).includes(q)||custNorm(r.phone).includes(q)||custNorm(r.email).includes(q));
+  }
+  rows.sort((a,b)=>a.company.localeCompare(b.company));
+
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--tm);padding:1.5rem;">No customers found.</td></tr>';
+    return;
+  }
+
+  tb.innerHTML=rows.map(r=>{
+    const stats=custStatsFor(r.company);
+    const weightStr=stats.weight?stats.weight.toFixed(1)+' kg':'—';
+    const unregBadge=r.registered?'':' <span class="badge b-p" style="margin-left:4px;">Not in CRM</span>';
+    const nameCell=`<a href="#" onclick="openCustomerHistory('${custAttr(r.company)}');return false;" style="color:var(--it);text-decoration:none;font-weight:500;">${custEsc(r.company)}</a>${unregBadge}`;
+    const editBtn=r.registered
+      ?`<button class="btn-edit" onclick="openCustomerEditModal('${r.id}')">Edit</button>`
+      :`<button class="btn-edit" onclick="quickAddCustomer('${custAttr(r.company)}')">+ Add to CRM</button>`;
+    const delBtn=r.registered?`<button class="btn-del" onclick="deleteCustomer('${r.id}','${custAttr(r.company)}')">Delete</button>`:'';
+    return `<tr>
+      <td>${nameCell}</td>
+      <td>${custEsc(r.contact)||'—'}</td>
+      <td>${custEsc(r.phone)||'—'}</td>
+      <td>${custEsc(r.email)||'—'}</td>
+      <td>${stats.count}</td>
+      <td>${stats.manifested}</td>
+      <td>${stats.arrived}</td>
+      <td>${stats.delivered}</td>
+      <td>${weightStr}</td>
+      <td>${editBtn}</td>
+      <td>${delBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openCustomerModal(){
+  editingCustomerId=null;
+  document.getElementById('cust-modal-mode').textContent='Add new customer';
+  document.getElementById('cust-modal-title').textContent='New customer';
+  document.getElementById('cm-company').value='';
+  document.getElementById('cm-company').disabled=false;
+  document.getElementById('cm-contact').value='';
+  document.getElementById('cm-phone').value='';
+  document.getElementById('cm-email').value='';
+  document.getElementById('cm-notes').value='';
+  document.getElementById('cm-msg').style.display='none';
+  document.getElementById('cust-modal-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function quickAddCustomer(company){
+  openCustomerModal();
+  document.getElementById('cm-company').value=company;
+}
+
+function openCustomerEditModal(id){
+  const c=customers.find(x=>x.id===id);if(!c)return;
+  editingCustomerId=id;
+  document.getElementById('cust-modal-mode').textContent='Editing customer';
+  document.getElementById('cust-modal-title').textContent=c.company;
+  document.getElementById('cm-company').value=c.company||'';
+  document.getElementById('cm-company').disabled=false;
+  document.getElementById('cm-contact').value=c.contact||'';
+  document.getElementById('cm-phone').value=c.phone||'';
+  document.getElementById('cm-email').value=c.email||'';
+  document.getElementById('cm-notes').value=c.notes||'';
+  document.getElementById('cm-msg').style.display='none';
+  document.getElementById('cust-modal-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function closeCustomerModal(){
+  document.getElementById('cust-modal-overlay').style.display='none';
+  document.body.style.overflow='';
+  editingCustomerId=null;
+}
+
+async function saveCustomer(){
+  const company=document.getElementById('cm-company').value.trim();
+  const contact=document.getElementById('cm-contact').value.trim();
+  const phone=document.getElementById('cm-phone').value.trim();
+  const email=document.getElementById('cm-email').value.trim();
+  const notes=document.getElementById('cm-notes').value.trim();
+  const msgEl=document.getElementById('cm-msg');
+  msgEl.style.display='none';
+
+  if(!company){const e=document.getElementById('cm-err-company');if(e){e.textContent='Customer name is required.';e.style.display='block';}return;}
+
+  try{
+    let res;
+    const body={company,contact,phone,email,notes};
+    if(editingCustomerId){
+      res=await fetch('/api/customers/'+encodeURIComponent(editingCustomerId),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    } else {
+      res=await fetch('/api/customers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    }
+    const data=await res.json();
+    if(!res.ok){msgEl.className='fmsg fmsg-err';msgEl.textContent=data.error||'Save failed.';msgEl.style.display='block';return;}
+    msgEl.className='fmsg fmsg-ok';msgEl.textContent=editingCustomerId?'Customer updated.':'Customer added.';msgEl.style.display='block';
+    await loadCustomers();renderCustomersTable();
+    setTimeout(()=>closeCustomerModal(),1000);
+  }catch(e){msgEl.className='fmsg fmsg-err';msgEl.textContent='Network error.';msgEl.style.display='block';}
+}
+
+async function deleteCustomer(id,company){
+  if(!confirm(`Remove "${company}" from the CRM? Their shipment history is not affected.`))return;
+  try{
+    const res=await fetch('/api/customers/'+encodeURIComponent(id),{method:'DELETE'});
+    const data=await res.json();
+    if(!res.ok){alert(data.error||'Delete failed.');return;}
+    await loadCustomers();renderCustomersTable();
+  }catch(e){alert('Delete failed.');}
+}
+
+function openCustomerHistory(company){
+  const stats=custStatsFor(company);
+  document.getElementById('ch-title').textContent=company+' — shipment history ('+stats.count+')';
+  const tb=document.getElementById('ch-table');
+  if(!stats.rows.length){
+    tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--tm);padding:1.5rem;">No shipments found for this customer.</td></tr>';
+  } else {
+    const sorted=[...stats.rows].sort((a,b)=>(b.eta||'').localeCompare(a.eta||''));
+    tb.innerHTML=sorted.map(c=>{
+      const weight=c.cw||c.gw||0;
+      return `<tr>
+        <td style="font-weight:500;">${custEsc(c.awb)}</td>
+        <td>${custEsc(c.flight)||'—'}</td>
+        <td>${c.eta?formatDate(c.eta):'—'}</td>
+        <td><span class="badge ${badgeCls(c.status)}">${custEsc(c.status)||'—'}</span></td>
+        <td>${c.pcs_delivered??c.pcs_received??c.pcs_manifested??'—'}</td>
+        <td>${weight?Number(weight).toFixed(1)+' kg':'—'}</td>
+        <td>${custEsc(c.desc)||'—'}</td>
+        <td>${custEsc(c.customs)||'—'}</td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('cust-history-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function closeCustomerHistory(){
+  document.getElementById('cust-history-overlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+document.getElementById('cust-modal-overlay').addEventListener('click',function(e){if(e.target===this)closeCustomerModal();});
+document.getElementById('cust-history-overlay').addEventListener('click',function(e){if(e.target===this)closeCustomerHistory();});
 
 // ── ACTIVITY LOG ──────────────────────────────────────────────────────────
 let actLog=[];
@@ -3323,6 +3587,7 @@ loadFlights();
 loadBin();
 loadCourierStorage();
 loadStorageSettings();
+loadCustomers();
 initSession();
 
 // ── AUTO SIGN-OUT AFTER INACTIVITY ─────────────────────────────────────
