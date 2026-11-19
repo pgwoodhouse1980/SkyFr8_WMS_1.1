@@ -247,8 +247,8 @@ tr:hover td{background:var(--off);}
       <div id="filter-summary" style="font-size:12px;color:var(--ts);margin-bottom:.75rem;display:none;"></div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>AWB</th><th>Consignee</th><th>Flight</th><th>Route</th><th>Manifested</th><th>On-hand</th><th>Weight</th><th>Status</th><th>Bay(s)</th><th></th><th></th></tr></thead>
-          <tbody id="cargo-table"><tr><td colspan="11" class="loading">Loading shipments...</td></tr></tbody>
+          <thead><tr><th>AWB</th><th>Consignee</th><th>Flight</th><th>Route</th><th>Manifested</th><th>On-hand</th><th>Weight</th><th>Status</th><th>Bay(s)</th><th></th><th></th><th></th></tr></thead>
+          <tbody id="cargo-table"><tr><td colspan="12" class="loading">Loading shipments...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -906,6 +906,56 @@ tr:hover td{background:var(--off);}
   </div>
 </div>
 
+<!-- NOTIFY CUSTOMER (single shipment) -->
+<div id="notify-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1300;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:white;border-radius:var(--rl);max-width:560px;margin:0 auto;padding:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
+      <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Notify customer</div><div id="ntf-label" style="font-size:18px;font-weight:600;color:var(--navy);"></div></div>
+      <button onclick="closeNotify()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
+    </div>
+    <div id="ntf-prev" style="font-size:12px;color:var(--ts);margin-bottom:1rem;"></div>
+    <div class="fg">
+      <div class="fgrp"><label>Phone</label><input id="ntf-phone" placeholder="+1876 555 0200"/></div>
+      <div class="fgrp"><label>Email</label><input id="ntf-email" type="email" placeholder="e.g. jane@example.com"/></div>
+    </div>
+    <div class="fgrp" style="margin-bottom:.75rem;">
+      <label>Message</label>
+      <textarea id="ntf-msg-text" rows="4" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:'Inter',sans-serif;color:var(--tp);resize:vertical;"></textarea>
+      <span class="hint">Edit as needed — this is sent as-is through whichever channel you pick below.</span>
+    </div>
+    <input type="hidden" id="ntf-method"/>
+    <div id="ntf-status" class="fmsg" style="margin-bottom:.5rem;"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn" style="background:#1DA851;" onclick="sendNotify('whatsapp')">📱 WhatsApp</button>
+      <button class="btn" style="background:var(--sky);" onclick="sendNotify('sms')">💬 SMS</button>
+      <button class="btn" style="background:var(--navy);" onclick="sendNotify('email')">✉️ Email</button>
+      <button class="btn btn-sec" onclick="closeNotify()">Done</button>
+    </div>
+    <div class="hint" style="margin-top:.75rem;">WhatsApp and Email open a pre-filled message for you to review and send. SMS opens your phone's messaging app on mobile; on desktop, copy the message text manually.</div>
+  </div>
+</div>
+
+<!-- NOTIFY CUSTOMER (bulk — all manifested shipments on a flight) -->
+<div id="notify-flight-overlay" style="display:none;position:fixed;inset:0;background:rgba(11,31,58,0.55);z-index:1000;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:white;border-radius:var(--rl);max-width:680px;margin:0 auto;padding:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
+      <div><div style="font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Notify manifested shipments</div><div id="ntf-fl-label" style="font-size:18px;font-weight:600;color:var(--navy);"></div></div>
+      <button onclick="closeNotifyFlight()" style="background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;">✕ Close</button>
+    </div>
+    <div style="font-size:12px;color:var(--ts);margin-bottom:1rem;">Click a shipment to open its notify panel and send via WhatsApp, SMS, or email. Already-notified shipments are marked below.</div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>AWB</th><th>Consignee</th><th>Status</th><th></th></tr></thead>
+        <tbody id="ntf-fl-rows"></tbody>
+      </table>
+    </div>
+    <div id="ntf-fl-empty" style="display:none;text-align:center;color:var(--tm);padding:1.5rem;font-size:13px;">No manifested shipments left on this flight.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem;">
+      <button class="btn btn-sec" onclick="closeNotifyFlight()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── DATE FORMATTING (dd-mmm-yyyy, e.g. 16-Sep-2026) ────────────────────
 const MONTH_ABBR=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -987,7 +1037,7 @@ async function loadCargos(){
     buildCollectorIndex();
     if(document.getElementById('storage-table'))renderStorageTable(); // keep MAWB→arrival sync indicators current
   }
-  catch(e){document.getElementById('cargo-table').innerHTML='<tr><td colspan="11" style="text-align:center;color:#C0392B;padding:1.5rem;">Could not connect to server. Make sure server.py is running.</td></tr>';}
+  catch(e){document.getElementById('cargo-table').innerHTML='<tr><td colspan="12" style="text-align:center;color:#C0392B;padding:1.5rem;">Could not connect to server. Make sure server.py is running.</td></tr>';}
 }
 
 // ── KNOWN COLLECTORS (autofill ID for repeat collectors) ──
@@ -1054,7 +1104,7 @@ function legsForCargo(c){
 
 function renderTable(data,overdueDays){
   const tb=document.getElementById('cargo-table');
-  if(!data.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--tm);padding:1.5rem;">No shipments found.</td></tr>';return;}
+  if(!data.length){tb.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--tm);padding:1.5rem;">No shipments found.</td></tr>';return;}
   const asOf=todayISO();
   // Business days elapsed since arrival — skips weekends (and any logged holidays),
   // same rule the Courier Storage tab uses, via businessDaysElapsed().
@@ -1088,6 +1138,7 @@ function renderTable(data,overdueDays){
       <td>${weightHtml}</td>
       <td><span class="badge ${badgeCls(c.status)}">${c.status}</span>${c.status==='Delivered'?`<div style="font-size:10px;color:var(--pvt);margin-top:2px;">${c.pcs_delivered} pcs·${formatDate(c.date_delivered)}${c.collector_name?` · ${c.collector_name}`:''}</div>`:''}${c.status==='In customs'?`<div style="font-size:10px;color:var(--ct);margin-top:2px;">Moved ${formatDate(c.customs_removed_date)}${c.customs_removed_note?` · ${c.customs_removed_note}`:''}</div>`:''}${daysTag}</td>
       <td>${baysHtml}</td>
+      <td><button class="btn-edit" style="color:var(--it);border-color:#B8DFC6;" onclick="openNotify('${c.awb}')">📣 Notify</button></td>
       <td><button class="btn-edit" onclick="openEdit('${c.awb}')">✏️ Edit</button></td>
       <td><button class="btn-del" onclick="deleteCargo('${c.awb}')">🗑</button></td>
     </tr>`;
@@ -1106,7 +1157,7 @@ function renderTable(data,overdueDays){
           ${lDays>0?`<div style="color:var(--tm);">${lDays} business day${lDays!==1?'s':''} in warehouse</div>`:''}
         </div>`;
       }).join('');
-      row+=`<tr id="legs-detail-${safeAwb}" style="display:none;background:var(--off);"><td colspan="11" style="padding:4px 16px;">${legsHtml}</td></tr>`;
+      row+=`<tr id="legs-detail-${safeAwb}" style="display:none;background:var(--off);"><td colspan="12" style="padding:4px 16px;">${legsHtml}</td></tr>`;
     }
     return row;
   }).join('');
@@ -2114,7 +2165,8 @@ function renderFlightsTable(){
     const shipCount=cargos.filter(c=>legsForCargo(c).some(l=>l.flight===f.flight&&l.eta===f.date)).length;
     const manifestedCount=cargos.filter(c=>legsForCargo(c).some(l=>l.flight===f.flight&&l.eta===f.date&&l.status==='Manifested')).length;
     const arriveBtn=manifestedCount>0?`<button class="btn-edit" style="color:var(--st);border-color:#B8DFC6;" onclick="openArriveAll('${f.flight}','${f.date}')">📥 Arrive all (${manifestedCount})</button>`:'';
-    return `<tr><td style="font-weight:500;">${f.flight}</td><td>${formatDate(f.date)}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${f.registration||'—'}</td><td>${f.origin}→${f.dest}</td><td>${f.airline||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${f.asycuda||'—'}</td><td><span class="badge b-t">${shipCount} shipment${shipCount!==1?'s':''}</span></td><td>${arriveBtn}</td><td><button class="btn-edit" onclick="openFlightEdit('${f.flight}','${f.date}')">✏️ Edit</button></td><td><button class="btn-del" onclick="deleteFlight('${f.flight}','${f.date}')">🗑</button></td></tr>`;
+    const notifyBtn=manifestedCount>0?`<button class="btn-edit" style="color:var(--it);border-color:#B8DFC6;" onclick="openNotifyFlight('${f.flight}','${f.date}')">📣 Notify (${manifestedCount})</button>`:'';
+    return `<tr><td style="font-weight:500;">${f.flight}</td><td>${formatDate(f.date)}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${f.registration||'—'}</td><td>${f.origin}→${f.dest}</td><td>${f.airline||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${f.asycuda||'—'}</td><td><span class="badge b-t">${shipCount} shipment${shipCount!==1?'s':''}</span></td><td style="display:flex;gap:6px;flex-wrap:wrap;">${arriveBtn}${notifyBtn}</td><td><button class="btn-edit" onclick="openFlightEdit('${f.flight}','${f.date}')">✏️ Edit</button></td><td><button class="btn-del" onclick="deleteFlight('${f.flight}','${f.date}')">🗑</button></td></tr>`;
   }).join('');
 }
 
@@ -2317,6 +2369,130 @@ async function saveArriveAll(){
 }
 
 document.getElementById('fl-arrive-overlay').addEventListener('click',function(e){if(e.target===this)closeArriveAll();});
+
+// ── NOTIFY CUSTOMER ─────────────────────────────────────
+// Free, staff-triggered notifications: pre-fills a message from the shipment's
+// own flight/AWB data and hands it to WhatsApp (wa.me), the phone's SMS app
+// (sms:), or the default mail client (mailto:) — no paid API or account needed.
+let notifyingAwb=null;
+let notifyingFlight=null; // {flight,date} when the bulk per-flight list is open
+
+function notifyDefaultMessage(c){
+  const legs=legsForCargo(c);
+  const leg=legs.find(l=>l.status==='Manifested')||legs[legs.length-1]||{};
+  const flightNo=leg.flight||c.flight||'';
+  const etaStr=formatDate(leg.eta||c.eta);
+  return `Hello, this is Sky Fr8 — your shipment (AWB ${c.awb}) is manifested on flight ${flightNo}, arriving ${etaStr}. We'll reach out again once it's ready for pickup/delivery. Thank you.`;
+}
+
+function openNotify(awb){
+  const c=cargos.find(x=>x.awb===awb);
+  if(!c)return;
+  notifyingAwb=awb;
+  const cust=(typeof customerRecordFor==='function')?customerRecordFor(c.cname):null;
+  const phone=(c.cphone||(cust&&cust.phone)||'').trim();
+  const email=((cust&&cust.email)||'').trim();
+  document.getElementById('ntf-label').textContent=c.awb+' · '+(c.cname||'');
+  document.getElementById('ntf-phone').value=phone;
+  document.getElementById('ntf-email').value=email;
+  document.getElementById('ntf-msg-text').value=notifyDefaultMessage(c);
+  const prevEl=document.getElementById('ntf-prev');
+  prevEl.textContent=c.notif_date?`Last notified ${formatDate(c.notif_date)} via ${c.notif_method||'—'}${c.notif_person?' by '+c.notif_person:''}.`:'Not yet notified for this shipment.';
+  document.getElementById('ntf-status').style.display='none';
+  document.getElementById('notify-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function closeNotify(){
+  document.getElementById('notify-overlay').style.display='none';
+  if(!notifyingFlight)document.body.style.overflow='';
+  notifyingAwb=null;
+}
+
+async function sendNotify(channel){
+  if(!notifyingAwb)return;
+  const phone=document.getElementById('ntf-phone').value.trim();
+  const email=document.getElementById('ntf-email').value.trim();
+  const text=document.getElementById('ntf-msg-text').value.trim();
+  if(!text){alert('Message cannot be empty.');return;}
+  const digits=phone.replace(/[^\d+]/g,'').replace(/^\+/,'');
+  if((channel==='whatsapp'||channel==='sms')&&!digits){alert('No phone number on file. Enter one above first.');return;}
+  if(channel==='email'&&!email){alert('No email address on file. Enter one above first.');return;}
+
+  if(channel==='whatsapp'){
+    window.open('https://wa.me/'+digits+'?text='+encodeURIComponent(text),'_blank');
+  }else if(channel==='sms'){
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    window.location.href='sms:'+phone.replace(/[^\d+]/g,'')+(isIOS?'&':'?')+'body='+encodeURIComponent(text);
+  }else if(channel==='email'){
+    window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent('Shipment update — AWB '+notifyingAwb)+'&body='+encodeURIComponent(text);
+  }
+  await logNotification(channel);
+}
+
+async function logNotification(channel){
+  if(!notifyingAwb)return;
+  const methodLabel={whatsapp:'WhatsApp',sms:'SMS',email:'Email'}[channel]||channel;
+  const statusEl=document.getElementById('ntf-status');
+  try{
+    await fetch('/api/shipments/'+encodeURIComponent(notifyingAwb),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({notif_date:todayISO(),notif_method:methodLabel,notif_person:currentUsername||null})});
+    await loadCargos();
+    statusEl.className='fmsg fmsg-ok';
+    statusEl.textContent=`Logged as notified via ${methodLabel} today.`;
+    statusEl.style.display='block';
+    const c=cargos.find(x=>x.awb===notifyingAwb);
+    if(c)document.getElementById('ntf-prev').textContent=`Last notified ${formatDate(c.notif_date)} via ${c.notif_method||'—'}${c.notif_person?' by '+c.notif_person:''}.`;
+    if(notifyingFlight)renderNotifyFlightRows();
+  }catch(e){
+    statusEl.className='fmsg fmsg-err';
+    statusEl.textContent='Message window opened, but logging the notification failed — you may need to record it manually.';
+    statusEl.style.display='block';
+  }
+}
+
+document.getElementById('notify-overlay').addEventListener('click',function(e){if(e.target===this)closeNotify();});
+
+// Bulk per-flight list: all shipments with a Manifested leg on this flight/date.
+function openNotifyFlight(flight,date){
+  notifyingFlight={flight,date};
+  document.getElementById('ntf-fl-label').textContent=flight+' · '+formatDate(date);
+  renderNotifyFlightRows();
+  document.getElementById('notify-flight-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function renderNotifyFlightRows(){
+  const tb=document.getElementById('ntf-fl-rows');
+  const emptyEl=document.getElementById('ntf-fl-empty');
+  if(!notifyingFlight){tb.innerHTML='';return;}
+  const matches=[];
+  cargos.forEach(c=>{
+    const leg=legsForCargo(c).find(l=>l.flight===notifyingFlight.flight&&l.eta===notifyingFlight.date&&l.status==='Manifested');
+    if(leg)matches.push(c);
+  });
+  if(!matches.length){
+    tb.innerHTML='';emptyEl.style.display='block';
+    return;
+  }
+  emptyEl.style.display='none';
+  tb.innerHTML=matches.map(c=>{
+    const notifiedTag=c.notif_date?`<span style="font-size:10px;color:var(--st);">✓ notified ${formatDate(c.notif_date)}</span>`:`<span style="font-size:10px;color:var(--tm);">not yet notified</span>`;
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;">${c.awb}</td>
+      <td>${c.cname||'—'}</td>
+      <td>${notifiedTag}</td>
+      <td><button class="btn-edit" style="color:var(--it);border-color:#B8DFC6;" onclick="openNotify('${c.awb}')">📣 Notify</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function closeNotifyFlight(){
+  document.getElementById('notify-flight-overlay').style.display='none';
+  if(document.getElementById('notify-overlay').style.display!=='block')document.body.style.overflow='';
+  notifyingFlight=null;
+}
+
+document.getElementById('notify-flight-overlay').addEventListener('click',function(e){if(e.target===this)closeNotifyFlight();});
 
 
 // ── INVENTORY ─────────────────────────────────────────
